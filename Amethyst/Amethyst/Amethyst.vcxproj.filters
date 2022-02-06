@@ -30,6 +30,9 @@
     </ClInclude>
     <ClInclude Include="src\amtpch.h" />
     <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
+    <ClInclude Include="src\Amethyst\Events\ApplicationEvent.h" />
+    <ClInclude Include="src\Amethyst\Events\KeyEvent.h" />
+    <ClInclude Include="src\Amethyst\Events\MouseEvent.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Amethyst\Application.cpp">

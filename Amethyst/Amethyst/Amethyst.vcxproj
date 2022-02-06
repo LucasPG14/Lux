@@ -153,7 +153,10 @@
     <ClInclude Include="src\Amethyst\Application.h" />
     <ClInclude Include="src\Amethyst\Core.h" />
     <ClInclude Include="src\Amethyst\EntryPoint.h" />
+    <ClInclude Include="src\Amethyst\Events\ApplicationEvent.h" />
     <ClInclude Include="src\Amethyst\Events\Event.h" />
+    <ClInclude Include="src\Amethyst\Events\KeyEvent.h" />
+    <ClInclude Include="src\Amethyst\Events\MouseEvent.h" />
     <ClInclude Include="src\Amethyst\Log.h" />
     <ClInclude Include="src\Amethyst\Window.h" />
     <ClInclude Include="src\amtpch.h" />
