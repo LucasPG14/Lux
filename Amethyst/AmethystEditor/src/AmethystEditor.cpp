@@ -24,6 +24,7 @@ public:
 	AmethystEditor()
 	{
 		PushLayer(new ExampleLayer);
+		PushOverlay(new Amethyst::ImGuiLayer);
 	}
 
 	~AmethystEditor()

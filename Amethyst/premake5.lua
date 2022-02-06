@@ -13,8 +13,12 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 -- Include directories relative to root folder (solution directory)
 IncludeDir = {}
 IncludeDir["GLFW"] = "Amethyst/vendor/GLFW/include"
+IncludeDir["Glad"] = "Amethyst/vendor/Glad/include"
+IncludeDir["ImGui"] = "Amethyst/vendor/ImGui"
 
 include "Amethyst/vendor/GLFW"
+include "Amethyst/vendor/Glad"
+include "Amethyst/vendor/ImGui"
 
 project "Amethyst"
 	location "Amethyst"
@@ -37,12 +41,16 @@ project "Amethyst"
 	{
 		"%{prj.name}/src",
 		"%{prj.name}/vendor/spdlog/include",
-		"%{IncludeDir.GLFW}"
+		"%{IncludeDir.GLFW}",
+		"%{IncludeDir.Glad}",
+		"%{IncludeDir.ImGui}"
 	}
 
 	links 
 	{ 
 		"GLFW",
+		"Glad",
+		"ImGui",
 		"opengl32.lib"
 	}
 
@@ -54,7 +62,8 @@ project "Amethyst"
 		defines
 		{
 			"AMT_PLATFORM_WINDOWS",
-			"AMT_BUILD_DLL"
+			"AMT_BUILD_DLL",
+			"GLFW_INCLUDE_NONE"
 		}
 
 		postbuildcommands

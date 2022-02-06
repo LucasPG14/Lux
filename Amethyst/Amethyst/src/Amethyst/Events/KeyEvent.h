@@ -52,4 +52,20 @@ namespace Amethyst
 
 		EVENT_CLASS_TYPE(KEY_RELEASED)
 	};
+
+	class AMT_API KeyTypedEvent : public KeyEvent
+	{
+	public:
+		KeyTypedEvent(int keycode)
+			: KeyEvent(keycode) {}
+
+		std::string ToString() const override
+		{
+			std::stringstream ss;
+			ss << "KeyTypedEvent: " << keyCode;
+			return ss.str();
+		}
+
+		EVENT_CLASS_TYPE(KEY_TYPED)
+	};
 }

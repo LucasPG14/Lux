@@ -3,10 +3,14 @@
 
 namespace Amethyst
 {
+	Application* Application::app = nullptr;
+
 	#define BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
 
 	Application::Application() : running(true)
 	{
+		AMT_CORE_ASSERT(!app, "Application already created!");
+		app = this;
 		window = std::unique_ptr<Window>(Window::Create());
 		window->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));
 	}
@@ -45,11 +49,13 @@ namespace Amethyst
 	void Application::PushLayer(Layer* layer)
 	{
 		layerStack.PushLayer(layer);
+		layer->OnCreate();
 	}
 
 	void Application::PushOverlay(Layer* overlay)
 	{
 		layerStack.PushOverlay(overlay);
+		overlay->OnCreate();
 	}
 
 	bool Application::CloseWindow(WindowCloseEvent& e)

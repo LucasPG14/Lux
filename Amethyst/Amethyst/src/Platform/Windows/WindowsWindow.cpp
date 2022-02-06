@@ -5,6 +5,9 @@
 #include "Amethyst/Events/MouseEvent.h"
 #include "Amethyst/Events/KeyEvent.h"
 
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
 namespace Amethyst 
 {
 	static void GLFWErrorCallback(int error, const char* description)
@@ -29,21 +32,31 @@ namespace Amethyst
 
 	void WindowsWindow::Init()
 	{
+		// Window default information
 		data.title = "Amethyst Editor";
 		data.width = 1280;
 		data.height = 720;
 
 		AMT_CORE_INFO("Creating window {0} ({1}, {2})", data.title, data.width, data.height);
 
+		// Initializing GLFW
 		int success = glfwInit();
 		AMT_CORE_ASSERT(success, "Could not intialize GLFW!");
 		glfwSetErrorCallback(GLFWErrorCallback);
 
+		// Creating GLFW window
 		window = glfwCreateWindow((int)data.width, (int)data.height, data.title.c_str(), nullptr, nullptr);
 		glfwMakeContextCurrent(window);
+
+		// Initializing GLAD
+		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+		AMT_CORE_ASSERT(status, "Could not initialize OpenGL!");
+
+		// Setting GLFW User Pointer
 		glfwSetWindowUserPointer(window, &data);
 		SetVSync(true);
 
+		// Setting Window Resize Callback
 		glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int width, int height)
 		{
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
@@ -54,6 +67,7 @@ namespace Amethyst
 			data.eventCallback(event);
 		});
 
+		// Setting Window Close Callback
 		glfwSetWindowCloseCallback(window, [](GLFWwindow* window)
 		{
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
@@ -62,6 +76,7 @@ namespace Amethyst
 			data.eventCallback(event);
 		});
 
+		// Setting Key Callback
 		glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
 		{
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
@@ -89,6 +104,16 @@ namespace Amethyst
 			}
 		});
 
+		// Setting Char Callback
+		glfwSetCharCallback(window, [](GLFWwindow* window, unsigned int key)
+		{
+			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+
+			KeyTypedEvent event(key);
+			data.eventCallback(event);
+		});
+
+		// Setting Mouse Button Callback
 		glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mods)
 		{
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
@@ -110,6 +135,7 @@ namespace Amethyst
 			}
 		});
 
+		// Setting Mouse Scroll Callback
 		glfwSetScrollCallback(window, [](GLFWwindow* window, double offsetX, double offsetY)
 		{
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
@@ -118,6 +144,7 @@ namespace Amethyst
 			data.eventCallback(event);
 		});
 
+		// Setting Mouse Position Callback
 		glfwSetCursorPosCallback(window, [](GLFWwindow* window, double posX, double posY)
 		{
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);

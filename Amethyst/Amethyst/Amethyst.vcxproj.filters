@@ -7,6 +7,9 @@
     <Filter Include="Amethyst\Events">
       <UniqueIdentifier>{18CA3E0B-8455-ACCF-8D66-2FC4F97008D0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Amethyst\ImGui">
+      <UniqueIdentifier>{DE9C4CCA-CA6A-40D0-B3FE-B0F69F6B1C35}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Platform">
       <UniqueIdentifier>{2AC788B4-1694-E3BF-3FAD-D1672BD9184E}</UniqueIdentifier>
     </Filter>
@@ -37,6 +40,9 @@
     <ClInclude Include="src\Amethyst\Events\MouseEvent.h">
       <Filter>Amethyst\Events</Filter>
     </ClInclude>
+    <ClInclude Include="src\Amethyst\ImGui\ImGuiLayer.h">
+      <Filter>Amethyst\ImGui</Filter>
+    </ClInclude>
     <ClInclude Include="src\Amethyst\Layer.h">
       <Filter>Amethyst</Filter>
     </ClInclude>
@@ -57,6 +63,12 @@
   <ItemGroup>
     <ClCompile Include="src\Amethyst\Application.cpp">
       <Filter>Amethyst</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Amethyst\ImGui\ImGuiBuild.cpp">
+      <Filter>Amethyst\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Amethyst\ImGui\ImGuiLayer.cpp">
+      <Filter>Amethyst\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="src\Amethyst\Layer.cpp">
       <Filter>Amethyst</Filter>

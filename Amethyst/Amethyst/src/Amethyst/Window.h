@@ -3,7 +3,7 @@
 #include "amtpch.h"
 
 #include "Core.h"
-#include "Events/Event.h"
+#include "Amethyst/Events/Event.h"
 
 namespace Amethyst
 {
