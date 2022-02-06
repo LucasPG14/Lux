@@ -159,16 +159,16 @@
     <ClInclude Include="src\Amethyst\Events\MouseEvent.h" />
     <ClInclude Include="src\Amethyst\Log.h" />
     <ClInclude Include="src\Amethyst\Window.h" />
-    <ClInclude Include="src\amtpch.h" />
     <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
+    <ClInclude Include="src\amtpch.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Amethyst\Application.cpp" />
     <ClCompile Include="src\Amethyst\Log.cpp" />
+    <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp" />
     <ClCompile Include="src\amtpch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="vendor\GLFW\GLFW.vcxproj">

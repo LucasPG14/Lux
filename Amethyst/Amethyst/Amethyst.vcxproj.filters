@@ -7,6 +7,12 @@
     <Filter Include="Amethyst\Events">
       <UniqueIdentifier>{18CA3E0B-8455-ACCF-8D66-2FC4F97008D0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Platform">
+      <UniqueIdentifier>{2AC788B4-1694-E3BF-3FAD-D1672BD9184E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Platform\Windows">
+      <UniqueIdentifier>{64FBD71A-50F4-F66C-7926-DCF1657ED678}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Amethyst.h" />
@@ -19,7 +25,16 @@
     <ClInclude Include="src\Amethyst\EntryPoint.h">
       <Filter>Amethyst</Filter>
     </ClInclude>
+    <ClInclude Include="src\Amethyst\Events\ApplicationEvent.h">
+      <Filter>Amethyst\Events</Filter>
+    </ClInclude>
     <ClInclude Include="src\Amethyst\Events\Event.h">
+      <Filter>Amethyst\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Amethyst\Events\KeyEvent.h">
+      <Filter>Amethyst\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Amethyst\Events\MouseEvent.h">
       <Filter>Amethyst\Events</Filter>
     </ClInclude>
     <ClInclude Include="src\Amethyst\Log.h">
@@ -28,11 +43,10 @@
     <ClInclude Include="src\Amethyst\Window.h">
       <Filter>Amethyst</Filter>
     </ClInclude>
+    <ClInclude Include="src\Platform\Windows\WindowsWindow.h">
+      <Filter>Platform\Windows</Filter>
+    </ClInclude>
     <ClInclude Include="src\amtpch.h" />
-    <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
-    <ClInclude Include="src\Amethyst\Events\ApplicationEvent.h" />
-    <ClInclude Include="src\Amethyst\Events\KeyEvent.h" />
-    <ClInclude Include="src\Amethyst\Events\MouseEvent.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Amethyst\Application.cpp">
@@ -41,7 +55,9 @@
     <ClCompile Include="src\Amethyst\Log.cpp">
       <Filter>Amethyst</Filter>
     </ClCompile>
+    <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp">
+      <Filter>Platform\Windows</Filter>
+    </ClCompile>
     <ClCompile Include="src\amtpch.cpp" />
-    <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp" />
   </ItemGroup>
 </Project>
