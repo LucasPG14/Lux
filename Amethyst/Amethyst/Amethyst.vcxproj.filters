@@ -37,6 +37,12 @@
     <ClInclude Include="src\Amethyst\Events\MouseEvent.h">
       <Filter>Amethyst\Events</Filter>
     </ClInclude>
+    <ClInclude Include="src\Amethyst\Layer.h">
+      <Filter>Amethyst</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Amethyst\LayerStack.h">
+      <Filter>Amethyst</Filter>
+    </ClInclude>
     <ClInclude Include="src\Amethyst\Log.h">
       <Filter>Amethyst</Filter>
     </ClInclude>
@@ -50,6 +56,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Amethyst\Application.cpp">
+      <Filter>Amethyst</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Amethyst\Layer.cpp">
+      <Filter>Amethyst</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Amethyst\LayerStack.cpp">
       <Filter>Amethyst</Filter>
     </ClCompile>
     <ClCompile Include="src\Amethyst\Log.cpp">

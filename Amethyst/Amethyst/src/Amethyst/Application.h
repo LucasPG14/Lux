@@ -1,8 +1,9 @@
 #pragma once
 
 #include "Core.h"
-#include "Events/Event.h"
-#include "Events/ApplicationEvent.h"
+#include "Amethyst/LayerStack.h"
+#include "Amethyst/Events/Event.h"
+#include "Amethyst/Events/ApplicationEvent.h"
 
 #include "Window.h"
 
@@ -19,11 +20,16 @@ namespace Amethyst
 
 		void OnEvent(Event& e);
 
+		void PushLayer(Layer* layer);
+		void PushOverlay(Layer* overlay);
+
 	private:
 		bool CloseWindow(WindowCloseEvent& e);
 	private:
 		std::unique_ptr<Window> window;
 		bool running;
+
+		LayerStack layerStack;
 	};
 
 	Application* CreateApp();

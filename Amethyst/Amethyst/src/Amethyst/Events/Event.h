@@ -43,7 +43,7 @@ namespace Amethyst
 		{
 			return GetCategoryFlags() & category;
 		}
-	protected:
+	public:
 		bool handled = false;
 	};
 

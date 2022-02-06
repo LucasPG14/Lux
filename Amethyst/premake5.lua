@@ -48,7 +48,7 @@ project "Amethyst"
 
 	filter "system:windows"
 		cppdialect "C++17"
-		staticruntime "Off"
+		staticruntime "On"
 		systemversion "latest"
 
 		defines
@@ -64,17 +64,17 @@ project "Amethyst"
 
 	filter "configurations:Debug"
 		defines "AMT_DEBUG"
-		runtime "Debug"
+		buildoptions "/MDd"
 		symbols "On"
 
 	filter "configurations:Release"
 		defines "AMT_RELEASE"
-		runtime "Release"
+		buildoptions "/MD"
 		optimize "On"
 
 	filter "configurations:Dist"
 		defines "AMT_DIST"
-		runtime "Release"
+		buildoptions "/MD"
 		optimize "On"
 
 project "AmethystEditor"
@@ -114,12 +114,15 @@ project "AmethystEditor"
 
 	filter "configurations:Debug"
 		defines "AMT_DEBUG"
+		buildoptions "/MDd"
 		symbols "On"
 
 	filter "configurations:Release"
 		defines "AMT_RELEASE"
+		buildoptions "/MD"
 		optimize "On"
 
 	filter "configurations:Dist"
 		defines "AMT_DIST"
+		buildoptions "/MD"
 		optimize "On"

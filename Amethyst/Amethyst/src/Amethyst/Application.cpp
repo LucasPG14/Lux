@@ -19,6 +19,9 @@ namespace Amethyst
 	{
 		while (running)
 		{
+			for (Layer* layer : layerStack)
+				layer->Update();
+
 			window->Update();
 		}
 	}
@@ -30,6 +33,23 @@ namespace Amethyst
 		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(Application::CloseWindow));
 
 		AMT_CORE_TRACE("{0}", e);
+
+		for (auto it = layerStack.end(); it != layerStack.begin();)
+		{
+			(*--it)->OnEvent(e);
+			if (e.handled)
+				break;
+		}
+	}
+
+	void Application::PushLayer(Layer* layer)
+	{
+		layerStack.PushLayer(layer);
+	}
+
+	void Application::PushOverlay(Layer* overlay)
+	{
+		layerStack.PushOverlay(overlay);
 	}
 
 	bool Application::CloseWindow(WindowCloseEvent& e)
