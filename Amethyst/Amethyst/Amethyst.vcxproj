@@ -156,6 +156,7 @@
     <ClInclude Include="src\Amethyst\Log.h" />
     <ClInclude Include="src\Amethyst\MouseCodes.h" />
     <ClInclude Include="src\Amethyst\Renderer\GraphicsContext.h" />
+    <ClInclude Include="src\Amethyst\Renderer\Shader.h" />
     <ClInclude Include="src\Amethyst\Window.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLContext.h" />
     <ClInclude Include="src\Platform\Windows\WindowsInput.h" />
@@ -584,6 +585,7 @@
     <ClCompile Include="src\Amethyst\Layer.cpp" />
     <ClCompile Include="src\Amethyst\LayerStack.cpp" />
     <ClCompile Include="src\Amethyst\Log.cpp" />
+    <ClCompile Include="src\Amethyst\Renderer\Shader.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLContext.cpp" />
     <ClCompile Include="src\Platform\Windows\WindowsInput.cpp" />
     <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp" />

@@ -8,6 +8,7 @@
 #include "Amethyst/Events/ApplicationEvent.h"
 
 #include "Amethyst/ImGui/ImGuiLayer.h"
+#include "Renderer/Shader.h"
 
 namespace Amethyst
 {
@@ -37,6 +38,7 @@ namespace Amethyst
 		LayerStack layerStack;
 
 		unsigned int vao, vbo, ebo;
+		std::unique_ptr<Shader> shader;
 
 		static Application* app;
 	};

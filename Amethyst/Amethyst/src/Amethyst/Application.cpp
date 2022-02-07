@@ -47,6 +47,37 @@ namespace Amethyst
 
 		unsigned int indices[3] = { 0, 1, 2 };
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+		
+		std::string vertex = R"(
+			#version 330 core
+
+			layout(location = 0) in vec3 aPosition;
+
+			out vec3 vPosition;
+			
+			void main()
+			{
+				vPosition = aPosition;
+				gl_Position = vec4(aPosition, 1.0);
+			}
+		
+		)";
+
+		std::string fragment = R"(
+			#version 330 core
+
+			layout(location = 0) out vec4 color;
+
+			in vec3 vPosition;
+
+			void main()
+			{
+				color = vec4(vPosition * 0.5 + 0.5, 1.0);
+			}
+		
+		)";
+		
+		shader.reset(new Shader(vertex, fragment));
 	}
 	
 	Application::~Application()
@@ -60,6 +91,7 @@ namespace Amethyst
 			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT);
 
+			shader->Bind();
 			glBindVertexArray(vao);
 			glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
 			glBindVertexArray(0);
