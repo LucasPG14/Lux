@@ -11,7 +11,7 @@ namespace Amethyst
 	void Log::Init()
 	{
 		spdlog::set_pattern("%^[%T] %n: %v%$");
-		coreLogger = spdlog::stdout_color_mt("HAZEL");
+		coreLogger = spdlog::stdout_color_mt("AMETHYST");
 		coreLogger->set_level(spdlog::level::trace);
 
 		clientLogger = spdlog::stdout_color_mt("APP");

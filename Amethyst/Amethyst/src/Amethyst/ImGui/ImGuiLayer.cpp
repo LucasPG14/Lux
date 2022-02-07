@@ -118,9 +118,6 @@ namespace Amethyst
 
 		if (key > 0 && key < 0x10000)
 			io.AddInputCharacter((unsigned short)key);
-		
-		if (key == GLFW_KEY_DELETE) 
-			io.ClearInputCharacters();
 
 		return false;
 	}

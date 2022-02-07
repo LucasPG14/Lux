@@ -22,6 +22,8 @@ namespace Amethyst
 		inline void SetEventCallback(const EventCallbackFn& callback) override { data.eventCallback = callback; }
 		void SetVSync(bool enabled) override;
 		bool IsVSync() const override;
+
+		inline void* GetWindow() const { return window; }
 	private:
 		virtual void Init();
 		virtual void Shutdown();

@@ -1,6 +1,9 @@
 #include "amtpch.h"
 #include "Application.h"
 
+#include "Amethyst/Input.h"
+#include "Amethyst/KeyCodes.h"
+
 namespace Amethyst
 {
 	Application* Application::app = nullptr;
@@ -25,6 +28,9 @@ namespace Amethyst
 		{
 			for (Layer* layer : layerStack)
 				layer->Update();
+
+			if (Input::IsKeyPressed(Keys::A))
+				AMT_CORE_TRACE("Key Pressed: A");
 
 			window->Update();
 		}

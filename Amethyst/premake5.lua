@@ -1,5 +1,6 @@
 workspace "Amethyst"
 	architecture "x64"
+	startproject "AmethystEditor"
 
 	configurations
 	{
@@ -16,14 +17,17 @@ IncludeDir["GLFW"] = "Amethyst/vendor/GLFW/include"
 IncludeDir["Glad"] = "Amethyst/vendor/Glad/include"
 IncludeDir["ImGui"] = "Amethyst/vendor/ImGui"
 
-include "Amethyst/vendor/GLFW"
-include "Amethyst/vendor/Glad"
-include "Amethyst/vendor/ImGui"
+group "Dependencies"
+	include "Amethyst/vendor/GLFW"
+	include "Amethyst/vendor/Glad"
+	include "Amethyst/vendor/ImGui"
+group ""
 
 project "Amethyst"
 	location "Amethyst"
 	kind "SharedLib"
 	language "C++"
+	staticruntime "Off"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -56,7 +60,6 @@ project "Amethyst"
 
 	filter "system:windows"
 		cppdialect "C++17"
-		staticruntime "On"
 		systemversion "latest"
 
 		defines
@@ -68,21 +71,21 @@ project "Amethyst"
 
 		postbuildcommands
 		{
-			("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/AmethystEditor")
+			("{COPY} %{cfg.buildtarget.relpath} \"../bin/" .. outputdir .. "/AmethystEditor/\"")
 		}
 
 	filter "configurations:Debug"
 		defines "AMT_DEBUG"
-		buildoptions "/MDd"
+		runtime "Debug"
 		symbols "On"
 
 	filter "configurations:Release"
 		defines "AMT_RELEASE"
-		buildoptions "/MD"
+		runtime "Release"
 		optimize "On"
 
 	filter "configurations:Dist"
-		defines "AMT_DIST"
+		runtime "Release"
 		buildoptions "/MD"
 		optimize "On"
 
@@ -90,6 +93,7 @@ project "AmethystEditor"
 	location "AmethystEditor"
 	kind "ConsoleApp"
 	language "C++"
+	staticruntime "Off"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -113,7 +117,6 @@ project "AmethystEditor"
 
 	filter "system:windows"
 		cppdialect "C++17"
-		staticruntime "On"
 		systemversion "latest"
 
 		defines
@@ -123,15 +126,15 @@ project "AmethystEditor"
 
 	filter "configurations:Debug"
 		defines "AMT_DEBUG"
-		buildoptions "/MDd"
+		runtime "Debug"
 		symbols "On"
 
 	filter "configurations:Release"
 		defines "AMT_RELEASE"
-		buildoptions "/MD"
+		runtime "Release"
 		optimize "On"
 
 	filter "configurations:Dist"
 		defines "AMT_DIST"
-		buildoptions "/MD"
+		runtime "Release"
 		optimize "On"
