@@ -5,7 +5,8 @@
 #include "Amethyst/Events/MouseEvent.h"
 #include "Amethyst/Events/KeyEvent.h"
 
-#include <glad/glad.h>
+#include "Platform/OpenGL/OpenGLContext.h"
+
 #include <GLFW/glfw3.h>
 
 namespace Amethyst 
@@ -46,11 +47,9 @@ namespace Amethyst
 
 		// Creating GLFW window
 		window = glfwCreateWindow((int)data.width, (int)data.height, data.title.c_str(), nullptr, nullptr);
-		glfwMakeContextCurrent(window);
-
-		// Initializing GLAD
-		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-		AMT_CORE_ASSERT(status, "Could not initialize OpenGL!");
+		
+		context = new OpenGLContext(window);
+		context->Init();
 
 		// Setting GLFW User Pointer
 		glfwSetWindowUserPointer(window, &data);
@@ -162,7 +161,7 @@ namespace Amethyst
 	void WindowsWindow::Update()
 	{
 		glfwPollEvents();
-		glfwSwapBuffers(window);
+		context->SwapBuffers();
 	}
 
 	void WindowsWindow::SetVSync(bool enabled)

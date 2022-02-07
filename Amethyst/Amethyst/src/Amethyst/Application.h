@@ -36,6 +36,7 @@ namespace Amethyst
 
 		LayerStack layerStack;
 
+		unsigned int vao, vbo, ebo;
 
 		static Application* app;
 	};

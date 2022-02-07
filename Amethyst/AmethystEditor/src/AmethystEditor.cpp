@@ -11,7 +11,7 @@ public:
 
 	void Update() override
 	{
-		AMT_INFO("ExampleLayer::Update");
+		//AMT_INFO("ExampleLayer::Update");
 	}
 
 	void RenderImGui() override

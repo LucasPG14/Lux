@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Amethyst/Window.h"
+#include "Amethyst/Renderer/GraphicsContext.h"
 
 struct GLFWwindow;
 
@@ -29,6 +30,7 @@ namespace Amethyst
 		virtual void Shutdown();
 	private:
 		GLFWwindow* window;
+		GraphicsContext* context;
 
 		struct WindowData
 		{
