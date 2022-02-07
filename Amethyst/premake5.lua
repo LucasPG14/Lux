@@ -16,6 +16,7 @@ IncludeDir = {}
 IncludeDir["GLFW"] = "Amethyst/vendor/GLFW/include"
 IncludeDir["Glad"] = "Amethyst/vendor/Glad/include"
 IncludeDir["ImGui"] = "Amethyst/vendor/ImGui"
+IncludeDir["glm"] = "Amethyst/vendor/glm"
 
 group "Dependencies"
 	include "Amethyst/vendor/GLFW"
@@ -25,9 +26,10 @@ group ""
 
 project "Amethyst"
 	location "Amethyst"
-	kind "SharedLib"
+	kind "StaticLib"
 	language "C++"
-	staticruntime "Off"
+	cppdialect "C++17"
+	staticruntime "on"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -38,7 +40,9 @@ project "Amethyst"
 	files
 	{
 		"%{prj.name}/src/**.h",
-		"%{prj.name}/src/**.cpp"
+		"%{prj.name}/src/**.cpp",
+		"%{prj.name}/vendor/glm/glm/**.hpp",
+		"%{prj.name}/vendor/glm/glm/**.inl"
 	}
 
 	includedirs
@@ -47,7 +51,8 @@ project "Amethyst"
 		"%{prj.name}/vendor/spdlog/include",
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.Glad}",
-		"%{IncludeDir.ImGui}"
+		"%{IncludeDir.ImGui}",
+		"%{IncludeDir.glm}"
 	}
 
 	links 
@@ -59,7 +64,6 @@ project "Amethyst"
 	}
 
 	filter "system:windows"
-		cppdialect "C++17"
 		systemversion "latest"
 
 		defines
@@ -69,31 +73,27 @@ project "Amethyst"
 			"GLFW_INCLUDE_NONE"
 		}
 
-		postbuildcommands
-		{
-			("{COPY} %{cfg.buildtarget.relpath} \"../bin/" .. outputdir .. "/AmethystEditor/\"")
-		}
-
 	filter "configurations:Debug"
 		defines "AMT_DEBUG"
 		runtime "Debug"
-		symbols "On"
+		symbols "on"
 
 	filter "configurations:Release"
 		defines "AMT_RELEASE"
 		runtime "Release"
-		optimize "On"
+		optimize "on"
 
 	filter "configurations:Dist"
+		defines "AMT_DIST"
 		runtime "Release"
-		buildoptions "/MD"
-		optimize "On"
+		optimize "on"
 
 project "AmethystEditor"
 	location "AmethystEditor"
 	kind "ConsoleApp"
 	language "C++"
-	staticruntime "Off"
+	cppdialect "C++17"
+	staticruntime "on"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -107,7 +107,9 @@ project "AmethystEditor"
 	includedirs
 	{
 		"Amethyst/vendor/spdlog/include",
-		"Amethyst/src"
+		"Amethyst/src",
+		"Amethyst/vendor",
+		"%{IncludeDir.glm}"
 	}
 
 	links
@@ -116,7 +118,6 @@ project "AmethystEditor"
 	}
 
 	filter "system:windows"
-		cppdialect "C++17"
 		systemversion "latest"
 
 		defines
@@ -127,14 +128,14 @@ project "AmethystEditor"
 	filter "configurations:Debug"
 		defines "AMT_DEBUG"
 		runtime "Debug"
-		symbols "On"
+		symbols "on"
 
 	filter "configurations:Release"
 		defines "AMT_RELEASE"
 		runtime "Release"
-		optimize "On"
+		optimize "on"
 
 	filter "configurations:Dist"
 		defines "AMT_DIST"
 		runtime "Release"
-		optimize "On"
+		optimize "on"

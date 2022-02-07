@@ -1,5 +1,7 @@
 #include <Amethyst.h>
 
+#include "imgui/imgui.h"
+
 class ExampleLayer : public Amethyst::Layer
 {
 public:
@@ -10,6 +12,12 @@ public:
 	void Update() override
 	{
 		AMT_INFO("ExampleLayer::Update");
+	}
+
+	void RenderImGui() override
+	{
+		ImGui::Begin("Hello");
+		ImGui::End();
 	}
 
 	void OnEvent(Amethyst::Event& event) override
@@ -24,7 +32,6 @@ public:
 	AmethystEditor()
 	{
 		PushLayer(new ExampleLayer);
-		PushOverlay(new Amethyst::ImGuiLayer);
 	}
 
 	~AmethystEditor()

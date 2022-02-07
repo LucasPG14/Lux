@@ -23,6 +23,6 @@ namespace Amethyst
 
 	private:
 		std::vector<Layer*> layers;
-		std::vector<Layer*>::iterator overlayInsert;
+		unsigned int layerIndex;
 	};
 }

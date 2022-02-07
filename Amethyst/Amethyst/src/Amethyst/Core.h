@@ -1,11 +1,15 @@
 #pragma once
 
 #ifdef AMT_PLATFORM_WINDOWS
+#if AMT_DYNAMIC_LINK
 	#ifdef AMT_BUILD_DLL
 		#define AMT_API __declspec(dllexport)
 	#else
 		#define AMT_API __declspec(dllimport)
 	#endif // 
+#else
+	#define AMT_API
+#endif
 #endif
 
 #ifdef AMT_DEBUG

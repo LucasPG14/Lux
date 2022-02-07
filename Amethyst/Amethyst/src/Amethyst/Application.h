@@ -1,11 +1,13 @@
 #pragma once
 
 #include "Core.h"
+
+#include "Window.h"
 #include "Amethyst/LayerStack.h"
 #include "Amethyst/Events/Event.h"
 #include "Amethyst/Events/ApplicationEvent.h"
 
-#include "Window.h"
+#include "Amethyst/ImGui/ImGuiLayer.h"
 
 namespace Amethyst
 {
@@ -29,6 +31,7 @@ namespace Amethyst
 		bool CloseWindow(WindowCloseEvent& e);
 	private:
 		std::unique_ptr<Window> window;
+		ImGuiLayer* imguiLayer;
 		bool running;
 
 		LayerStack layerStack;

@@ -14,8 +14,13 @@ namespace Amethyst
 	{
 		AMT_CORE_ASSERT(!app, "Application already created!");
 		app = this;
+		// Creating Window
 		window = std::unique_ptr<Window>(Window::Create());
 		window->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));
+
+		// Creating ImGuiLayer
+		imguiLayer = new ImGuiLayer();
+		PushOverlay(imguiLayer);
 	}
 	
 	Application::~Application()
@@ -29,8 +34,13 @@ namespace Amethyst
 			for (Layer* layer : layerStack)
 				layer->Update();
 
-			if (Input::IsKeyPressed(Keys::A))
-				AMT_CORE_TRACE("Key Pressed: A");
+			// This should be on the renderer, on a separate thread
+			imguiLayer->Begin();
+
+			for (Layer* layer : layerStack)
+				layer->RenderImGui();
+
+			imguiLayer->End();
 
 			window->Update();
 		}

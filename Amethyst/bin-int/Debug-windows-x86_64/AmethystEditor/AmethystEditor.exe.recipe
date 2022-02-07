@@ -2,9 +2,6 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\Users\lucas\Documents\GitHub\BlackSapphire\Amethyst\bin\Debug-windows-x86_64\Amethyst\Amethyst.dll</FullPath>
-    </ProjectOutput>
-    <ProjectOutput>
       <FullPath>C:\Users\lucas\Documents\GitHub\BlackSapphire\Amethyst\bin\Debug-windows-x86_64\AmethystEditor\AmethystEditor.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>

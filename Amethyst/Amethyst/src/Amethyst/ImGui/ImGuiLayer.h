@@ -19,16 +19,20 @@ namespace Amethyst
 		void OnDestroy() override;
 
 		void Update() override;
-		void OnEvent(Event& event) override;
-	private:
-		bool OnMousePressed(MouseButtonPressedEvent& event);
-		bool OnMouseReleased(MouseButtonReleasedEvent& event);
-		bool OnMouseMoved(MouseMovedEvent& event);
-		bool OnMouseScrolled(MouseScrolledEvent& event);
+		void RenderImGui() override;
 
-		bool OnKeyPressed(KeyPressedEvent& event);
-		bool OnKeyReleased(KeyReleasedEvent& event);
-		bool OnKeyTyped(KeyTypedEvent& event);
-		bool OnWindowResized(WindowResizeEvent& event);
+		void Begin();
+		void End();
+	//	void OnEvent(Event& event) override;
+	//private:
+	//	bool OnMousePressed(MouseButtonPressedEvent& event);
+	//	bool OnMouseReleased(MouseButtonReleasedEvent& event);
+	//	bool OnMouseMoved(MouseMovedEvent& event);
+	//	bool OnMouseScrolled(MouseScrolledEvent& event);
+
+	//	bool OnKeyPressed(KeyPressedEvent& event);
+	//	bool OnKeyReleased(KeyReleasedEvent& event);
+	//	bool OnKeyTyped(KeyTypedEvent& event);
+	//	bool OnWindowResized(WindowResizeEvent& event);
 	};
 }

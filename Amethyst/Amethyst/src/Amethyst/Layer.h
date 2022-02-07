@@ -15,6 +15,7 @@ namespace Amethyst
 		virtual void OnDestroy() {}
 
 		virtual void Update() {}
+		virtual void RenderImGui() {}
 
 		virtual void OnEvent(Event& e) {}
 

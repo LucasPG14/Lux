@@ -3,9 +3,8 @@
 
 namespace Amethyst
 {
-	LayerStack::LayerStack()
+	LayerStack::LayerStack() : layerIndex(0)
 	{
-		overlayInsert = layers.begin();
 	}
 	
 	LayerStack::~LayerStack()
@@ -16,7 +15,8 @@ namespace Amethyst
 	
 	void LayerStack::PushLayer(Layer* layer)
 	{
-		overlayInsert = layers.insert(overlayInsert, layer);
+		layers.emplace(layers.begin() + layerIndex, layer);
+		layerIndex++;
 	}
 	
 	void LayerStack::PopLayer(Layer* layer)
@@ -25,7 +25,7 @@ namespace Amethyst
 		if (it != layers.end())
 		{
 			layers.erase(it);
-			overlayInsert--;
+			layerIndex--;
 		}
 	}
 	
