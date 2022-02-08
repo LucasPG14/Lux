@@ -28,9 +28,6 @@ namespace Amethyst
 		glGenVertexArrays(1, &vao);
 		glBindVertexArray(vao);
 
-		glGenBuffers(1, &vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
 		float vertices[9] =
 		{
 			-0.5f, -0.5f, 0.0f,
@@ -38,15 +35,13 @@ namespace Amethyst
 			 0.0f,  0.5f, 0.0f,
 		};
 
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+		vbo.reset(VertexBuffer::Create(vertices, sizeof(vertices)));
+
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
 
-		glGenBuffers(1, &ebo);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-
-		unsigned int indices[3] = { 0, 1, 2 };
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+		uint32_t indices[3] = { 0, 1, 2 };
+		ebo.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
 		
 		std::string vertex = R"(
 			#version 330 core
@@ -93,7 +88,7 @@ namespace Amethyst
 
 			shader->Bind();
 			glBindVertexArray(vao);
-			glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
+			glDrawElements(GL_TRIANGLES, ebo->GetCount(), GL_UNSIGNED_INT, nullptr);
 			glBindVertexArray(0);
 
 			for (Layer* layer : layerStack)

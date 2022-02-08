@@ -9,6 +9,7 @@
 
 #include "Amethyst/ImGui/ImGuiLayer.h"
 #include "Renderer/Shader.h"
+#include "Renderer/Buffer.h"
 
 namespace Amethyst
 {
@@ -37,8 +38,10 @@ namespace Amethyst
 
 		LayerStack layerStack;
 
-		unsigned int vao, vbo, ebo;
+		unsigned int vao;
 		std::unique_ptr<Shader> shader;
+		std::unique_ptr<VertexBuffer> vbo;
+		std::unique_ptr<IndexBuffer> ebo;
 
 		static Application* app;
 	};

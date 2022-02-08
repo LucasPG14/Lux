@@ -34,6 +34,7 @@ namespace Amethyst
 
 			AMT_CORE_ERROR("{0}", infoLog.data());
 			AMT_CORE_ASSERT(false, "Vertex Shader Compilation Failed!");
+			return;
 		}
 
 		// Create an empty fragment shader handle
@@ -64,6 +65,7 @@ namespace Amethyst
 
 			AMT_CORE_ERROR("{0}", infoLog.data());
 			AMT_CORE_ASSERT(false, "Fragment Shader Compilation Failed!");
+			return;
 		}
 
 		// Vertex and fragment shaders are successfully compiled.
@@ -98,6 +100,7 @@ namespace Amethyst
 
 			AMT_CORE_ERROR("{0}", infoLog.data());
 			AMT_CORE_ASSERT(false, "Shader Link Failed!");
+			return;
 		}
 
 		// Always detach shaders after a successful link.
