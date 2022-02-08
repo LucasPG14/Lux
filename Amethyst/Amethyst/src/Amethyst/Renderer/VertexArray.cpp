@@ -11,12 +11,12 @@ namespace Amethyst
 	{
 		switch (Renderer::GetRenderer())
 		{
-		case RendererAPI::NONE:
+		case Render::API::NONE:
 		{
 			AMT_CORE_ASSERT(false, "There's no RendererAPI");
 			return nullptr;
 		}
-		case RendererAPI::OPENGL: return new OpenGLVertexArray();
+		case Render::API::OPENGL: return new OpenGLVertexArray();
 		}
 
 		AMT_CORE_ASSERT(false, "RendererAPI not defined!");

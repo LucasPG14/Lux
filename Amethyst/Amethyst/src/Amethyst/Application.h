@@ -39,14 +39,6 @@ namespace Amethyst
 
 		LayerStack layerStack;
 
-		std::shared_ptr<Shader> shader;
-		std::shared_ptr<VertexArray> vao;
-		std::shared_ptr<VertexBuffer> vbo;
-		std::shared_ptr<IndexBuffer> ebo;
-
-		std::shared_ptr<Shader> shader2;
-		std::shared_ptr<VertexArray> squareVA;
-
 		static Application* app;
 	};
 

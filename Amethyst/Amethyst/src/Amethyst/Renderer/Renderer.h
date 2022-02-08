@@ -1,19 +1,17 @@
 #pragma once
 
+#include "RenderOrder.h"
+
 namespace Amethyst
 {
-	enum class RendererAPI
-	{
-		NONE = 0,
-		OPENGL = 1,
-		VULKAN = 2
-	};
-
 	class Renderer
 	{
 	public:
-		inline static RendererAPI GetRenderer() { return rendererType; }
-	private:
-		static RendererAPI rendererType;
+		static void BeginScene();
+		static void EndScene();
+
+		static void Submit(const std::shared_ptr<VertexArray>& vertexArray);
+
+		inline static Render::API GetRenderer() { return Render::GetAPI(); }
 	};
 }

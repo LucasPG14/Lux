@@ -1,7 +1,18 @@
-#include "amtpch.h"
+ #include "amtpch.h"
 #include "Renderer.h"
 
 namespace Amethyst
 {
-	RendererAPI Renderer::rendererType = RendererAPI::OPENGL;
+	void Renderer::BeginScene()
+	{
+	}
+	
+	void Renderer::EndScene()
+	{
+	}
+	
+	void Renderer::Submit(const std::shared_ptr<VertexArray>& vertexArray)
+	{
+		RenderOrder::Draw(vertexArray);
+	}
 }

@@ -1352,6 +1352,9 @@
     <ClInclude Include="src\Amethyst\Renderer\Renderer.h" />
     <ClInclude Include="src\Amethyst\Renderer\VertexArray.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLVertexArray.h" />
+    <ClInclude Include="src\Amethyst\Renderer\Render.h" />
+    <ClInclude Include="src\Amethyst\Renderer\RenderOrder.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGLRender.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Amethyst\Application.cpp">
@@ -1388,5 +1391,8 @@
     <ClCompile Include="src\Amethyst\Renderer\Renderer.cpp" />
     <ClCompile Include="src\Amethyst\Renderer\VertexArray.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLVertexArray.cpp" />
+    <ClCompile Include="src\Amethyst\Renderer\Render.cpp" />
+    <ClCompile Include="src\Amethyst\Renderer\RenderOrder.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGLRender.cpp" />
   </ItemGroup>
 </Project>
