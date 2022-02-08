@@ -82,7 +82,7 @@ namespace Amethyst
 		}
 		
 		inline uint32_t GetStride() const { return stride; }
-		inline const std::vector<BufferElement>& GetElements() { return elements; }
+		inline const std::vector<BufferElement>& GetElements() const { return elements; }
 		
 		std::vector<BufferElement>::iterator begin() { return elements.begin(); }
 		std::vector<BufferElement>::iterator end() { return elements.end(); }

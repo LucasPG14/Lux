@@ -12,26 +12,6 @@ namespace Amethyst
 
 	#define BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
 
-	static GLenum ShaderTypeToOpenGL(ShaderDataType type)
-	{
-		switch (type)
-		{
-		case ShaderDataType::FLOAT:		return GL_FLOAT;
-		case ShaderDataType::FLOAT2:	return GL_FLOAT;
-		case ShaderDataType::FLOAT3:	return GL_FLOAT;
-		case ShaderDataType::FLOAT4:	return GL_FLOAT;
-		case ShaderDataType::INT:	 	return GL_INT;
-		case ShaderDataType::INT2: 		return GL_INT;
-		case ShaderDataType::INT3:	 	return GL_INT;
-		case ShaderDataType::INT4: 		return GL_INT;
-		case ShaderDataType::MAT3: 		return GL_FLOAT;
-		case ShaderDataType::MAT4:		return GL_FLOAT;
-		}
-
-		AMT_CORE_ASSERT(false, "ShaderDataType doesn't exist!");
-		return 0;
-	}
-
 	Application::Application() : running(true)
 	{
 		AMT_CORE_ASSERT(!app, "Application already created!");
@@ -44,9 +24,7 @@ namespace Amethyst
 		imguiLayer = new ImGuiLayer();
 		PushOverlay(imguiLayer);
 
-		// TEMPORARY
-		glGenVertexArrays(1, &vao);
-		glBindVertexArray(vao);
+		vao.reset(VertexArray::Create());
 
 		float vertices[21] =
 		{
@@ -68,19 +46,39 @@ namespace Amethyst
 			vbo->SetLayout(layout);
 		}
 
-		uint32_t index = 0;
-		for (const auto& lay : vbo->GetLayout())
-		{
-			glEnableVertexAttribArray(index);
-			glVertexAttribPointer(index, lay.GetCount(), ShaderTypeToOpenGL(lay.type), lay.normalize ? GL_TRUE : GL_FALSE, vbo->GetLayout().GetStride(), (const void*)lay.offset);
-			index++;
-		}
-
-		//vbo->SetLayout(layout);
+		vao->AddVertexBuffer(vbo);
 
 		uint32_t indices[3] = { 0, 1, 2 };
 		ebo.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
-		
+		vao->AddIndexBuffer(ebo);
+
+		squareVA.reset(VertexArray::Create());
+
+		float vertices2[12] =
+		{
+			-0.5f, -0.5f, 0.0f, 
+			 0.5f, -0.5f, 0.0f, 
+			 0.5f,  0.5f, 0.0f,
+			-0.5f,  0.5f, 0.0f
+		};
+
+		std::shared_ptr<VertexBuffer> vertexBuffer;
+		vertexBuffer.reset(VertexBuffer::Create(vertices2, sizeof(vertices2)));
+
+		BufferLayout layout2 =
+		{
+			{ShaderDataType::FLOAT3, "position"},
+			//{ShaderDataType::FLOAT3, "normal"}
+		};
+
+		vertexBuffer->SetLayout(layout2);
+		squareVA->AddVertexBuffer(vertexBuffer);
+
+		uint32_t indices2[6] = { 0, 1, 2, 2, 3, 0 };
+		std::shared_ptr<IndexBuffer> indexBuffer;
+		indexBuffer.reset(IndexBuffer::Create(indices2, sizeof(indices2) / sizeof(uint32_t)));
+		squareVA->AddIndexBuffer(indexBuffer);
+
 		std::string vertex = R"(
 			#version 330 core
 
@@ -116,6 +114,37 @@ namespace Amethyst
 		)";
 		
 		shader.reset(new Shader(vertex, fragment));
+
+		std::string vertex2 = R"(
+			#version 330 core
+
+			layout(location = 0) in vec3 aPosition;
+
+			out vec3 vPosition;
+			
+			void main()
+			{
+				vPosition = aPosition;
+				gl_Position = vec4(aPosition, 1.0);
+			}
+		
+		)";
+
+		std::string fragment2 = R"(
+			#version 330 core
+
+			layout(location = 0) out vec4 color;
+
+			in vec3 vPosition;
+
+			void main()
+			{
+				color = vec4(0.2, 0.3, 0.8, 1.0);
+			}
+		
+		)";
+
+		shader2.reset(new Shader(vertex2, fragment2));
 	}
 	
 	Application::~Application()
@@ -129,10 +158,13 @@ namespace Amethyst
 			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT);
 
+			shader2->Bind();
+			squareVA->Bind();
+			glDrawElements(GL_TRIANGLES, squareVA->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
+
 			shader->Bind();
-			glBindVertexArray(vao);
+			vao->Bind();
 			glDrawElements(GL_TRIANGLES, ebo->GetCount(), GL_UNSIGNED_INT, nullptr);
-			glBindVertexArray(0);
 
 			for (Layer* layer : layerStack)
 				layer->Update();
