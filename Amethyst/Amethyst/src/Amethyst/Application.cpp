@@ -12,6 +12,26 @@ namespace Amethyst
 
 	#define BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
 
+	static GLenum ShaderTypeToOpenGL(ShaderDataType type)
+	{
+		switch (type)
+		{
+		case ShaderDataType::FLOAT:		return GL_FLOAT;
+		case ShaderDataType::FLOAT2:	return GL_FLOAT;
+		case ShaderDataType::FLOAT3:	return GL_FLOAT;
+		case ShaderDataType::FLOAT4:	return GL_FLOAT;
+		case ShaderDataType::INT:	 	return GL_INT;
+		case ShaderDataType::INT2: 		return GL_INT;
+		case ShaderDataType::INT3:	 	return GL_INT;
+		case ShaderDataType::INT4: 		return GL_INT;
+		case ShaderDataType::MAT3: 		return GL_FLOAT;
+		case ShaderDataType::MAT4:		return GL_FLOAT;
+		}
+
+		AMT_CORE_ASSERT(false, "ShaderDataType doesn't exist!");
+		return 0;
+	}
+
 	Application::Application() : running(true)
 	{
 		AMT_CORE_ASSERT(!app, "Application already created!");
@@ -28,17 +48,35 @@ namespace Amethyst
 		glGenVertexArrays(1, &vao);
 		glBindVertexArray(vao);
 
-		float vertices[9] =
+		float vertices[21] =
 		{
-			-0.5f, -0.5f, 0.0f,
-			 0.5f, -0.5f, 0.0f,
-			 0.0f,  0.5f, 0.0f,
+			-0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+			 0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+			 0.0f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f
 		};
 
 		vbo.reset(VertexBuffer::Create(vertices, sizeof(vertices)));
 
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+		{
+			BufferLayout layout =
+			{
+				{ShaderDataType::FLOAT3, "position"},
+				{ShaderDataType::FLOAT4, "color"},
+				//{ShaderDataType::FLOAT3, "normal"}
+			};
+
+			vbo->SetLayout(layout);
+		}
+
+		uint32_t index = 0;
+		for (const auto& lay : vbo->GetLayout())
+		{
+			glEnableVertexAttribArray(index);
+			glVertexAttribPointer(index, lay.GetCount(), ShaderTypeToOpenGL(lay.type), lay.normalize ? GL_TRUE : GL_FALSE, vbo->GetLayout().GetStride(), (const void*)lay.offset);
+			index++;
+		}
+
+		//vbo->SetLayout(layout);
 
 		uint32_t indices[3] = { 0, 1, 2 };
 		ebo.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
@@ -47,11 +85,14 @@ namespace Amethyst
 			#version 330 core
 
 			layout(location = 0) in vec3 aPosition;
+			layout(location = 1) in vec4 aColor;
 
 			out vec3 vPosition;
+			out vec4 vColor;
 			
 			void main()
 			{
+				vColor = aColor;
 				vPosition = aPosition;
 				gl_Position = vec4(aPosition, 1.0);
 			}
@@ -64,10 +105,12 @@ namespace Amethyst
 			layout(location = 0) out vec4 color;
 
 			in vec3 vPosition;
+			in vec4 vColor;
 
 			void main()
 			{
 				color = vec4(vPosition * 0.5 + 0.5, 1.0);
+				color = vColor;
 			}
 		
 		)";

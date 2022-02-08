@@ -13,8 +13,12 @@ namespace Amethyst
 		void Bind() const override;
 		void Unbind() const override;
 
+		inline const BufferLayout& GetLayout() override { return layout; }
+		void SetLayout(const BufferLayout& lay) override { layout = lay; }
+
 	private:
 		uint32_t vertexID;
+		BufferLayout layout;
 	};
 
 	class OpenGLIndexBuffer : public IndexBuffer
