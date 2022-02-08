@@ -3,6 +3,8 @@
 #include "Amethyst/Core.h"
 #include "Amethyst/Events/Event.h"
 
+#include "Core/Timer.h"
+
 namespace Amethyst
 {
 	class AMT_API Layer
@@ -14,7 +16,7 @@ namespace Amethyst
 		virtual void OnCreate() {}
 		virtual void OnDestroy() {}
 
-		virtual void Update() {}
+		virtual void Update(Timer timer) {}
 		virtual void RenderImGui() {}
 
 		virtual void OnEvent(Event& e) {}

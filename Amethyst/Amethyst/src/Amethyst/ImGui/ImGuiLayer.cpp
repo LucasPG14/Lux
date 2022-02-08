@@ -60,7 +60,7 @@ namespace Amethyst
 		ImGui::DestroyContext();
 	}
 	
-	void ImGuiLayer::Update()
+	void ImGuiLayer::Update(Timer timer)
 	{
 		
 	}

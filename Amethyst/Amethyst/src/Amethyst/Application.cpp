@@ -5,6 +5,8 @@
 
 #include "Amethyst/Input.h"
 
+#include <GLFW/glfw3.h>
+
 namespace Amethyst
 {
 	Application* Application::app = nullptr;
@@ -32,18 +34,12 @@ namespace Amethyst
 	{
 		while (running)
 		{
-			//glClearColor();
-			//glClear(GL_COLOR_BUFFER_BIT);
-
-			/*squareVA->Bind();
-			glDrawElements(GL_TRIANGLES, squareVA->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
-
-			shader->Bind();
-			vao->Bind();
-			glDrawElements(GL_TRIANGLES, ebo->GetCount(), GL_UNSIGNED_INT, nullptr);*/
+			float time = (float)glfwGetTime();
+			Timer timer = time - lastFrameTime;
+			lastFrameTime = time;
 
 			for (Layer* layer : layerStack)
-				layer->Update();
+				layer->Update(timer);
 
 			// This should be on the renderer, on a separate thread
 			imguiLayer->Begin();

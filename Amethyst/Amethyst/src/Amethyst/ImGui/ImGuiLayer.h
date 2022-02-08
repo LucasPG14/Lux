@@ -18,7 +18,7 @@ namespace Amethyst
 		void OnCreate() override;
 		void OnDestroy() override;
 
-		void Update() override;
+		void Update(Timer timer) override;
 		void RenderImGui() override;
 
 		void Begin();

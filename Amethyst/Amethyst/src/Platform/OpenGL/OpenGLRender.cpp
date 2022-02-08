@@ -19,5 +19,6 @@ namespace Amethyst
 	{
 		vertexArray->Bind();
 		glDrawElements(GL_TRIANGLES, vertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
+		GLenum code = glGetError();
 	}
 }

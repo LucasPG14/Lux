@@ -70,14 +70,16 @@ public:
 			layout(location = 0) in vec3 aPosition;
 			layout(location = 1) in vec4 aColor;
 
-			out vec3 vPosition;
+			uniform mat4 view;
+			uniform mat4 projection;
+			uniform mat4 model;
+
 			out vec4 vColor;
 			
 			void main()
 			{
 				vColor = aColor;
-				vPosition = aPosition;
-				gl_Position = vec4(aPosition, 1.0);
+				gl_Position = projection * view * model * vec4(aPosition, 1.0);
 			}
 		
 		)";
@@ -87,12 +89,10 @@ public:
 
 			layout(location = 0) out vec4 color;
 
-			in vec3 vPosition;
 			in vec4 vColor;
 
 			void main()
 			{
-				color = vec4(vPosition * 0.5 + 0.5, 1.0);
 				color = vColor;
 			}
 		
@@ -105,12 +105,16 @@ public:
 
 			layout(location = 0) in vec3 aPosition;
 
+			uniform mat4 view;
+			uniform mat4 projection;
+			uniform mat4 model;			
+
 			out vec3 vPosition;
 			
 			void main()
 			{
 				vPosition = aPosition;
-				gl_Position = vec4(aPosition, 1.0);
+				gl_Position = projection * view * model * vec4(aPosition, 1.0);
 			}
 		
 		)";
@@ -134,18 +138,28 @@ public:
 
 	~ExampleLayer() {}
 
-	void Update() override
+	void Update(Amethyst::Timer timer) override
 	{
+		camera.Update(timer);
+		AMT_TRACE("Delta time: {0}s ({1})ms", timer.GetSeconds(), timer.GetMilliSeconds());
 		//AMT_INFO("ExampleLayer::Update");
+		glm::mat4 model(1.0f);
+
 		Amethyst::RenderOrder::ClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 		Amethyst::RenderOrder::Clear();
 
 		Amethyst::Renderer::BeginScene();
 
 		shader2->Bind();
+		shader2->UploadUniformMat4("view", camera.GetViewMatrix());
+		shader2->UploadUniformMat4("projection", camera.GetProjectionMatrix());
+		shader2->UploadUniformMat4("model", model);
 		Amethyst::Renderer::Submit(squareVA);
 
 		shader->Bind();
+		shader->UploadUniformMat4("view", camera.GetViewMatrix());
+		shader->UploadUniformMat4("projection", camera.GetProjectionMatrix());
+		shader->UploadUniformMat4("model", model);
 		Amethyst::Renderer::Submit(vao);
 
 		Amethyst::Renderer::EndScene();
@@ -167,6 +181,8 @@ private:
 
 	std::shared_ptr<Amethyst::Shader> shader2;
 	std::shared_ptr<Amethyst::VertexArray> squareVA;
+
+	Amethyst::PerspectiveCamera camera;
 };
 
 class AmethystEditor : public Amethyst::Application

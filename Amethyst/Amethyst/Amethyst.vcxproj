@@ -143,6 +143,7 @@
     <ClInclude Include="src\Amethyst.h" />
     <ClInclude Include="src\Amethyst\Application.h" />
     <ClInclude Include="src\Amethyst\Core.h" />
+    <ClInclude Include="src\Amethyst\Core\Timer.h" />
     <ClInclude Include="src\Amethyst\EntryPoint.h" />
     <ClInclude Include="src\Amethyst\Events\ApplicationEvent.h" />
     <ClInclude Include="src\Amethyst\Events\Event.h" />
@@ -155,6 +156,7 @@
     <ClInclude Include="src\Amethyst\LayerStack.h" />
     <ClInclude Include="src\Amethyst\Log.h" />
     <ClInclude Include="src\Amethyst\MouseCodes.h" />
+    <ClInclude Include="src\Amethyst\PerspectiveCamera.h" />
     <ClInclude Include="src\Amethyst\Renderer\Buffer.h" />
     <ClInclude Include="src\Amethyst\Renderer\GraphicsContext.h" />
     <ClInclude Include="src\Amethyst\Renderer\Render.h" />
@@ -593,6 +595,7 @@
     <ClCompile Include="src\Amethyst\Layer.cpp" />
     <ClCompile Include="src\Amethyst\LayerStack.cpp" />
     <ClCompile Include="src\Amethyst\Log.cpp" />
+    <ClCompile Include="src\Amethyst\PerspectiveCamera.cpp" />
     <ClCompile Include="src\Amethyst\Renderer\Buffer.cpp" />
     <ClCompile Include="src\Amethyst\Renderer\Render.cpp" />
     <ClCompile Include="src\Amethyst\Renderer\Renderer.cpp" />

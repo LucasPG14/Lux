@@ -12,6 +12,8 @@
 #include "Renderer/Buffer.h"
 #include "Renderer/VertexArray.h"
 
+#include "Amethyst/Core/Timer.h"
+
 namespace Amethyst
 {
 	class AMT_API Application
@@ -38,6 +40,7 @@ namespace Amethyst
 		bool running;
 
 		LayerStack layerStack;
+		float lastFrameTime;
 
 		static Application* app;
 	};

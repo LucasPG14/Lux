@@ -2,10 +2,11 @@
 #include "Shader.h"
 
 #include <glad/glad.h>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace Amethyst
 {
-	Shader::Shader(const std::string& vertex, const std::string& fragment)
+	Shader::Shader(const std::string& vertex, const std::string& fragment) : shaderID(0)
 	{
 		// Create an empty vertex shader handle
 		GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -121,5 +122,11 @@ namespace Amethyst
 	void Shader::Unbind() const
 	{
 		glUseProgram(0);
+	}
+	
+	void Shader::UploadUniformMat4(const std::string& name, const glm::mat4& matrix)
+	{
+		int location = glGetUniformLocation(shaderID, name.c_str());
+		glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(glm::transpose(matrix)));
 	}
 }

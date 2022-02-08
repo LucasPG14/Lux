@@ -7,6 +7,9 @@
 #include "Amethyst/Input.h"
 #include "Amethyst/KeyCodes.h"
 #include "Amethyst/MouseCodes.h"
+#include "Amethyst/PerspectiveCamera.h"
+
+#include "Amethyst/Core/Timer.h"
 
 // Renderer
 #include "Amethyst/Renderer/Renderer.h"
