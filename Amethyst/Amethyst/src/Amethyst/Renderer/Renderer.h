@@ -7,6 +7,8 @@ namespace Amethyst
 	class Renderer
 	{
 	public:
+		static void Init();
+
 		static void BeginScene();
 		static void EndScene();
 

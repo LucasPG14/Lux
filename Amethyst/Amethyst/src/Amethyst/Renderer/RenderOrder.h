@@ -7,6 +7,11 @@ namespace Amethyst
 	class RenderOrder
 	{
 	public:
+		inline static void Init()
+		{
+			render->Init();
+		}
+
 		inline static void ClearColor(const glm::vec4& color)
 		{
 			render->ClearColor(color);

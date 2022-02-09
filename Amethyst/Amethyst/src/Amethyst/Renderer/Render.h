@@ -16,6 +16,8 @@ namespace Amethyst
 			VULKAN = 2
 		};
 	public:
+		virtual void Init() const = 0;
+
 		virtual void ClearColor(const glm::vec4& color) const = 0;
 		virtual void Clear() const = 0;
 

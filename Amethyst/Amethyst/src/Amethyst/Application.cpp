@@ -21,6 +21,9 @@ namespace Amethyst
 		window = std::unique_ptr<Window>(Window::Create());
 		window->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));
 
+		// Initializing renderer
+		Renderer::Init();
+
 		// Creating ImGuiLayer
 		imguiLayer = new ImGuiLayer();
 		PushOverlay(imguiLayer);

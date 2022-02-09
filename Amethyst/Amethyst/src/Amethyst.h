@@ -17,6 +17,7 @@
 
 #include "Amethyst/Renderer/Buffer.h"
 #include "Amethyst/Renderer/Shader.h"
+#include "Amethyst/Renderer/Texture.h"
 #include "Amethyst/Renderer/VertexArray.h"
 
 #include "Amethyst/EntryPoint.h"

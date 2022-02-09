@@ -7,14 +7,23 @@
     <Filter Include="src\Amethyst">
       <UniqueIdentifier>{AB737763-97D6-0608-405C-3FBE2C9ED28A}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Amethyst\Core">
+      <UniqueIdentifier>{E39A72F9-4FB1-708F-9828-FCB0047E4117}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Amethyst\Events">
       <UniqueIdentifier>{2FF1A625-9B52-8433-24C0-CAE59020BBF2}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Amethyst\ImGui">
       <UniqueIdentifier>{15BD3028-01A1-F17D-6A01-ECD05604DCFF}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Amethyst\Renderer">
+      <UniqueIdentifier>{B1072322-1D74-DE1C-E667-767A52930085}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Platform">
       <UniqueIdentifier>{21CA02E5-0D2D-9289-B6B2-CA3FA2F45D0C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Platform\OpenGL">
+      <UniqueIdentifier>{35A49437-A105-7245-2A73-B8F796D3A804}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Platform\Windows">
       <UniqueIdentifier>{5B054582-4794-CE4B-F0B2-E246DC20DFF1}</UniqueIdentifier>
@@ -40,6 +49,9 @@
     <Filter Include="vendor\glm\glm\gtx">
       <UniqueIdentifier>{B3A6A76B-9F8A-68C1-08EB-6214F4ED5243}</UniqueIdentifier>
     </Filter>
+    <Filter Include="vendor\stb_image">
+      <UniqueIdentifier>{0DA0BA59-F998-D9AB-22CB-BE300E23B9B7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Amethyst.h">
@@ -50,6 +62,9 @@
     </ClInclude>
     <ClInclude Include="src\Amethyst\Core.h">
       <Filter>src\Amethyst</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Amethyst\Core\Timer.h">
+      <Filter>src\Amethyst\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Amethyst\EntryPoint.h">
       <Filter>src\Amethyst</Filter>
@@ -87,8 +102,53 @@
     <ClInclude Include="src\Amethyst\MouseCodes.h">
       <Filter>src\Amethyst</Filter>
     </ClInclude>
+    <ClInclude Include="src\Amethyst\PerspectiveCamera.h">
+      <Filter>src\Amethyst</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Amethyst\Renderer\Buffer.h">
+      <Filter>src\Amethyst\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Amethyst\Renderer\GraphicsContext.h">
+      <Filter>src\Amethyst\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Amethyst\Renderer\Render.h">
+      <Filter>src\Amethyst\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Amethyst\Renderer\RenderOrder.h">
+      <Filter>src\Amethyst\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Amethyst\Renderer\Renderer.h">
+      <Filter>src\Amethyst\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Amethyst\Renderer\Shader.h">
+      <Filter>src\Amethyst\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Amethyst\Renderer\Texture.h">
+      <Filter>src\Amethyst\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Amethyst\Renderer\VertexArray.h">
+      <Filter>src\Amethyst\Renderer</Filter>
+    </ClInclude>
     <ClInclude Include="src\Amethyst\Window.h">
       <Filter>src\Amethyst</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\OpenGL\OpenGLBuffer.h">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\OpenGL\OpenGLContext.h">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\OpenGL\OpenGLRender.h">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\OpenGL\OpenGLShader.h">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\OpenGL\OpenGLTexture.h">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\OpenGL\OpenGLVertexArray.h">
+      <Filter>src\Platform\OpenGL</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\Windows\WindowsInput.h">
       <Filter>src\Platform\Windows</Filter>
@@ -1344,19 +1404,9 @@
     <ClInclude Include="vendor\glm\glm\vector_relational.hpp">
       <Filter>vendor\glm\glm</Filter>
     </ClInclude>
-    <ClInclude Include="src\Amethyst\Renderer\GraphicsContext.h" />
-    <ClInclude Include="src\Platform\OpenGL\OpenGLContext.h" />
-    <ClInclude Include="src\Amethyst\Renderer\Shader.h" />
-    <ClInclude Include="src\Amethyst\Renderer\Buffer.h" />
-    <ClInclude Include="src\Platform\OpenGL\OpenGLBuffer.h" />
-    <ClInclude Include="src\Amethyst\Renderer\Renderer.h" />
-    <ClInclude Include="src\Amethyst\Renderer\VertexArray.h" />
-    <ClInclude Include="src\Platform\OpenGL\OpenGLVertexArray.h" />
-    <ClInclude Include="src\Amethyst\Renderer\Render.h" />
-    <ClInclude Include="src\Amethyst\Renderer\RenderOrder.h" />
-    <ClInclude Include="src\Platform\OpenGL\OpenGLRender.h" />
-    <ClInclude Include="src\Amethyst\Core\Timer.h" />
-    <ClInclude Include="src\Amethyst\PerspectiveCamera.h" />
+    <ClInclude Include="vendor\stb_image\stb_image.h">
+      <Filter>vendor\stb_image</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Amethyst\Application.cpp">
@@ -1377,6 +1427,48 @@
     <ClCompile Include="src\Amethyst\Log.cpp">
       <Filter>src\Amethyst</Filter>
     </ClCompile>
+    <ClCompile Include="src\Amethyst\PerspectiveCamera.cpp">
+      <Filter>src\Amethyst</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Amethyst\Renderer\Buffer.cpp">
+      <Filter>src\Amethyst\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Amethyst\Renderer\Render.cpp">
+      <Filter>src\Amethyst\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Amethyst\Renderer\RenderOrder.cpp">
+      <Filter>src\Amethyst\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Amethyst\Renderer\Renderer.cpp">
+      <Filter>src\Amethyst\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Amethyst\Renderer\Shader.cpp">
+      <Filter>src\Amethyst\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Amethyst\Renderer\Texture.cpp">
+      <Filter>src\Amethyst\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Amethyst\Renderer\VertexArray.cpp">
+      <Filter>src\Amethyst\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\OpenGL\OpenGLContext.cpp">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\OpenGL\OpenGLRender.cpp">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\OpenGL\OpenGLShader.cpp">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\OpenGL\OpenGLTexture.cpp">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\OpenGL\OpenGLVertexArray.cpp">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClCompile>
     <ClCompile Include="src\Platform\Windows\WindowsInput.cpp">
       <Filter>src\Platform\Windows</Filter>
     </ClCompile>
@@ -1386,16 +1478,8 @@
     <ClCompile Include="src\amtpch.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\OpenGLContext.cpp" />
-    <ClCompile Include="src\Amethyst\Renderer\Shader.cpp" />
-    <ClCompile Include="src\Amethyst\Renderer\Buffer.cpp" />
-    <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp" />
-    <ClCompile Include="src\Amethyst\Renderer\Renderer.cpp" />
-    <ClCompile Include="src\Amethyst\Renderer\VertexArray.cpp" />
-    <ClCompile Include="src\Platform\OpenGL\OpenGLVertexArray.cpp" />
-    <ClCompile Include="src\Amethyst\Renderer\Render.cpp" />
-    <ClCompile Include="src\Amethyst\Renderer\RenderOrder.cpp" />
-    <ClCompile Include="src\Platform\OpenGL\OpenGLRender.cpp" />
-    <ClCompile Include="src\Amethyst\PerspectiveCamera.cpp" />
+    <ClCompile Include="vendor\stb_image\stb_image.cpp">
+      <Filter>vendor\stb_image</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

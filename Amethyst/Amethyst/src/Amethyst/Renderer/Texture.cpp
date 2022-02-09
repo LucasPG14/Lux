@@ -1,23 +1,23 @@
 #include "amtpch.h"
-#include "Shader.h"
+#include "Texture.h"
 
 #include "Renderer.h"
-
-#include "Platform/OpenGL/OpenGLShader.h"
+#include "Platform/OpenGL/OpenGLTexture.h"
 
 namespace Amethyst
 {
-	Shader* Shader::Create(const std::string& vertex, const std::string& fragment)
+	Texture2D* Texture2D::Create(const std::string& path)
 	{
 		switch (Renderer::GetRenderer())
 		{
-		case Render::API::NONE: 
+		case Render::API::NONE:
 		{
 			AMT_CORE_ASSERT(false, "There's no RendererAPI");
 			return nullptr;
 		}
-		case Render::API::OPENGL: return new OpenGLShader(vertex, fragment);
+		case Render::API::OPENGL: return new OpenGLTexture2D(path);
 		}
+
 		AMT_CORE_ASSERT(false, "RendererAPI not defined!");
 		return nullptr;
 	}

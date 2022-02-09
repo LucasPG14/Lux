@@ -1,8 +1,13 @@
- #include "amtpch.h"
+#include "amtpch.h"
 #include "Renderer.h"
 
 namespace Amethyst
 {
+	void Renderer::Init()
+	{
+		RenderOrder::Init();
+	}
+
 	void Renderer::BeginScene()
 	{
 	}

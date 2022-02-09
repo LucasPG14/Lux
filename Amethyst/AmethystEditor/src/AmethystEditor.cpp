@@ -39,12 +39,12 @@ public:
 
 		squareVA.reset(Amethyst::VertexArray::Create());
 
-		float vertices2[12] =
+		float vertices2[20] =
 		{
-			-0.5f, -0.5f, 0.0f,
-			 0.5f, -0.5f, 0.0f,
-			 0.5f,  0.5f, 0.0f,
-			-0.5f,  0.5f, 0.0f
+			-0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
+			 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+			 0.5f,  0.5f, 0.0f, 1.0f, 1.0f,
+			-0.5f,  0.5f, 0.0f, 0.0f, 1.0f
 		};
 
 		std::shared_ptr<Amethyst::VertexBuffer> vertexBuffer;
@@ -53,6 +53,7 @@ public:
 		Amethyst::BufferLayout layout2 =
 		{
 			{Amethyst::ShaderDataType::FLOAT3, "position"},
+			{Amethyst::ShaderDataType::FLOAT2, "texCoord"},
 			//{ShaderDataType::FLOAT3, "normal"}
 		};
 
@@ -98,7 +99,7 @@ public:
 		
 		)";
 
-		shader.reset(new Amethyst::Shader(vertex, fragment));
+		shader.reset(Amethyst::Shader::Create(vertex, fragment));
 
 		std::string vertex2 = R"(
 			#version 330 core
@@ -133,7 +134,51 @@ public:
 		
 		)";
 
-		shader2.reset(new Amethyst::Shader(vertex2, fragment2));
+		shader2.reset(Amethyst::Shader::Create(vertex2, fragment2));
+	
+		std::string vertexTexture = R"(
+			#version 330 core
+
+			layout(location = 0) in vec3 aPosition;
+			layout(location = 1) in vec2 aTexCoord;
+
+			uniform mat4 view;
+			uniform mat4 projection;
+			uniform mat4 model;			
+
+			out vec2 texCoord;
+			
+			void main()
+			{
+				texCoord = aTexCoord;
+				gl_Position = projection * view * model * vec4(aPosition, 1.0);
+			}
+		
+		)";
+
+		std::string textureFragment = R"(
+			#version 330 core
+
+			layout(location = 0) out vec4 color;
+
+			in vec2 texCoord;
+
+			uniform sampler2D ourTexture;
+
+			void main()
+			{
+				color = texture(ourTexture, texCoord);
+			}
+		
+		)";
+
+		texture.reset(Amethyst::Shader::Create(vertexTexture, textureFragment));
+	
+		tex.reset(Amethyst::Texture2D::Create("assets/textures/bakeHouse.png"));
+		logo.reset(Amethyst::Texture2D::Create("assets/textures/deadpool.png"));
+	
+		texture->Bind();
+		texture->UploadUniformInt("ourTexture", 0);
 	}
 
 	~ExampleLayer() {}
@@ -150,17 +195,19 @@ public:
 
 		Amethyst::Renderer::BeginScene();
 
-		shader2->Bind();
-		shader2->UploadUniformMat4("view", camera.GetViewMatrix());
-		shader2->UploadUniformMat4("projection", camera.GetProjectionMatrix());
-		shader2->UploadUniformMat4("model", model);
+		tex->Bind();
+		texture->Bind();
+		texture->UploadUniformMat4("view", camera.GetViewMatrix());
+		texture->UploadUniformMat4("projection", camera.GetProjectionMatrix());
+		texture->UploadUniformMat4("model", model);
 		Amethyst::Renderer::Submit(squareVA);
-
-		shader->Bind();
-		shader->UploadUniformMat4("view", camera.GetViewMatrix());
-		shader->UploadUniformMat4("projection", camera.GetProjectionMatrix());
-		shader->UploadUniformMat4("model", model);
-		Amethyst::Renderer::Submit(vao);
+		logo->Bind();
+		Amethyst::Renderer::Submit(squareVA);
+		//shader->Bind();
+		//shader->UploadUniformMat4("view", camera.GetViewMatrix());
+		//shader->UploadUniformMat4("projection", camera.GetProjectionMatrix());
+		//shader->UploadUniformMat4("model", model);
+		//Amethyst::Renderer::Submit(vao);
 
 		Amethyst::Renderer::EndScene();
 	}
@@ -180,6 +227,9 @@ private:
 	std::shared_ptr<Amethyst::VertexArray> vao;
 
 	std::shared_ptr<Amethyst::Shader> shader2;
+	std::shared_ptr<Amethyst::Shader> texture;
+	std::shared_ptr<Amethyst::Texture2D> tex;
+	std::shared_ptr<Amethyst::Texture2D> logo;
 	std::shared_ptr<Amethyst::VertexArray> squareVA;
 
 	Amethyst::PerspectiveCamera camera;
