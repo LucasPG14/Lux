@@ -99,7 +99,7 @@ public:
 		
 		)";
 
-		shader = Amethyst::Shader::Create("Hola", vertex, fragment));
+		shader = Amethyst::Shader::Create("Hola", vertex, fragment);
 
 		std::string vertex2 = R"(
 			#version 330 core
@@ -134,9 +134,9 @@ public:
 		
 		)";
 
-		shader2 = Amethyst::Shader::Create("Hola2", vertex2, fragment2));
+		shader2 = Amethyst::Shader::Create("Hola2", vertex2, fragment2);
 
-		texture = Amethyst::Shader::Create("assets/shaders/Texture.glsl"));
+		texture = Amethyst::Shader::Create("assets/shaders/Texture.glsl");
 	
 		tex.reset(Amethyst::Texture2D::Create("assets/textures/bakeHouse.png"));
 		logo.reset(Amethyst::Texture2D::Create("assets/textures/deadpool.png"));

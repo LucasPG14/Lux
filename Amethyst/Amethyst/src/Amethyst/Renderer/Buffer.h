@@ -45,7 +45,7 @@ namespace Amethyst
 		uint32_t offset;
 		bool normalize;
 
-		BufferElement() {}
+		BufferElement() : name(""), type(ShaderDataType::NONE), size(0), offset(0), normalize(false) {}
 
 		BufferElement(const ShaderDataType elemType, const std::string& elemName, bool normalized = false)
 			: name(elemName), type(elemType), size(ShaderDataTypeSize(elemType)), offset(0), normalize(normalized) {}
@@ -75,7 +75,7 @@ namespace Amethyst
 	class BufferLayout
 	{
 	public:
-		BufferLayout() {}
+		BufferLayout() : stride(0){}
 		BufferLayout(const std::initializer_list<BufferElement>& elem) : elements(elem) 
 		{
 			CalculateOffset();
