@@ -99,7 +99,7 @@ public:
 		
 		)";
 
-		shader.reset(Amethyst::Shader::Create(vertex, fragment));
+		shader = Amethyst::Shader::Create("Hola", vertex, fragment));
 
 		std::string vertex2 = R"(
 			#version 330 core
@@ -134,45 +134,9 @@ public:
 		
 		)";
 
-		shader2.reset(Amethyst::Shader::Create(vertex2, fragment2));
-	
-		std::string vertexTexture = R"(
-			#version 330 core
+		shader2 = Amethyst::Shader::Create("Hola2", vertex2, fragment2));
 
-			layout(location = 0) in vec3 aPosition;
-			layout(location = 1) in vec2 aTexCoord;
-
-			uniform mat4 view;
-			uniform mat4 projection;
-			uniform mat4 model;			
-
-			out vec2 texCoord;
-			
-			void main()
-			{
-				texCoord = aTexCoord;
-				gl_Position = projection * view * model * vec4(aPosition, 1.0);
-			}
-		
-		)";
-
-		std::string textureFragment = R"(
-			#version 330 core
-
-			layout(location = 0) out vec4 color;
-
-			in vec2 texCoord;
-
-			uniform sampler2D ourTexture;
-
-			void main()
-			{
-				color = texture(ourTexture, texCoord);
-			}
-		
-		)";
-
-		texture.reset(Amethyst::Shader::Create(vertexTexture, textureFragment));
+		texture = Amethyst::Shader::Create("assets/shaders/Texture.glsl"));
 	
 		tex.reset(Amethyst::Texture2D::Create("assets/textures/bakeHouse.png"));
 		logo.reset(Amethyst::Texture2D::Create("assets/textures/deadpool.png"));
