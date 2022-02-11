@@ -30,6 +30,8 @@ namespace Amethyst
 		void PushLayer(Layer* layer);
 		void PushOverlay(Layer* overlay);
 
+		inline void Close() { running = false; }
+
 		inline static Application& Get() { return *app; }
 		inline Window& GetWindow() { return *window; }
 	private:

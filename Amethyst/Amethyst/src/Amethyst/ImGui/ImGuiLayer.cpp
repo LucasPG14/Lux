@@ -67,7 +67,6 @@ namespace Amethyst
 
 	void ImGuiLayer::RenderImGui()
 	{
-		ImGui::ShowDemoWindow();
 	}
 
 	void ImGuiLayer::Begin()

@@ -86,7 +86,7 @@ namespace Amethyst
 
 	bool Application::CloseWindow(WindowCloseEvent& e)
 	{
-		running = false;
+		Close();
 		return true;
 	}
 }
