@@ -14,6 +14,7 @@ namespace Amethyst
 		inline uint32_t GetHeight() const override { return height; }
 
 		void Bind(uint32_t slot = 0) const override;
+		void Unbind(uint32_t slot = 0) const override;
 	private:
 		std::string path;
 

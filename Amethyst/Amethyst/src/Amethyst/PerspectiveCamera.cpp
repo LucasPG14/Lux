@@ -1,10 +1,10 @@
 #include "amtpch.h"
 #include "PerspectiveCamera.h"
 
-#include "Application.h"
-#include "Input.h"
-#include "MouseCodes.h"
-#include "KeyCodes.h"
+#include "Core/Application.h"
+#include "Core/Input.h"
+#include "Core/MouseCodes.h"
+#include "Core/KeyCodes.h"
 
 #include <GLM/gtx/orthonormalize.hpp>
 
@@ -67,6 +67,8 @@ namespace Amethyst
 			position = newPos;
 			up = newUp;
 			front = newFront;
+
+			AMT_CORE_INFO("X: {0} Y: {1}, Z: {2}", position.x, position.y, position.z);
 		}
 
 		viewMatrix = ComputeViewMatrix();

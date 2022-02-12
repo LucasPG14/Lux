@@ -1,7 +1,7 @@
 #include "amtpch.h"
 #include "WindowsInput.h"
 
-#include "Amethyst/Application.h"
+#include "Amethyst/Core/Application.h"
 #include <GLFW/glfw3.h>
 
 namespace Amethyst

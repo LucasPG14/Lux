@@ -57,17 +57,38 @@
     <ClInclude Include="src\Amethyst.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="src\Amethyst\Application.h">
-      <Filter>src\Amethyst</Filter>
+    <ClInclude Include="src\Amethyst\Core\Application.h">
+      <Filter>src\Amethyst\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\Amethyst\Core.h">
-      <Filter>src\Amethyst</Filter>
+    <ClInclude Include="src\Amethyst\Core\Core.h">
+      <Filter>src\Amethyst\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Amethyst\Core\EntryPoint.h">
+      <Filter>src\Amethyst\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Amethyst\Core\Input.h">
+      <Filter>src\Amethyst\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Amethyst\Core\KeyCodes.h">
+      <Filter>src\Amethyst\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Amethyst\Core\Layer.h">
+      <Filter>src\Amethyst\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Amethyst\Core\LayerStack.h">
+      <Filter>src\Amethyst\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Amethyst\Core\Log.h">
+      <Filter>src\Amethyst\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Amethyst\Core\MouseCodes.h">
+      <Filter>src\Amethyst\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Amethyst\Core\Timer.h">
       <Filter>src\Amethyst\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\Amethyst\EntryPoint.h">
-      <Filter>src\Amethyst</Filter>
+    <ClInclude Include="src\Amethyst\Core\Window.h">
+      <Filter>src\Amethyst\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Amethyst\Events\ApplicationEvent.h">
       <Filter>src\Amethyst\Events</Filter>
@@ -84,28 +105,13 @@
     <ClInclude Include="src\Amethyst\ImGui\ImGuiLayer.h">
       <Filter>src\Amethyst\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="src\Amethyst\Input.h">
-      <Filter>src\Amethyst</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Amethyst\KeyCodes.h">
-      <Filter>src\Amethyst</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Amethyst\Layer.h">
-      <Filter>src\Amethyst</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Amethyst\LayerStack.h">
-      <Filter>src\Amethyst</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Amethyst\Log.h">
-      <Filter>src\Amethyst</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Amethyst\MouseCodes.h">
-      <Filter>src\Amethyst</Filter>
-    </ClInclude>
     <ClInclude Include="src\Amethyst\PerspectiveCamera.h">
       <Filter>src\Amethyst</Filter>
     </ClInclude>
     <ClInclude Include="src\Amethyst\Renderer\Buffer.h">
+      <Filter>src\Amethyst\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Amethyst\Renderer\Framebuffer.h">
       <Filter>src\Amethyst\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Amethyst\Renderer\GraphicsContext.h">
@@ -129,13 +135,13 @@
     <ClInclude Include="src\Amethyst\Renderer\VertexArray.h">
       <Filter>src\Amethyst\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="src\Amethyst\Window.h">
-      <Filter>src\Amethyst</Filter>
-    </ClInclude>
     <ClInclude Include="src\Platform\OpenGL\OpenGLBuffer.h">
       <Filter>src\Platform\OpenGL</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\OpenGL\OpenGLContext.h">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\OpenGL\OpenGLFramebuffer.h">
       <Filter>src\Platform\OpenGL</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\OpenGL\OpenGLRender.h">
@@ -1409,8 +1415,17 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Amethyst\Application.cpp">
-      <Filter>src\Amethyst</Filter>
+    <ClCompile Include="src\Amethyst\Core\Application.cpp">
+      <Filter>src\Amethyst\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Amethyst\Core\Layer.cpp">
+      <Filter>src\Amethyst\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Amethyst\Core\LayerStack.cpp">
+      <Filter>src\Amethyst\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Amethyst\Core\Log.cpp">
+      <Filter>src\Amethyst\Core</Filter>
     </ClCompile>
     <ClCompile Include="src\Amethyst\ImGui\ImGuiBuild.cpp">
       <Filter>src\Amethyst\ImGui</Filter>
@@ -1418,19 +1433,13 @@
     <ClCompile Include="src\Amethyst\ImGui\ImGuiLayer.cpp">
       <Filter>src\Amethyst\ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="src\Amethyst\Layer.cpp">
-      <Filter>src\Amethyst</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Amethyst\LayerStack.cpp">
-      <Filter>src\Amethyst</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Amethyst\Log.cpp">
-      <Filter>src\Amethyst</Filter>
-    </ClCompile>
     <ClCompile Include="src\Amethyst\PerspectiveCamera.cpp">
       <Filter>src\Amethyst</Filter>
     </ClCompile>
     <ClCompile Include="src\Amethyst\Renderer\Buffer.cpp">
+      <Filter>src\Amethyst\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Amethyst\Renderer\Framebuffer.cpp">
       <Filter>src\Amethyst\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Amethyst\Renderer\Render.cpp">
@@ -1455,6 +1464,9 @@
       <Filter>src\Platform\OpenGL</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\OpenGL\OpenGLContext.cpp">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\OpenGL\OpenGLFramebuffer.cpp">
       <Filter>src\Platform\OpenGL</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\OpenGL\OpenGLRender.cpp">

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Amethyst/Window.h"
+#include "Amethyst/Core/Window.h"
 #include "Amethyst/Renderer/GraphicsContext.h"
 
 struct GLFWwindow;

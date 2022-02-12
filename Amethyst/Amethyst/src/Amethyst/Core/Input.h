@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Amethyst/Core.h"
+#include "Amethyst/Core/Core.h"
 
 namespace Amethyst
 {

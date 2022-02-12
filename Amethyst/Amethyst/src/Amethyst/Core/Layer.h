@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Amethyst/Core.h"
+#include "Amethyst/Core/Core.h"
 #include "Amethyst/Events/Event.h"
 
-#include "Core/Timer.h"
+#include "Amethyst/Core/Timer.h"
 
 namespace Amethyst
 {

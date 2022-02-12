@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Amethyst/Layer.h"
+#include "Amethyst/Core/Layer.h"
 
 #include "Amethyst/Events/ApplicationEvent.h"
 #include "Amethyst/Events/KeyEvent.h"

@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Amethyst/Application.h"
-#include "Amethyst/Layer.h"
-#include "Amethyst/Log.h"
+#include "Amethyst/Core/Application.h"
+#include "Amethyst/Core/Layer.h"
+#include "Amethyst/Core/Log.h"
 
-#include "Amethyst/Input.h"
-#include "Amethyst/KeyCodes.h"
-#include "Amethyst/MouseCodes.h"
+#include "Amethyst/Core/Input.h"
+#include "Amethyst/Core/KeyCodes.h"
+#include "Amethyst/Core/MouseCodes.h"
 #include "Amethyst/PerspectiveCamera.h"
 
 #include "Amethyst/Core/Timer.h"
@@ -17,7 +17,6 @@
 
 #include "Amethyst/Renderer/Buffer.h"
 #include "Amethyst/Renderer/Shader.h"
+#include "Amethyst/Renderer/Framebuffer.h"
 #include "Amethyst/Renderer/Texture.h"
 #include "Amethyst/Renderer/VertexArray.h"
-
-#include "Amethyst/EntryPoint.h"

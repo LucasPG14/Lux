@@ -1,5 +1,5 @@
 workspace "Amethyst"
-	architecture "x64"
+	architecture "x86_64"
 	startproject "AmethystEditor"
 
 	configurations
@@ -7,6 +7,11 @@ workspace "Amethyst"
 		"Debug",
 		"Release",
 		"Dist"
+	}
+
+	flags
+	{
+		"MultiProcessorCompile"
 	}
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
@@ -67,14 +72,19 @@ project "Amethyst"
 		"opengl32.lib"
 	}
 
+	defines
+	{
+		"_CRT_SECURE_NO_WARNINGS",
+		"GLFW_INCLUDE_NONE"
+	}
+
 	filter "system:windows"
 		systemversion "latest"
 
 		defines
 		{
 			"AMT_PLATFORM_WINDOWS",
-			"AMT_BUILD_DLL",
-			"GLFW_INCLUDE_NONE"
+			"AMT_BUILD_DLL"
 		}
 
 	filter "configurations:Debug"
@@ -119,6 +129,11 @@ project "AmethystEditor"
 	links
 	{
 		"Amethyst"
+	}
+
+	defines
+	{
+		"_CRT_SECURE_NO_WARNINGS",
 	}
 
 	filter "system:windows"

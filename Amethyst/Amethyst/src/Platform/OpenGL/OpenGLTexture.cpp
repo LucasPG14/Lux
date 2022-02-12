@@ -40,7 +40,8 @@ namespace Amethyst
 		glTextureParameteri(textureID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 		glTextureSubImage2D(textureID, 0, 0, 0, width, height, dataFormat, GL_UNSIGNED_BYTE, data);
-		
+		glBindTexture(GL_TEXTURE_2D, 0);
+
 		stbi_image_free(data);
 	}
 
@@ -51,6 +52,11 @@ namespace Amethyst
 	
 	void OpenGLTexture2D::Bind(uint32_t slot) const
 	{
-		glBindTextureUnit(0, textureID);
+		glBindTexture(GL_TEXTURE_2D, textureID);
+	}
+	
+	void OpenGLTexture2D::Unbind(uint32_t slot) const
+	{
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 }

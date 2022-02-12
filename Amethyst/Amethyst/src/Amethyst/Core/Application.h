@@ -3,14 +3,14 @@
 #include "Core.h"
 
 #include "Window.h"
-#include "Amethyst/LayerStack.h"
+#include "Amethyst/Core/LayerStack.h"
 #include "Amethyst/Events/Event.h"
 #include "Amethyst/Events/ApplicationEvent.h"
 
 #include "Amethyst/ImGui/ImGuiLayer.h"
-#include "Renderer/Shader.h"
-#include "Renderer/Buffer.h"
-#include "Renderer/VertexArray.h"
+#include "Amethyst/Renderer/Shader.h"
+#include "Amethyst/Renderer/Buffer.h"
+#include "Amethyst/Renderer/VertexArray.h"
 
 #include "Amethyst/Core/Timer.h"
 

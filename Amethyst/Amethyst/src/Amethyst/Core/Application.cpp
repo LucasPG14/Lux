@@ -3,7 +3,7 @@
 
 #include "Amethyst/Renderer/Renderer.h"
 
-#include "Amethyst/Input.h"
+#include "Amethyst/Core/Input.h"
 
 #include <GLFW/glfw3.h>
 
@@ -61,8 +61,6 @@ namespace Amethyst
 		EventDispatcher dispatcher(e);
 
 		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(Application::CloseWindow));
-
-		AMT_CORE_TRACE("{0}", e);
 
 		for (auto it = layerStack.end(); it != layerStack.begin();)
 		{

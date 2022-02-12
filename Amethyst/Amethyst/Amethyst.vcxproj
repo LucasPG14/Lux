@@ -76,11 +76,13 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>amtpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>AMT_PLATFORM_WINDOWS;AMT_BUILD_DLL;GLFW_INCLUDE_NONE;AMT_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GLFW_INCLUDE_NONE;AMT_PLATFORM_WINDOWS;AMT_BUILD_DLL;AMT_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\Glad\include;vendor\ImGui;vendor\glm;vendor\stb_image;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
+      <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -96,7 +98,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>amtpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>AMT_PLATFORM_WINDOWS;AMT_BUILD_DLL;GLFW_INCLUDE_NONE;AMT_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GLFW_INCLUDE_NONE;AMT_PLATFORM_WINDOWS;AMT_BUILD_DLL;AMT_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\Glad\include;vendor\ImGui;vendor\glm;vendor\stb_image;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -104,6 +106,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -120,7 +123,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>amtpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>AMT_PLATFORM_WINDOWS;AMT_BUILD_DLL;GLFW_INCLUDE_NONE;AMT_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GLFW_INCLUDE_NONE;AMT_PLATFORM_WINDOWS;AMT_BUILD_DLL;AMT_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\Glad\include;vendor\ImGui;vendor\glm;vendor\stb_image;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -128,6 +131,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -141,23 +145,25 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\Amethyst.h" />
-    <ClInclude Include="src\Amethyst\Application.h" />
-    <ClInclude Include="src\Amethyst\Core.h" />
+    <ClInclude Include="src\Amethyst\Core\Application.h" />
+    <ClInclude Include="src\Amethyst\Core\Core.h" />
+    <ClInclude Include="src\Amethyst\Core\EntryPoint.h" />
+    <ClInclude Include="src\Amethyst\Core\Input.h" />
+    <ClInclude Include="src\Amethyst\Core\KeyCodes.h" />
+    <ClInclude Include="src\Amethyst\Core\Layer.h" />
+    <ClInclude Include="src\Amethyst\Core\LayerStack.h" />
+    <ClInclude Include="src\Amethyst\Core\Log.h" />
+    <ClInclude Include="src\Amethyst\Core\MouseCodes.h" />
     <ClInclude Include="src\Amethyst\Core\Timer.h" />
-    <ClInclude Include="src\Amethyst\EntryPoint.h" />
+    <ClInclude Include="src\Amethyst\Core\Window.h" />
     <ClInclude Include="src\Amethyst\Events\ApplicationEvent.h" />
     <ClInclude Include="src\Amethyst\Events\Event.h" />
     <ClInclude Include="src\Amethyst\Events\KeyEvent.h" />
     <ClInclude Include="src\Amethyst\Events\MouseEvent.h" />
     <ClInclude Include="src\Amethyst\ImGui\ImGuiLayer.h" />
-    <ClInclude Include="src\Amethyst\Input.h" />
-    <ClInclude Include="src\Amethyst\KeyCodes.h" />
-    <ClInclude Include="src\Amethyst\Layer.h" />
-    <ClInclude Include="src\Amethyst\LayerStack.h" />
-    <ClInclude Include="src\Amethyst\Log.h" />
-    <ClInclude Include="src\Amethyst\MouseCodes.h" />
     <ClInclude Include="src\Amethyst\PerspectiveCamera.h" />
     <ClInclude Include="src\Amethyst\Renderer\Buffer.h" />
+    <ClInclude Include="src\Amethyst\Renderer\Framebuffer.h" />
     <ClInclude Include="src\Amethyst\Renderer\GraphicsContext.h" />
     <ClInclude Include="src\Amethyst\Renderer\Render.h" />
     <ClInclude Include="src\Amethyst\Renderer\RenderOrder.h" />
@@ -165,9 +171,9 @@
     <ClInclude Include="src\Amethyst\Renderer\Shader.h" />
     <ClInclude Include="src\Amethyst\Renderer\Texture.h" />
     <ClInclude Include="src\Amethyst\Renderer\VertexArray.h" />
-    <ClInclude Include="src\Amethyst\Window.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLBuffer.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLContext.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGLFramebuffer.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLRender.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLShader.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLTexture.h" />
@@ -593,14 +599,15 @@
     <ClInclude Include="vendor\stb_image\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Amethyst\Application.cpp" />
+    <ClCompile Include="src\Amethyst\Core\Application.cpp" />
+    <ClCompile Include="src\Amethyst\Core\Layer.cpp" />
+    <ClCompile Include="src\Amethyst\Core\LayerStack.cpp" />
+    <ClCompile Include="src\Amethyst\Core\Log.cpp" />
     <ClCompile Include="src\Amethyst\ImGui\ImGuiBuild.cpp" />
     <ClCompile Include="src\Amethyst\ImGui\ImGuiLayer.cpp" />
-    <ClCompile Include="src\Amethyst\Layer.cpp" />
-    <ClCompile Include="src\Amethyst\LayerStack.cpp" />
-    <ClCompile Include="src\Amethyst\Log.cpp" />
     <ClCompile Include="src\Amethyst\PerspectiveCamera.cpp" />
     <ClCompile Include="src\Amethyst\Renderer\Buffer.cpp" />
+    <ClCompile Include="src\Amethyst\Renderer\Framebuffer.cpp" />
     <ClCompile Include="src\Amethyst\Renderer\Render.cpp" />
     <ClCompile Include="src\Amethyst\Renderer\RenderOrder.cpp" />
     <ClCompile Include="src\Amethyst\Renderer\Renderer.cpp" />
@@ -609,6 +616,7 @@
     <ClCompile Include="src\Amethyst\Renderer\VertexArray.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLContext.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGLFramebuffer.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLRender.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLShader.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLTexture.cpp" />
