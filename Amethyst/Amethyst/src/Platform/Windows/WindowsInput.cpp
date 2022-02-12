@@ -1,21 +1,19 @@
 #include "amtpch.h"
-#include "WindowsInput.h"
+#include "Amethyst/Core/Input.h"
 
 #include "Amethyst/Core/Application.h"
 #include <GLFW/glfw3.h>
 
 namespace Amethyst
 {
-	Input* Input::input = new WindowsInput();
-
-	bool WindowsInput::IsKeyPressedImpl(int keycode)
+	bool Input::IsKeyPressed(KeyCode keycode)
 	{
 		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetWindow());
 		int state = glfwGetKey(window, keycode);
 		return state == GLFW_PRESS || state == GLFW_REPEAT;
 	}
 	
-	bool WindowsInput::IsMouseButtonPressedImpl(int button)
+	bool Input::IsMouseButtonPressed(MouseCode button)
 	{
 		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetWindow());
 		int state = glfwGetMouseButton(window, button);
@@ -23,7 +21,7 @@ namespace Amethyst
 		return state == GLFW_PRESS;
 	}
 	
-	float WindowsInput::GetMouseXImpl()
+	float Input::GetMouseX()
 	{
 		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetWindow());
 		double posX, posY;
@@ -32,7 +30,7 @@ namespace Amethyst
 		return (float)posX;
 	}
 	
-	float WindowsInput::GetMouseYImpl()
+	float Input::GetMouseY()
 	{
 		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetWindow());
 		double posX, posY;

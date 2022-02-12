@@ -3,11 +3,11 @@
 
 namespace Amethyst
 {
-	using KeyCode = uint16_t;
+	using MouseCode = uint16_t;
 
 	namespace Mouse
 	{
-		enum : KeyCode
+		enum : MouseCode
 		{
 			BUTTON_LEFT = 0,
 			BUTTON_RIGHT = 1,
