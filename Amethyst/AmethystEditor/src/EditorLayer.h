@@ -20,18 +20,19 @@ namespace Amethyst
 		void OnEvent(Event& e) override;
 
 	private:
-		std::shared_ptr<Amethyst::Shader> shader;
-		std::shared_ptr<Amethyst::VertexArray> vao;
+		std::shared_ptr<Shader> shader;
+		std::shared_ptr<VertexArray> vao;
+		std::shared_ptr<Scene> scene;
 
-		std::shared_ptr<Amethyst::Framebuffer> fbo;
+		std::shared_ptr<Framebuffer> fbo;
 
-		std::shared_ptr<Amethyst::Shader> shader2;
-		std::shared_ptr<Amethyst::Shader> texture;
-		std::shared_ptr<Amethyst::Texture2D> tex;
-		std::shared_ptr<Amethyst::Texture2D> logo;
-		std::shared_ptr<Amethyst::VertexArray> squareVA;
+		std::shared_ptr<Shader> shader2;
+		std::shared_ptr<Shader> texture;
+		std::shared_ptr<Texture2D> tex;
+		std::shared_ptr<Texture2D> logo;
+		std::shared_ptr<VertexArray> squareVA;
 
-		Amethyst::PerspectiveCamera camera;
+		PerspectiveCamera camera;
 
 		glm::vec2 viewSize;
 	};

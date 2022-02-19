@@ -64,9 +64,9 @@ namespace Amethyst
 
 		for (auto it = layerStack.end(); it != layerStack.begin();)
 		{
-			(*--it)->OnEvent(e);
 			if (e.handled)
 				break;
+			(*--it)->OnEvent(e);
 		}
 	}
 

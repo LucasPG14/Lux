@@ -5,6 +5,8 @@
 #include "examples/imgui_impl_glfw.h"
 #include "examples/imgui_impl_opengl3.h"
 
+#include "ImGuiStyle.h"
+
 #include "Amethyst/Core/Application.h"
 
 // TEMPORARY
@@ -35,7 +37,8 @@ namespace Amethyst
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
 
 		// Setup Dear ImGui style
-		ImGui::StyleColorsDark();
+		//ImGui::StyleColorsDark();
+		ImGui::SetAmethystStyle();
 
 		// When viewports are enabled we tweak WindowRounding/WindowBg so platform Windows can look identical to regular ones.
 		ImGuiStyle& style = ImGui::GetStyle();

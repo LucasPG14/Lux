@@ -13,6 +13,7 @@
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
+#include <bitset>
 
 #include "Amethyst/Core/Log.h"
 

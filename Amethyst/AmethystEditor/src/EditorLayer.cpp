@@ -6,6 +6,7 @@ namespace Amethyst
 {
 	EditorLayer::EditorLayer()
 	{
+		scene = std::make_shared<Scene>();
 	}
 
 	EditorLayer::~EditorLayer()
@@ -260,6 +261,16 @@ namespace Amethyst
 		//style.WindowMinSize.x = minWinSizeX;
 
 		ImGui::Begin("Hierarchy");
+		std::vector<Entity> entities = scene->GetEntities();
+		for (int i = 0; i < entities.size(); ++i)
+		{
+			ImGui::PushID(i);
+			if (ImGui::TreeNodeEx(entities[i].GetName().c_str()))
+			{
+				ImGui::TreePop();
+			}
+			ImGui::PopID();
+		}
 		ImGui::End();
 
 		ImGui::Begin("Inspector");
