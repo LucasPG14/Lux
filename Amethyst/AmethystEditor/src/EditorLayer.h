@@ -35,5 +35,7 @@ namespace Amethyst
 		PerspectiveCamera camera;
 
 		glm::vec2 viewSize;
+
+		std::filesystem::path currentDir;
 	};
 }

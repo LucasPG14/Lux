@@ -13,6 +13,8 @@ namespace Amethyst
 		inline uint32_t GetWidth() const override { return width; }
 		inline uint32_t GetHeight() const override { return height; }
 
+		inline uint32_t GetID() const { return textureID; }
+
 		void Bind(uint32_t slot = 0) const override;
 		void Unbind(uint32_t slot = 0) const override;
 	private:

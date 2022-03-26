@@ -4,7 +4,7 @@
 
 namespace Amethyst
 {
-	EditorLayer::EditorLayer()
+	EditorLayer::EditorLayer() : currentDir("assets/Resources")
 	{
 		scene = std::make_shared<Scene>();
 	}
@@ -15,12 +15,12 @@ namespace Amethyst
 
 	void EditorLayer::OnCreate()
 	{
-		Amethyst::FramebufferSpecification spec;
+		FramebufferSpecification spec;
 		spec.width = 1280;
 		spec.height = 720;
-		fbo = Amethyst::Framebuffer::Create(spec);
+		fbo = Framebuffer::Create(spec);
 
-		vao.reset(Amethyst::VertexArray::Create());
+		vao.reset(VertexArray::Create());
 
 		float vertices[21] =
 		{
@@ -29,14 +29,14 @@ namespace Amethyst
 			 0.0f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f
 		};
 
-		std::shared_ptr<Amethyst::VertexBuffer> vbo;
-		vbo.reset(Amethyst::VertexBuffer::Create(vertices, sizeof(vertices)));
+		std::shared_ptr<VertexBuffer> vbo;
+		vbo.reset(VertexBuffer::Create(vertices, sizeof(vertices)));
 
 		{
-			Amethyst::BufferLayout layout =
+			BufferLayout layout =
 			{
-				{Amethyst::ShaderDataType::FLOAT3, "position"},
-				{Amethyst::ShaderDataType::FLOAT4, "color"},
+				{ShaderDataType::FLOAT3, "position"},
+				{ShaderDataType::FLOAT4, "color"},
 				//{ShaderDataType::FLOAT3, "normal"}
 			};
 
@@ -46,11 +46,11 @@ namespace Amethyst
 		vao->AddVertexBuffer(vbo);
 
 		uint32_t indices[3] = { 0, 1, 2 };
-		std::shared_ptr<Amethyst::IndexBuffer> ebo;
-		ebo.reset(Amethyst::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
+		std::shared_ptr<IndexBuffer> ebo;
+		ebo.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
 		vao->AddIndexBuffer(ebo);
 
-		squareVA.reset(Amethyst::VertexArray::Create());
+		squareVA.reset(VertexArray::Create());
 
 		float vertices2[20] =
 		{
@@ -60,13 +60,13 @@ namespace Amethyst
 			-0.5f,  0.5f, 0.0f, 0.0f, 1.0f
 		};
 
-		std::shared_ptr<Amethyst::VertexBuffer> vertexBuffer;
-		vertexBuffer.reset(Amethyst::VertexBuffer::Create(vertices2, sizeof(vertices2)));
+		std::shared_ptr<VertexBuffer> vertexBuffer;
+		vertexBuffer.reset(VertexBuffer::Create(vertices2, sizeof(vertices2)));
 
-		Amethyst::BufferLayout layout2 =
+		BufferLayout layout2 =
 		{
-			{Amethyst::ShaderDataType::FLOAT3, "position"},
-			{Amethyst::ShaderDataType::FLOAT2, "texCoord"},
+			{ShaderDataType::FLOAT3, "position"},
+			{ShaderDataType::FLOAT2, "texCoord"},
 			//{ShaderDataType::FLOAT3, "normal"}
 		};
 
@@ -74,8 +74,8 @@ namespace Amethyst
 		squareVA->AddVertexBuffer(vertexBuffer);
 
 		uint32_t indices2[6] = { 0, 1, 2, 2, 3, 0 };
-		std::shared_ptr<Amethyst::IndexBuffer> indexBuffer;
-		indexBuffer.reset(Amethyst::IndexBuffer::Create(indices2, sizeof(indices2) / sizeof(uint32_t)));
+		std::shared_ptr<IndexBuffer> indexBuffer;
+		indexBuffer.reset(IndexBuffer::Create(indices2, sizeof(indices2) / sizeof(uint32_t)));
 		squareVA->AddIndexBuffer(indexBuffer);
 
 		std::string vertex = R"(
@@ -112,7 +112,7 @@ namespace Amethyst
 		
 		)";
 
-		shader = Amethyst::Shader::Create("Hola", vertex, fragment);
+		shader = Shader::Create("Hola", vertex, fragment);
 
 		std::string vertex2 = R"(
 			#version 330 core
@@ -147,12 +147,12 @@ namespace Amethyst
 		
 		)";
 
-		shader2 = Amethyst::Shader::Create("Hola2", vertex2, fragment2);
+		shader2 = Shader::Create("Hola2", vertex2, fragment2);
 
-		texture = Amethyst::Shader::Create("assets/shaders/Texture.glsl");
+		texture = Shader::Create("assets/shaders/Texture.glsl");
 
-		logo.reset(Amethyst::Texture2D::Create("assets/textures/deadpool.png"));
-		tex.reset(Amethyst::Texture2D::Create("assets/textures/bakeHouse.png"));
+		logo.reset(Texture2D::Create("assets/textures/deadpool.png"));
+		tex.reset(Texture2D::Create("assets/textures/bakeHouse.png"));
 
 		texture->Bind();
 		texture->UploadUniformInt("ourTexture", 0);
@@ -170,26 +170,26 @@ namespace Amethyst
 		glm::mat4 model(1.0f);
 
 		fbo->Bind();
-		Amethyst::RenderOrder::ClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
-		Amethyst::RenderOrder::Clear();
+		RenderOrder::ClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
+		RenderOrder::Clear();
 
-		Amethyst::Renderer::BeginScene();
+		Renderer::BeginScene();
 
 		tex->Bind();
 		texture->Bind();
 		texture->UploadUniformMat4("view", camera.GetViewMatrix());
 		texture->UploadUniformMat4("projection", camera.GetProjectionMatrix());
 		texture->UploadUniformMat4("model", model);
-		Amethyst::Renderer::Submit(squareVA);
+		Renderer::Submit(squareVA);
 		logo->Bind();
-		Amethyst::Renderer::Submit(squareVA);
+		Renderer::Submit(squareVA);
 		//shader->Bind();
 		//shader->UploadUniformMat4("view", camera.GetViewMatrix());
 		//shader->UploadUniformMat4("projection", camera.GetProjectionMatrix());
 		//shader->UploadUniformMat4("model", model);
 		//Amethyst::Renderer::Submit(vao);
 
-		Amethyst::Renderer::EndScene();
+		Renderer::EndScene();
 
 		fbo->Unbind();
 	}
@@ -235,10 +235,25 @@ namespace Amethyst
 				if (ImGui::MenuItem("Save scene", "Ctrl + S"));
 				if (ImGui::MenuItem("Save scene as...", "Ctrl + Shift + S"));
 				ImGui::Separator();
-				if (ImGui::MenuItem("Exit", "Alt + F4")) Amethyst::Application::Get().Close();
+				if (ImGui::MenuItem("Exit", "Alt + F4")) Application::Get().Close();
 
 				ImGui::EndMenu();
 			}
+
+			if (ImGui::BeginMenu("Edit"))
+			{
+				if (ImGui::MenuItem("Undo", "Ctrl + Z"));
+				if (ImGui::MenuItem("Redo", "Ctrl + Y"));
+				ImGui::Separator();
+				if (ImGui::MenuItem("Cut", "Ctrl + X"));
+				if (ImGui::MenuItem("Copy", "Ctrl + C"));
+				if (ImGui::MenuItem("Paste", "Ctrl + V"));
+				if (ImGui::MenuItem("Duplicate", "Ctrl + D"));
+				if (ImGui::MenuItem("Delete", "Del"));
+
+				ImGui::EndMenu();
+			}
+
 			ImGui::EndMainMenuBar();
 		}
 
@@ -261,20 +276,72 @@ namespace Amethyst
 		//style.WindowMinSize.x = minWinSizeX;
 
 		ImGui::Begin("Hierarchy");
-		std::vector<Entity> entities = scene->GetEntities();
+		static Entity* entSelected;
+		std::vector<Entity>& entities = scene->GetEntities();
 		for (int i = 0; i < entities.size(); ++i)
 		{
 			ImGui::PushID(i);
-			if (ImGui::TreeNodeEx(entities[i].GetName().c_str()))
+			if (ImGui::TreeNodeEx(entities[i].GetName().c_str(), entSelected == &entities[i] ? ImGuiTreeNodeFlags_Selected : 0))
 			{
 				ImGui::TreePop();
 			}
+
+			if (ImGui::IsItemClicked())
+				entSelected = &entities[i];
+
 			ImGui::PopID();
 		}
+
 		ImGui::End();
 
+		// Inspector begin
 		ImGui::Begin("Inspector");
 		ImGui::End();
+		// Inspector end
+
+		// Content Browser begin
+		static bool ret = true;
+		ImGui::Begin("Content Browser", &ret, ImGuiWindowFlags_MenuBar);
+
+		ImGui::BeginMenuBar();
+
+		ImGui::EndMenuBar();
+
+		static std::filesystem::path selected;
+
+		// Setting the number of columns
+		float cell = 128;
+
+		float width = ImGui::GetContentRegionAvail().x;
+		int columns = (int)(width / cell);
+		
+		if (columns < 1)
+			columns = 1;
+
+		ImGui::Columns(columns, 0, false);
+
+		for (const auto& file : std::filesystem::directory_iterator(currentDir))
+		{
+			ImGui::ImageButton((ImTextureID)tex->GetID(), { 100, 100 }, { 0, 1 }, { 1, 0 });
+			if (ImGui::IsItemHovered())
+			{
+				if (ImGui::IsMouseDoubleClicked(0))
+				{
+					if (file.is_directory()) currentDir = selected;
+				}
+				else if (ImGui::IsMouseClicked(0))
+				{
+					selected = file.path();
+				}
+			}
+			
+			ImGui::Text(file.path().filename().string().c_str());
+
+			ImGui::NextColumn();
+		}
+
+		ImGui::End();
+		// Content Browser end
 
 		ImGui::End();
 	}
