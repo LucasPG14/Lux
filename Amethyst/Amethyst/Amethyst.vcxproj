@@ -172,7 +172,9 @@
     <ClInclude Include="src\Amethyst\Renderer\Shader.h" />
     <ClInclude Include="src\Amethyst\Renderer\Texture.h" />
     <ClInclude Include="src\Amethyst\Renderer\VertexArray.h" />
-    <ClInclude Include="src\Amethyst\Scene\Component.h" />
+    <ClInclude Include="src\Amethyst\Scene\Components\Component.h" />
+    <ClInclude Include="src\Amethyst\Scene\Components\MeshComponent.h" />
+    <ClInclude Include="src\Amethyst\Scene\Components\TransformComponent.h" />
     <ClInclude Include="src\Amethyst\Scene\Entity.h" />
     <ClInclude Include="src\Amethyst\Scene\Scene.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLBuffer.h" />
@@ -617,6 +619,8 @@
     <ClCompile Include="src\Amethyst\Renderer\Shader.cpp" />
     <ClCompile Include="src\Amethyst\Renderer\Texture.cpp" />
     <ClCompile Include="src\Amethyst\Renderer\VertexArray.cpp" />
+    <ClCompile Include="src\Amethyst\Scene\Components\MeshComponent.cpp" />
+    <ClCompile Include="src\Amethyst\Scene\Components\TransformComponent.cpp" />
     <ClCompile Include="src\Amethyst\Scene\Entity.cpp" />
     <ClCompile Include="src\Amethyst\Scene\Scene.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp" />

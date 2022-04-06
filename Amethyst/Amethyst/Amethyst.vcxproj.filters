@@ -22,6 +22,9 @@
     <Filter Include="src\Amethyst\Scene">
       <UniqueIdentifier>{08B5E028-F498-A17E-5DF9-9BD149FC8B00}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Amethyst\Scene\Components">
+      <UniqueIdentifier>{1D65ADD2-897D-94FC-522A-2496BE012996}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Platform">
       <UniqueIdentifier>{21CA02E5-0D2D-9289-B6B2-CA3FA2F45D0C}</UniqueIdentifier>
     </Filter>
@@ -141,8 +144,8 @@
     <ClInclude Include="src\Amethyst\Renderer\VertexArray.h">
       <Filter>src\Amethyst\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="src\Amethyst\Scene\Component.h">
-      <Filter>src\Amethyst\Scene</Filter>
+    <ClInclude Include="src\Amethyst\Scene\Components\Component.h">
+      <Filter>src\Amethyst\Scene\Components</Filter>
     </ClInclude>
     <ClInclude Include="src\Amethyst\Scene\Entity.h">
       <Filter>src\Amethyst\Scene</Filter>
@@ -1425,6 +1428,8 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
+    <ClInclude Include="src\Amethyst\Scene\Components\TransformComponent.h" />
+    <ClInclude Include="src\Amethyst\Scene\Components\MeshComponent.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Amethyst\Core\Application.cpp">
@@ -1511,5 +1516,7 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
+    <ClCompile Include="src\Amethyst\Scene\Components\TransformComponent.cpp" />
+    <ClCompile Include="src\Amethyst\Scene\Components\MeshComponent.cpp" />
   </ItemGroup>
 </Project>

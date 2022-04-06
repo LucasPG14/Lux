@@ -25,14 +25,14 @@ namespace ImGui
 		colors[ImGuiCol_MenuBarBg] = ImVec4(0.109f, 0.109f, 0.109f, 1.0f);
 		colors[ImGuiCol_Border] = ImVec4(0.109f, 0.109f, 0.109f, 1.0f);
 		colors[ImGuiCol_TitleBg] = ImVec4(0.188f, 0.164f, 0.094f, 0.4f);
-		colors[ImGuiCol_TitleBgActive] = ImVec4(0.188f, 0.164f, 0.094f, 0.4f);
+		colors[ImGuiCol_TitleBgActive] = ImVec4(0.188f, 0.164f, 0.094f, 1.0f);
 
 		// Tabs
 		colors[ImGuiCol_Tab] = ImVec4(0.188f, 0.164f, 0.094f, 1.0f);
-		colors[ImGuiCol_TabActive] = ImVec4(0.992f, 0.894f, 0.764f, 0.85f);
-		colors[ImGuiCol_TabHovered] = ImVec4(0.964f, 0.964f, 0.964f, 0.6f);
-		colors[ImGuiCol_TabUnfocused] = ImVec4(0.188f, 0.164f, 0.094f, 1.0f);
-		colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.188f, 0.164f, 0.094f, 1.0f);
+		colors[ImGuiCol_TabActive] = ImVec4(0.992f, 0.894f, 0.764f, 1.0f);
+		colors[ImGuiCol_TabHovered] = ImVec4(0.992f, 0.894f, 0.764f, 0.7f);
+		colors[ImGuiCol_TabUnfocused] = ImVec4(0.992f, 0.894f, 0.764f, 0.4f);
+		colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.992f, 0.894f, 0.764f, 0.4f);
 
 		// Separator
 		colors[ImGuiCol_Separator] = ImVec4(0.992f, 0.894f, 0.764f, 0.3f);

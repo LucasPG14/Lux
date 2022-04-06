@@ -277,9 +277,10 @@ namespace Amethyst
 
 		ImGui::Begin("Hierarchy");
 		static Entity* entSelected;
-		std::vector<Entity>& entities = scene->GetEntities();
+		std::vector<Entity>& entities = scene->GetWorld();
 		for (int i = 0; i < entities.size(); ++i)
 		{
+			//entities.get<InfoComponent>(entities()[i]);
 			ImGui::PushID(i);
 			if (ImGui::TreeNodeEx(entities[i].GetName().c_str(), entSelected == &entities[i] ? ImGuiTreeNodeFlags_Selected : 0))
 			{
@@ -296,6 +297,12 @@ namespace Amethyst
 
 		// Inspector begin
 		ImGui::Begin("Inspector");
+
+		if (entSelected)
+		{
+			entSelected->DrawInspector();
+		}
+
 		ImGui::End();
 		// Inspector end
 

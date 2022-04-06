@@ -2,6 +2,8 @@
 
 namespace Amethyst
 {
+	class Component;
+	
 	class Entity
 	{
 	public:
@@ -15,10 +17,13 @@ namespace Amethyst
 		// Getters
 		inline std::string& GetName() { return name; }
 
+		template<typename T, typename... Args>
+		T* CreateComponent(Args&&... args);
+
 	private:
 		std::string name;
 
-		std::vector<Entity*> childrens;
-		//std::vector<Component*>
+		std::vector<Entity> childrens;
+		std::vector<Component*> components;
 	};
 }

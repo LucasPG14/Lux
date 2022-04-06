@@ -9,6 +9,7 @@
 #include "Amethyst/Core/MouseCodes.h"
 #include "Amethyst/PerspectiveCamera.h"
 #include "Amethyst/Scene/Scene.h"
+#include "Amethyst/Scene/Components/Component.h"
 
 #include "Amethyst/Core/Timer.h"
 

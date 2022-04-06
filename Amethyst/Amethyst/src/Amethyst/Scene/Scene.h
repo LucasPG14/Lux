@@ -12,8 +12,9 @@ namespace Amethyst
 
 		void Update();
 
-		inline std::vector<Entity>& GetEntities() { return entities; }
+		inline std::vector<Entity>& GetWorld() { return world; }
+	
 	private:
-		std::vector<Entity> entities;
+		std::vector<Entity> world;
 	};
 }
