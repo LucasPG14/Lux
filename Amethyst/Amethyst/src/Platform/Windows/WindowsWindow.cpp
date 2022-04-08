@@ -151,6 +151,18 @@ namespace Amethyst
 			MouseMovedEvent event((float)posX, (float)posY);
 			data.eventCallback(event);
 		});
+
+		glfwSetDropCallback(window, [](GLFWwindow* window, int size, const char* paths[])
+		{
+			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+
+			std::vector<std::string> filePaths;
+			for (int i = 0; i < size; ++i)
+				filePaths.push_back(paths[i]);
+
+			WindowDropEvent event(filePaths);
+			data.eventCallback(event);
+		});
 	}
 
 	void WindowsWindow::Shutdown()

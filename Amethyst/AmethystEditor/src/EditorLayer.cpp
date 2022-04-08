@@ -4,6 +4,8 @@
 
 namespace Amethyst
 {
+	#define BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
+
 	EditorLayer::EditorLayer() : currentDir("assets/Resources")
 	{
 		scene = std::make_shared<Scene>();
@@ -173,23 +175,23 @@ namespace Amethyst
 		RenderOrder::ClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 		RenderOrder::Clear();
 
-		Renderer::BeginScene();
+		Renderer2D::BeginScene();
 
 		tex->Bind();
 		texture->Bind();
 		texture->UploadUniformMat4("view", camera.GetViewMatrix());
 		texture->UploadUniformMat4("projection", camera.GetProjectionMatrix());
 		texture->UploadUniformMat4("model", model);
-		Renderer::Submit(squareVA);
+		Renderer2D::Submit(squareVA);
 		logo->Bind();
-		Renderer::Submit(squareVA);
+		Renderer2D::Submit(squareVA);
 		//shader->Bind();
 		//shader->UploadUniformMat4("view", camera.GetViewMatrix());
 		//shader->UploadUniformMat4("projection", camera.GetProjectionMatrix());
 		//shader->UploadUniformMat4("model", model);
 		//Amethyst::Renderer::Submit(vao);
 
-		Renderer::EndScene();
+		Renderer2D::EndScene();
 
 		fbo->Unbind();
 	}
@@ -355,5 +357,19 @@ namespace Amethyst
 
 	void EditorLayer::OnEvent(Event& e)
 	{
+		EventDispatcher dispatcher(e);
+
+		dispatcher.Dispatch<WindowDropEvent>(BIND_EVENT_FN(EditorLayer::FileDropped));
+	}
+	
+	bool EditorLayer::FileDropped(WindowDropEvent& e)
+	{
+		std::vector<std::string>& paths = e.GetPaths();
+		for (int i = 0; i < paths.size(); ++i)
+		{
+			Importer::Import(paths[i]);
+		}
+
+		return true;
 	}
 }

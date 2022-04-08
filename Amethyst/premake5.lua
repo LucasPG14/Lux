@@ -21,7 +21,7 @@ IncludeDir = {}
 IncludeDir["GLFW"] = "Amethyst/vendor/GLFW/include"
 IncludeDir["Glad"] = "Amethyst/vendor/Glad/include"
 IncludeDir["ImGui"] = "Amethyst/vendor/ImGui"
-IncludeDir["Assimp"] = "Amethyst/vendor/Assimp"
+IncludeDir["Assimp"] = "Amethyst/vendor/Assimp/include"
 IncludeDir["glm"] = "Amethyst/vendor/glm"
 IncludeDir["stb_image"] = "Amethyst/vendor/stb_image"
 

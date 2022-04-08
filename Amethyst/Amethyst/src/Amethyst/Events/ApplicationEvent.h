@@ -34,4 +34,17 @@ namespace Amethyst
 		EVENT_CLASS_TYPE(WINDOW_CLOSE)
 		EVENT_CLASS_CATEGORY(EVENT_CATEGORY_APP)
 	};
+
+	class AMT_API WindowDropEvent : public Event
+	{
+	public:
+		WindowDropEvent(std::vector<std::string>& filePaths) : paths(filePaths){}
+
+		inline std::vector<std::string>& GetPaths() { return paths; }
+
+		EVENT_CLASS_TYPE(WINDOW_DROP)
+		EVENT_CLASS_CATEGORY(EVENT_CATEGORY_APP)
+	private:
+		std::vector<std::string> paths;
+	};
 }

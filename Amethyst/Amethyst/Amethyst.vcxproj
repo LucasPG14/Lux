@@ -77,7 +77,7 @@
       <PrecompiledHeaderFile>amtpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GLFW_INCLUDE_NONE;AMT_PLATFORM_WINDOWS;AMT_BUILD_DLL;AMT_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\Glad\include;vendor\ImGui;vendor\Assimp;vendor\glm;vendor\stb_image;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\Glad\include;vendor\ImGui;vendor\Assimp\include;vendor\glm;vendor\stb_image;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -99,7 +99,7 @@
       <PrecompiledHeaderFile>amtpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GLFW_INCLUDE_NONE;AMT_PLATFORM_WINDOWS;AMT_BUILD_DLL;AMT_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\Glad\include;vendor\ImGui;vendor\Assimp;vendor\glm;vendor\stb_image;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\Glad\include;vendor\ImGui;vendor\Assimp\include;vendor\glm;vendor\stb_image;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -124,7 +124,7 @@
       <PrecompiledHeaderFile>amtpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GLFW_INCLUDE_NONE;AMT_PLATFORM_WINDOWS;AMT_BUILD_DLL;AMT_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\Glad\include;vendor\ImGui;vendor\Assimp;vendor\glm;vendor\stb_image;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\Glad\include;vendor\ImGui;vendor\Assimp\include;vendor\glm;vendor\stb_image;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -162,13 +162,14 @@
     <ClInclude Include="src\Amethyst\Events\MouseEvent.h" />
     <ClInclude Include="src\Amethyst\ImGui\ImGuiLayer.h" />
     <ClInclude Include="src\Amethyst\ImGui\ImGuiStyle.h" />
+    <ClInclude Include="src\Amethyst\Importers\Importer.h" />
     <ClInclude Include="src\Amethyst\PerspectiveCamera.h" />
     <ClInclude Include="src\Amethyst\Renderer\Buffer.h" />
     <ClInclude Include="src\Amethyst\Renderer\Framebuffer.h" />
     <ClInclude Include="src\Amethyst\Renderer\GraphicsContext.h" />
     <ClInclude Include="src\Amethyst\Renderer\Render.h" />
     <ClInclude Include="src\Amethyst\Renderer\RenderOrder.h" />
-    <ClInclude Include="src\Amethyst\Renderer\Renderer.h" />
+    <ClInclude Include="src\Amethyst\Renderer\Renderer2D.h" />
     <ClInclude Include="src\Amethyst\Renderer\Shader.h" />
     <ClInclude Include="src\Amethyst\Renderer\Texture.h" />
     <ClInclude Include="src\Amethyst\Renderer\VertexArray.h" />
@@ -610,12 +611,13 @@
     <ClCompile Include="src\Amethyst\Core\Log.cpp" />
     <ClCompile Include="src\Amethyst\ImGui\ImGuiBuild.cpp" />
     <ClCompile Include="src\Amethyst\ImGui\ImGuiLayer.cpp" />
+    <ClCompile Include="src\Amethyst\Importers\Importer.cpp" />
     <ClCompile Include="src\Amethyst\PerspectiveCamera.cpp" />
     <ClCompile Include="src\Amethyst\Renderer\Buffer.cpp" />
     <ClCompile Include="src\Amethyst\Renderer\Framebuffer.cpp" />
     <ClCompile Include="src\Amethyst\Renderer\Render.cpp" />
     <ClCompile Include="src\Amethyst\Renderer\RenderOrder.cpp" />
-    <ClCompile Include="src\Amethyst\Renderer\Renderer.cpp" />
+    <ClCompile Include="src\Amethyst\Renderer\Renderer2D.cpp" />
     <ClCompile Include="src\Amethyst\Renderer\Shader.cpp" />
     <ClCompile Include="src\Amethyst\Renderer\Texture.cpp" />
     <ClCompile Include="src\Amethyst\Renderer\VertexArray.cpp" />

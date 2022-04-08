@@ -20,6 +20,9 @@ namespace Amethyst
 		void OnEvent(Event& e) override;
 
 	private:
+		bool FileDropped(WindowDropEvent& e);
+
+	private:
 		std::shared_ptr<Shader> shader;
 		std::shared_ptr<VertexArray> vao;
 		std::shared_ptr<Scene> scene;

@@ -1,14 +1,14 @@
 #include "amtpch.h"
 #include "Texture.h"
 
-#include "Renderer.h"
+#include "Renderer2D.h"
 #include "Platform/OpenGL/OpenGLTexture.h"
 
 namespace Amethyst
 {
 	Texture2D* Texture2D::Create(const std::string& path)
 	{
-		switch (Renderer::GetRenderer())
+		switch (Renderer2D::GetRenderer())
 		{
 		case Render::API::NONE:
 		{

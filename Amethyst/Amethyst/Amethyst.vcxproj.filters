@@ -16,6 +16,9 @@
     <Filter Include="src\Amethyst\ImGui">
       <UniqueIdentifier>{15BD3028-01A1-F17D-6A01-ECD05604DCFF}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Amethyst\Importers">
+      <UniqueIdentifier>{FF3BBC64-EB35-E5B6-D4A2-7BC7C03B4B23}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Amethyst\Renderer">
       <UniqueIdentifier>{B1072322-1D74-DE1C-E667-767A52930085}</UniqueIdentifier>
     </Filter>
@@ -114,6 +117,9 @@
     <ClInclude Include="src\Amethyst\ImGui\ImGuiStyle.h">
       <Filter>src\Amethyst\ImGui</Filter>
     </ClInclude>
+    <ClInclude Include="src\Amethyst\Importers\Importer.h">
+      <Filter>src\Amethyst\Importers</Filter>
+    </ClInclude>
     <ClInclude Include="src\Amethyst\PerspectiveCamera.h">
       <Filter>src\Amethyst</Filter>
     </ClInclude>
@@ -132,7 +138,7 @@
     <ClInclude Include="src\Amethyst\Renderer\RenderOrder.h">
       <Filter>src\Amethyst\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="src\Amethyst\Renderer\Renderer.h">
+    <ClInclude Include="src\Amethyst\Renderer\Renderer2D.h">
       <Filter>src\Amethyst\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Amethyst\Renderer\Shader.h">
@@ -1454,6 +1460,9 @@
     <ClCompile Include="src\Amethyst\ImGui\ImGuiLayer.cpp">
       <Filter>src\Amethyst\ImGui</Filter>
     </ClCompile>
+    <ClCompile Include="src\Amethyst\Importers\Importer.cpp">
+      <Filter>src\Amethyst\Importers</Filter>
+    </ClCompile>
     <ClCompile Include="src\Amethyst\PerspectiveCamera.cpp">
       <Filter>src\Amethyst</Filter>
     </ClCompile>
@@ -1469,7 +1478,7 @@
     <ClCompile Include="src\Amethyst\Renderer\RenderOrder.cpp">
       <Filter>src\Amethyst\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="src\Amethyst\Renderer\Renderer.cpp">
+    <ClCompile Include="src\Amethyst\Renderer\Renderer2D.cpp">
       <Filter>src\Amethyst\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Amethyst\Renderer\Shader.cpp">

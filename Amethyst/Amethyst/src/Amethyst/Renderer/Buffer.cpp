@@ -1,7 +1,7 @@
 #include "amtpch.h"
 #include "Buffer.h"
 
-#include "Renderer.h"
+#include "Renderer2D.h"
 
 #include "Platform/OpenGL/OpenGLBuffer.h"
 
@@ -9,7 +9,7 @@ namespace Amethyst
 {
 	VertexBuffer* VertexBuffer::Create(float* vertices, uint32_t size)
 	{
-		switch (Renderer::GetRenderer())
+		switch (Renderer2D::GetRenderer())
 		{
 			case Render::API::NONE: 
 			{
@@ -25,7 +25,7 @@ namespace Amethyst
 
 	IndexBuffer* IndexBuffer::Create(uint32_t* indices, uint32_t size)
 	{
-		switch (Renderer::GetRenderer())
+		switch (Renderer2D::GetRenderer())
 		{
 			case Render::API::NONE:
 			{
