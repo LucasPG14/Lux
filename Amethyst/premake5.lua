@@ -21,6 +21,7 @@ IncludeDir = {}
 IncludeDir["GLFW"] = "Amethyst/vendor/GLFW/include"
 IncludeDir["Glad"] = "Amethyst/vendor/Glad/include"
 IncludeDir["ImGui"] = "Amethyst/vendor/ImGui"
+IncludeDir["Assimp"] = "Amethyst/vendor/Assimp"
 IncludeDir["glm"] = "Amethyst/vendor/glm"
 IncludeDir["stb_image"] = "Amethyst/vendor/stb_image"
 
@@ -28,6 +29,7 @@ group "Dependencies"
 	include "Amethyst/vendor/GLFW"
 	include "Amethyst/vendor/Glad"
 	include "Amethyst/vendor/ImGui"
+	include "Amethyst/vendor/Assimp"
 group ""
 
 project "Amethyst"
@@ -60,6 +62,7 @@ project "Amethyst"
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.Glad}",
 		"%{IncludeDir.ImGui}",
+		"%{IncludeDir.Assimp}",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.stb_image}"
 	}
@@ -69,6 +72,7 @@ project "Amethyst"
 		"GLFW",
 		"Glad",
 		"ImGui",
+		"Assimp",
 		"opengl32.lib"
 	}
 
