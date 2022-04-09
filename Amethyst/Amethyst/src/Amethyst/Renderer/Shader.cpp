@@ -1,7 +1,7 @@
 #include "amtpch.h"
 #include "Shader.h"
 
-#include "Renderer2D.h"
+#include "Renderer.h"
 
 #include "Platform/OpenGL/OpenGLShader.h"
 
@@ -9,7 +9,7 @@ namespace Amethyst
 {
 	std::shared_ptr<Shader> Shader::Create(const std::string& filePath)
 	{
-		switch (Renderer2D::GetRenderer())
+		switch (Renderer::GetRenderer())
 		{
 		case Render::API::NONE:
 		{
@@ -24,7 +24,7 @@ namespace Amethyst
 
 	std::shared_ptr<Shader> Shader::Create(const std::string& name, const std::string& vertex, const std::string& fragment)
 	{
-		switch (Renderer2D::GetRenderer())
+		switch (Renderer::GetRenderer())
 		{
 		case Render::API::NONE: 
 		{

@@ -28,6 +28,9 @@
     <Filter Include="src\Amethyst\Scene\Components">
       <UniqueIdentifier>{1D65ADD2-897D-94FC-522A-2496BE012996}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Amethyst\Utils">
+      <UniqueIdentifier>{4B490E29-372D-CF7E-A08D-C9D18C90B900}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Platform">
       <UniqueIdentifier>{21CA02E5-0D2D-9289-B6B2-CA3FA2F45D0C}</UniqueIdentifier>
     </Filter>
@@ -138,7 +141,7 @@
     <ClInclude Include="src\Amethyst\Renderer\RenderOrder.h">
       <Filter>src\Amethyst\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="src\Amethyst\Renderer\Renderer2D.h">
+    <ClInclude Include="src\Amethyst\Renderer\Renderer.h">
       <Filter>src\Amethyst\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Amethyst\Renderer\Shader.h">
@@ -164,6 +167,9 @@
     </ClInclude>
     <ClInclude Include="src\Amethyst\Scene\Scene.h">
       <Filter>src\Amethyst\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Amethyst\Utils\Vertex.h">
+      <Filter>src\Amethyst\Utils</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\OpenGL\OpenGLBuffer.h">
       <Filter>src\Platform\OpenGL</Filter>
@@ -1478,7 +1484,7 @@
     <ClCompile Include="src\Amethyst\Renderer\RenderOrder.cpp">
       <Filter>src\Amethyst\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="src\Amethyst\Renderer\Renderer2D.cpp">
+    <ClCompile Include="src\Amethyst\Renderer\Renderer.cpp">
       <Filter>src\Amethyst\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Amethyst\Renderer\Shader.cpp">

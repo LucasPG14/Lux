@@ -1,7 +1,7 @@
 #include "amtpch.h"
 #include "VertexArray.h"
 
-#include "Renderer2D.h"
+#include "Renderer.h"
 
 #include "Platform/OpenGL/OpenGLVertexArray.h"
 
@@ -9,7 +9,7 @@ namespace Amethyst
 {
 	VertexArray* VertexArray::Create()
 	{
-		switch (Renderer2D::GetRenderer())
+		switch (Renderer::GetRenderer())
 		{
 		case Render::API::NONE:
 		{

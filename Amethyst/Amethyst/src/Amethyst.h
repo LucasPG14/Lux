@@ -17,7 +17,7 @@
 #include "Amethyst/Importers/Importer.h"
 
 // Renderer
-#include "Amethyst/Renderer/Renderer2D.h"
+#include "Amethyst/Renderer/Renderer.h"
 #include "Amethyst/Renderer/RenderOrder.h"
 
 #include "Amethyst/Renderer/Buffer.h"

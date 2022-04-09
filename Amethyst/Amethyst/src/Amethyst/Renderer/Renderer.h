@@ -4,7 +4,7 @@
 
 namespace Amethyst
 {
-	class Renderer2D
+	class Renderer
 	{
 	public:
 		static void Init();

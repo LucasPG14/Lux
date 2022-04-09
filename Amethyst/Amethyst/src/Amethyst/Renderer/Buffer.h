@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Amethyst/Utils/Vertex.h"
+
 namespace Amethyst
 {
 	enum class ShaderDataType
@@ -120,6 +122,7 @@ namespace Amethyst
 		virtual void SetLayout(const BufferLayout& lay) = 0;
 
 		static VertexBuffer* Create(float* vertices, uint32_t size);
+		static VertexBuffer* Create(Vertex* vertices, uint32_t size);
 	};
 
 	class IndexBuffer

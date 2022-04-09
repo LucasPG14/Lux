@@ -1,7 +1,7 @@
 #include "amtpch.h"
 #include "Application.h"
 
-#include "Amethyst/Renderer/Renderer2D.h"
+#include "Amethyst/Renderer/Renderer.h"
 
 #include "Amethyst/Core/Input.h"
 
@@ -22,7 +22,7 @@ namespace Amethyst
 		window->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));
 
 		// Initializing renderer
-		Renderer2D::Init();
+		Renderer::Init();
 
 		// Creating ImGuiLayer
 		imguiLayer = new ImGuiLayer();

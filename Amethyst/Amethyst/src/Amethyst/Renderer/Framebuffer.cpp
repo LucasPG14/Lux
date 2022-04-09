@@ -1,7 +1,7 @@
 #include "amtpch.h"
 #include "Framebuffer.h"
 
-#include "Renderer2D.h"
+#include "Renderer.h"
 
 #include "Platform/OpenGL/OpenGLFramebuffer.h"
 
@@ -9,7 +9,7 @@ namespace Amethyst
 {
 	std::shared_ptr<Framebuffer> Framebuffer::Create(const FramebufferSpecification& specification)
 	{
-		switch (Renderer2D::GetRenderer())
+		switch (Renderer::GetRenderer())
 		{
 		case Render::API::NONE:
 		{

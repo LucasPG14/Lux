@@ -54,16 +54,21 @@ namespace Amethyst
 
 		squareVA.reset(VertexArray::Create());
 
-		float vertices2[20] =
-		{
-			-0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
-			 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
-			 0.5f,  0.5f, 0.0f, 1.0f, 1.0f,
-			-0.5f,  0.5f, 0.0f, 0.0f, 1.0f
-		};
+		//float vertices2[20] =
+		//{
+		//	-0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
+		//	 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+		//	 0.5f,  0.5f, 0.0f, 1.0f, 1.0f,
+		//	-0.5f,  0.5f, 0.0f, 0.0f, 1.0f
+		//};
+
+		std::vector<Vertex> vertices2;
+		std::vector<uint32_t> indices2;
+
+		Importer::Import(std::filesystem::path("assets/Resources/Models/BakerHouse.obj"), std::filesystem::path(""), vertices2, indices2);
 
 		std::shared_ptr<VertexBuffer> vertexBuffer;
-		vertexBuffer.reset(VertexBuffer::Create(vertices2, sizeof(vertices2)));
+		vertexBuffer.reset(VertexBuffer::Create(vertices2.data(), sizeof(Vertex) * vertices2.size()));
 
 		BufferLayout layout2 =
 		{
@@ -75,9 +80,9 @@ namespace Amethyst
 		vertexBuffer->SetLayout(layout2);
 		squareVA->AddVertexBuffer(vertexBuffer);
 
-		uint32_t indices2[6] = { 0, 1, 2, 2, 3, 0 };
+		//uint32_t indices2[6] = { 0, 1, 2, 2, 3, 0 };
 		std::shared_ptr<IndexBuffer> indexBuffer;
-		indexBuffer.reset(IndexBuffer::Create(indices2, sizeof(indices2) / sizeof(uint32_t)));
+		indexBuffer.reset(IndexBuffer::Create(indices2.data(), indices2.size()));
 		squareVA->AddIndexBuffer(indexBuffer);
 
 		std::string vertex = R"(
@@ -175,23 +180,23 @@ namespace Amethyst
 		RenderOrder::ClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 		RenderOrder::Clear();
 
-		Renderer2D::BeginScene();
+		Renderer::BeginScene();
 
 		tex->Bind();
 		texture->Bind();
 		texture->UploadUniformMat4("view", camera.GetViewMatrix());
 		texture->UploadUniformMat4("projection", camera.GetProjectionMatrix());
 		texture->UploadUniformMat4("model", model);
-		Renderer2D::Submit(squareVA);
-		logo->Bind();
-		Renderer2D::Submit(squareVA);
+		//Renderer::Submit(squareVA);
+		//logo->Bind();
+		Renderer::Submit(squareVA);
 		//shader->Bind();
 		//shader->UploadUniformMat4("view", camera.GetViewMatrix());
 		//shader->UploadUniformMat4("projection", camera.GetProjectionMatrix());
 		//shader->UploadUniformMat4("model", model);
 		//Amethyst::Renderer::Submit(vao);
 
-		Renderer2D::EndScene();
+		Renderer::EndScene();
 
 		fbo->Unbind();
 	}
@@ -367,7 +372,7 @@ namespace Amethyst
 		std::vector<std::string>& paths = e.GetPaths();
 		for (int i = 0; i < paths.size(); ++i)
 		{
-			Importer::Import(paths[i]);
+			//Importer::Import(std::filesystem::path(paths[i]), currentDir);
 		}
 
 		return true;
