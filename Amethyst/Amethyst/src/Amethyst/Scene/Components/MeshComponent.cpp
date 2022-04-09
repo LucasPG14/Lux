@@ -8,29 +8,9 @@
 
 namespace Amethyst
 {
-	MeshComponent::MeshComponent(std::vector<Vertex>& vertices, std::vector<uint32_t>& indices)
+	MeshComponent::MeshComponent(std::shared_ptr<Mesh> meshPtr) : mesh(meshPtr)
 	{
-		vao.reset(VertexArray::Create());
-
-		std::shared_ptr<VertexBuffer> vbo;
-		vbo.reset(VertexBuffer::Create(vertices.data(), sizeof(Vertex) * vertices.size()));
-
-		{
-			BufferLayout layout =
-			{
-				{ShaderDataType::FLOAT3, "position"},
-				{ShaderDataType::FLOAT2, "texCoords"},
-				//{ShaderDataType::FLOAT3, "normal"}
-			};
-
-			vbo->SetLayout(layout);
-		}
-
-		std::shared_ptr<IndexBuffer> ebo;
-		ebo.reset(IndexBuffer::Create(indices.data(), indices.size()));
-		vao->AddIndexBuffer(ebo);
-
-		vao->AddVertexBuffer(vbo);
+		mesh->Load();
 	}
 	
 	MeshComponent::~MeshComponent()
@@ -39,10 +19,14 @@ namespace Amethyst
 	
 	void MeshComponent::Update()
 	{
-		Renderer::Submit(vao);
+		mesh->Update();
 	}
 	
 	void MeshComponent::DrawInspector()
 	{
+		if (ImGui::CollapsingHeader("Mesh"))
+		{
+
+		}
 	}
 }

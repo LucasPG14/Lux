@@ -9,6 +9,6 @@ namespace Amethyst
 	namespace Importer
 	{
 		void Import(std::filesystem::path& path, std::filesystem::path directory);
-		MeshComponent* Load(std::filesystem::path& path);
+		//MeshComponent* Load(std::filesystem::path& path);
 	}
 }

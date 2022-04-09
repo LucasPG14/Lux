@@ -18,7 +18,12 @@ namespace Amethyst
 		inline std::string& GetName() { return name; }
 
 		template<typename T, typename... Args>
-		T* CreateComponent(Args&&... args);
+		T* CreateComponent(Args&&... args)
+		{
+			T* component = new T(std::forward<Args>(args)...);
+			components.push_back(component);
+			return component;
+		}
 
 		void AddComponent(Component* component) { components.push_back(component); }
 

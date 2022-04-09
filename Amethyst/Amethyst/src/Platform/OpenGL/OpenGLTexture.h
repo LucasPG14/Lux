@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Amethyst/Renderer/Texture.h"
+#include "Amethyst/Resources/Texture.h"
 
 namespace Amethyst
 {
@@ -8,7 +8,12 @@ namespace Amethyst
 	{
 	public:
 		OpenGLTexture2D(const std::string& path);
+		OpenGLTexture2D(const std::filesystem::path& path);
 		~OpenGLTexture2D();
+
+		void Load() override;
+
+		void UnLoad() override;
 
 		inline uint32_t GetWidth() const override { return width; }
 		inline uint32_t GetHeight() const override { return height; }
@@ -17,9 +22,8 @@ namespace Amethyst
 
 		void Bind(uint32_t slot = 0) const override;
 		void Unbind(uint32_t slot = 0) const override;
-	private:
-		std::string path;
 
+	private:
 		uint32_t width;
 		uint32_t height;
 		uint32_t textureID;

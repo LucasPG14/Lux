@@ -14,7 +14,7 @@ namespace Amethyst
 
 		inline std::vector<Entity>& GetWorld() { return world; }
 
-		Entity& CreateEntity();
+		Entity& CreateEntity(const std::string& name = "Entity");
 	
 	private:
 		std::vector<Entity> world;

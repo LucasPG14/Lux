@@ -10,11 +10,16 @@
 #include "Amethyst/PerspectiveCamera.h"
 #include "Amethyst/Scene/Scene.h"
 #include "Amethyst/Scene/Components/Component.h"
+#include "Amethyst/Scene/Components/MeshComponent.h"
 
 #include "Amethyst/Core/Timer.h"
 
-// Importer
-#include "Amethyst/Importers/Importer.h"
+// For the editor
+#include "Amethyst/Resources/ResourceSystem.h"
+
+// Utils
+#include "Amethyst/Utils/Importer.h"
+#include "Amethyst/Utils/Hash.h"
 
 // Renderer
 #include "Amethyst/Renderer/Renderer.h"
@@ -23,5 +28,4 @@
 #include "Amethyst/Renderer/Buffer.h"
 #include "Amethyst/Renderer/Shader.h"
 #include "Amethyst/Renderer/Framebuffer.h"
-#include "Amethyst/Renderer/Texture.h"
 #include "Amethyst/Renderer/VertexArray.h"

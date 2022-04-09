@@ -23,8 +23,8 @@ namespace Amethyst
 
 	}
 	
-	Entity& Scene::CreateEntity()
+	Entity& Scene::CreateEntity(const std::string& name)
 	{
-		return world.emplace_back("Baker_House");
+		return world.emplace_back(name);
 	}
 }

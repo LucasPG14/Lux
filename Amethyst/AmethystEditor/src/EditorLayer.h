@@ -22,6 +22,8 @@ namespace Amethyst
 	private:
 		bool FileDropped(WindowDropEvent& e);
 
+		void AddToScene(std::filesystem::path& path);
+
 	private:
 		std::shared_ptr<Shader> shader;
 		std::shared_ptr<VertexArray> vao;
@@ -33,6 +35,7 @@ namespace Amethyst
 		std::shared_ptr<Shader> texture;
 		std::shared_ptr<Texture2D> tex;
 		std::shared_ptr<Texture2D> logo;
+		std::shared_ptr<Texture2D> folder;
 		std::shared_ptr<VertexArray> squareVA;
 
 		PerspectiveCamera camera;

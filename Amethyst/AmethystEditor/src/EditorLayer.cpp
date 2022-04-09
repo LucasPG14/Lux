@@ -1,5 +1,7 @@
 #include "EditorLayer.h"
 
+#include "Amethyst/Resources/Mesh.h"
+
 #include "imgui/imgui.h"
 
 namespace Amethyst
@@ -160,9 +162,33 @@ namespace Amethyst
 
 		logo.reset(Texture2D::Create("assets/textures/deadpool.png"));
 		tex.reset(Texture2D::Create("assets/textures/bakeHouse.png"));
+		folder.reset(Texture2D::Create("editor/textures/folder.png"));
 
 		texture->Bind();
 		texture->UploadUniformInt("ourTexture", 0);
+
+
+		// Load Resources
+		std::stack<std::filesystem::path> resources;
+		resources.push(assetsDir);
+
+		std::string extension = ".bsres";
+
+		while (!resources.empty())
+		{
+			std::filesystem::path path = resources.top();
+			resources.pop();
+
+			for (auto& entry : std::filesystem::directory_iterator(path))
+			{
+				std::filesystem::path filePath = entry.path();
+				if (entry.is_directory()) resources.push(entry);
+				else if (filePath.extension().string() == extension)
+				{
+					ResourceSystem::ImportResources(filePath);
+				}
+			}
+		}
 	}
 
 	void EditorLayer::OnDestroy()
@@ -267,11 +293,9 @@ namespace Amethyst
 			ImGui::EndMainMenuBar();
 		}
 
+		// Viewport Begin
 		ImGuiWindowFlags viewportFlags = ImGuiWindowFlags_NoTitleBar;
 		static bool viewportEnabled = true;
-		
-
-		// Viewport Begin
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
 		
 		ImGui::Begin("Viewport", &viewportEnabled, viewportFlags);
@@ -293,10 +317,11 @@ namespace Amethyst
 				std::filesystem::path realPath = std::filesystem::path(assetsDir) / path;
 				if (realPath.has_extension())
 				{
-					MeshComponent* mesh = Importer::Load(realPath);
+					//MeshComponent* mesh = Importer::Load(realPath);
 
-					Entity& entity = scene->CreateEntity();
-					entity.AddComponent(mesh);
+					//Entity& entity = scene->CreateEntity();
+					//entity.AddComponent(mesh);
+					AddToScene(realPath);
 				}
 			}
 
@@ -369,7 +394,8 @@ namespace Amethyst
 			auto relativePath = std::filesystem::relative(file.path(), assetsDir);
 			std::string filename = relativePath.filename().string();
 			
-			ImGui::ImageButton((ImTextureID)tex->GetID(), { 100, 100 }, { 0, 1 }, { 1, 0 });
+			if (file.is_directory()) ImGui::ImageButton((ImTextureID)folder->GetID(), { 100, 100 }, { 0, 1 }, { 1, 0 });
+			else ImGui::ImageButton((ImTextureID)tex->GetID(), { 100, 100 }, { 0, 1 }, { 1, 0 });
 			// Drag objects from the Content Browser
 			if (ImGui::BeginDragDropSource())
 			{
@@ -418,5 +444,28 @@ namespace Amethyst
 		}
 
 		return true;
+	}
+	
+	void EditorLayer::AddToScene(std::filesystem::path& path)
+	{
+		std::ifstream file(path, std::ios::binary);
+
+		std::filesystem::path name = path;
+		name.replace_extension("");
+
+		Entity& entity = scene->CreateEntity(name.filename().string());
+		std::uint32_t type;
+		file.read((char*)&type, sizeof(std::uint32_t));
+
+		file.close();
+		
+		switch (type)
+		{
+		case TypeID<Mesh>::id(): 
+		{
+			entity.CreateComponent<MeshComponent>(ResourceSystem::Get<Mesh>(path));
+			return;
+		}
+		}
 	}
 }

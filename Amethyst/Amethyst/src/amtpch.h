@@ -12,6 +12,7 @@
 #include <sstream>
 #include <array>
 #include <vector>
+#include <stack>
 #include <unordered_map>
 #include <unordered_set>
 #include <bitset>

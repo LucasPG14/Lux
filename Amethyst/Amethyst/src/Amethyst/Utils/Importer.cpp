@@ -3,6 +3,10 @@
 
 #include "Amethyst/Utils/Vertex.h"
 
+#include "Amethyst/Resources/ResourceSystem.h"
+
+#include "Amethyst/Utils/Hash.h"
+
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -64,6 +68,8 @@ namespace Amethyst
 					std::ofstream saveFile(pathToSave.string(), std::ios::binary);
 
 					// Storing all information first to create the mesh correctly
+					std::uint32_t type = TypeID<Mesh>::id();
+					saveFile.write((char*)&type, sizeof(std::uint32_t));
 					saveFile.write((char*)&numVertices, sizeof(int));
 					saveFile.write((char*)&numIndices, sizeof(int));
 					saveFile.write((char*)vertices.data(), sizeof(Vertex) * vertices.size());
@@ -73,6 +79,8 @@ namespace Amethyst
 					//saveFile << indices.data();
 
 					saveFile.close();
+
+					ResourceSystem::Create<Mesh>(pathToSave);
 				}
 
 				for (int i = 0; i < scene->mNumMaterials; ++i)
@@ -93,33 +101,38 @@ namespace Amethyst
 						{
 							bool ret = true;
 							ret = false;
+
+							/*std::filesystem::path texPath = directory / 
+							std::ofstream file();*/
+
+							//ResourceSystem::Create<Texture2D>(std::filesystem::path(""));
 						}
 					}
 				}
 			}
 		}
 		
-		MeshComponent* Load(std::filesystem::path& path)
-		{
-			std::ifstream file(path.c_str(), std::ios::binary);
+		//MeshComponent* Load(std::filesystem::path& path)
+		//{
+		//	std::ifstream file(path.c_str(), std::ios::binary);
 
-			int numVertices = 0;
-			int numIndices = 0;
+		//	int numVertices = 0;
+		//	int numIndices = 0;
 
-			std::vector<Vertex> vertices;
-			std::vector<uint32_t> indices;
+		//	std::vector<Vertex> vertices;
+		//	std::vector<uint32_t> indices;
 
-			file.read((char*)&numVertices, sizeof(int));
-			file.read((char*)&numIndices, sizeof(int));
-			
-			vertices.resize(numVertices);
-			indices.resize(numIndices);
-			
-			file.read((char*)vertices.data(), sizeof(Vertex) * numVertices);
-			file.read((char*)indices.data(), sizeof(uint32_t) * numIndices);
+		//	file.read((char*)&numVertices, sizeof(int));
+		//	file.read((char*)&numIndices, sizeof(int));
+		//	
+		//	vertices.resize(numVertices);
+		//	indices.resize(numIndices);
+		//	
+		//	file.read((char*)vertices.data(), sizeof(Vertex) * numVertices);
+		//	file.read((char*)indices.data(), sizeof(uint32_t) * numIndices);
 
-			MeshComponent* mesh = new MeshComponent(vertices, indices);
-			return mesh;
-		}
+		//	//MeshComponent* mesh = new MeshComponent(vertices, indices);
+		//	return mesh;
+		//}
 	}
 }

@@ -38,7 +38,7 @@ namespace ImGui
 		colors[ImGuiCol_Separator] = ImVec4(0.992f, 0.894f, 0.764f, 0.3f);
 
 		// Buttons
-		colors[ImGuiCol_Button] = ImVec4(0.992f, 0.894f, 0.764f, 0.4f);
+		colors[ImGuiCol_Button] = ImVec4(0.992f, 0.894f, 0.764f, 0.0f);
 		colors[ImGuiCol_ButtonHovered] = ImVec4(0.992f, 0.894f, 0.764f, 0.7f);
 		colors[ImGuiCol_ButtonActive] = ImVec4(0.992f, 0.894f, 0.764f, 1.0f);
 

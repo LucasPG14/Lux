@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Component.h"
-#include "Amethyst/Renderer/VertexArray.h"
+#include "Amethyst/Resources/Mesh.h"
 
 #include <glm/glm.hpp>
 
@@ -10,7 +10,7 @@ namespace Amethyst
 	class MeshComponent : public Component
 	{
 	public:
-		MeshComponent(std::vector<Vertex>& vertices, std::vector<uint32_t>& indices);
+		MeshComponent(std::shared_ptr<Mesh> meshPtr);
 
 		~MeshComponent();
 
@@ -19,6 +19,6 @@ namespace Amethyst
 		void DrawInspector() override;
 
 	private:
-		std::shared_ptr<VertexArray> vao;
+		std::shared_ptr<Mesh> mesh;
 	};
 }

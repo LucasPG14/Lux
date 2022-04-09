@@ -162,7 +162,8 @@
     <ClInclude Include="src\Amethyst\Events\MouseEvent.h" />
     <ClInclude Include="src\Amethyst\ImGui\ImGuiLayer.h" />
     <ClInclude Include="src\Amethyst\ImGui\ImGuiStyle.h" />
-    <ClInclude Include="src\Amethyst\Importers\Importer.h" />
+    <ClInclude Include="src\Amethyst\Utils\Hash.h" />
+    <ClInclude Include="src\Amethyst\Utils\Importer.h" />
     <ClInclude Include="src\Amethyst\PerspectiveCamera.h" />
     <ClInclude Include="src\Amethyst\Renderer\Buffer.h" />
     <ClInclude Include="src\Amethyst\Renderer\Framebuffer.h" />
@@ -171,8 +172,12 @@
     <ClInclude Include="src\Amethyst\Renderer\RenderOrder.h" />
     <ClInclude Include="src\Amethyst\Renderer\Renderer.h" />
     <ClInclude Include="src\Amethyst\Renderer\Shader.h" />
-    <ClInclude Include="src\Amethyst\Renderer\Texture.h" />
+    <ClInclude Include="src\Amethyst\Resources\Texture.h" />
     <ClInclude Include="src\Amethyst\Renderer\VertexArray.h" />
+    <ClInclude Include="src\Amethyst\Resources\Material.h" />
+    <ClInclude Include="src\Amethyst\Resources\Mesh.h" />
+    <ClInclude Include="src\Amethyst\Resources\Resource.h" />
+    <ClInclude Include="src\Amethyst\Resources\ResourceSystem.h" />
     <ClInclude Include="src\Amethyst\Scene\Components\Component.h" />
     <ClInclude Include="src\Amethyst\Scene\Components\MeshComponent.h" />
     <ClInclude Include="src\Amethyst\Scene\Components\TransformComponent.h" />
@@ -612,7 +617,7 @@
     <ClCompile Include="src\Amethyst\Core\Log.cpp" />
     <ClCompile Include="src\Amethyst\ImGui\ImGuiBuild.cpp" />
     <ClCompile Include="src\Amethyst\ImGui\ImGuiLayer.cpp" />
-    <ClCompile Include="src\Amethyst\Importers\Importer.cpp" />
+    <ClCompile Include="src\Amethyst\Utils\Importer.cpp" />
     <ClCompile Include="src\Amethyst\PerspectiveCamera.cpp" />
     <ClCompile Include="src\Amethyst\Renderer\Buffer.cpp" />
     <ClCompile Include="src\Amethyst\Renderer\Framebuffer.cpp" />
@@ -620,8 +625,11 @@
     <ClCompile Include="src\Amethyst\Renderer\RenderOrder.cpp" />
     <ClCompile Include="src\Amethyst\Renderer\Renderer.cpp" />
     <ClCompile Include="src\Amethyst\Renderer\Shader.cpp" />
-    <ClCompile Include="src\Amethyst\Renderer\Texture.cpp" />
+    <ClCompile Include="src\Amethyst\Resources\Texture.cpp" />
     <ClCompile Include="src\Amethyst\Renderer\VertexArray.cpp" />
+    <ClCompile Include="src\Amethyst\Resources\Material.cpp" />
+    <ClCompile Include="src\Amethyst\Resources\Mesh.cpp" />
+    <ClCompile Include="src\Amethyst\Resources\ResourceSystem.cpp" />
     <ClCompile Include="src\Amethyst\Scene\Components\MeshComponent.cpp" />
     <ClCompile Include="src\Amethyst\Scene\Components\TransformComponent.cpp" />
     <ClCompile Include="src\Amethyst\Scene\Entity.cpp" />

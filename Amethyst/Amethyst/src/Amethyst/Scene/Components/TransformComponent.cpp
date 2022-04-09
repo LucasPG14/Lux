@@ -21,6 +21,19 @@ namespace Amethyst
 	
 	void TransformComponent::DrawInspector()
 	{
-		ImGui::DragFloat3("Position", glm::value_ptr(position));
+		if (ImGui::CollapsingHeader("Transform"))
+		{
+			ImGui::DragFloat3("##Position", glm::value_ptr(position));
+			ImGui::SameLine();
+			ImGui::Text("Position");
+
+			ImGui::DragFloat3("##Rotation", glm::value_ptr(rotation));
+			ImGui::SameLine();
+			ImGui::Text("Rotation");
+
+			ImGui::DragFloat3("##Scale", glm::value_ptr(scale));
+			ImGui::SameLine();
+			ImGui::Text("Scale");
+		}
 	}
 }

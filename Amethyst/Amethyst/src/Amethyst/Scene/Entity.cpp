@@ -33,12 +33,4 @@ namespace Amethyst
 			components[i]->DrawInspector();
 		}
 	}
-
-	template<typename T, typename... Args>
-	T* Entity::CreateComponent(Args&&... args)
-	{
-		T* component = new T(std::forward<Args>(args)...);
-		components.push_back(component);
-		return component;
-	}
 }
