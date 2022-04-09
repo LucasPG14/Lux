@@ -40,5 +40,6 @@ namespace Amethyst
 		glm::vec2 viewSize;
 
 		std::filesystem::path currentDir;
+		std::filesystem::path assetsDir;
 	};
 }

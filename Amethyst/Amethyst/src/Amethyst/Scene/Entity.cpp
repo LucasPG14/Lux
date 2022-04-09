@@ -21,7 +21,8 @@ namespace Amethyst
 	
 	void Entity::Update()
 	{
-
+		for (int i = 0; i < components.size(); ++i)
+			components[i]->Update();
 	}
 	
 	void Entity::DrawInspector()

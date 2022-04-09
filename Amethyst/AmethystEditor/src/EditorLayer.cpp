@@ -6,7 +6,7 @@ namespace Amethyst
 {
 	#define BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
 
-	EditorLayer::EditorLayer() : currentDir("assets/Resources")
+	EditorLayer::EditorLayer() : currentDir("assets/"), assetsDir("assets/")
 	{
 		scene = std::make_shared<Scene>();
 	}
@@ -62,28 +62,28 @@ namespace Amethyst
 		//	-0.5f,  0.5f, 0.0f, 0.0f, 1.0f
 		//};
 
-		std::vector<Vertex> vertices2;
+		/*std::vector<Vertex> vertices2;
 		std::vector<uint32_t> indices2;
 
-		Importer::Import(std::filesystem::path("assets/Resources/Models/BakerHouse.obj"), std::filesystem::path(""), vertices2, indices2);
+		Importer::Import(std::filesystem::path("assets/Resources/Models/BakerHouse.obj"), std::filesystem::path(""), vertices2, indices2);*/
 
-		std::shared_ptr<VertexBuffer> vertexBuffer;
-		vertexBuffer.reset(VertexBuffer::Create(vertices2.data(), sizeof(Vertex) * vertices2.size()));
+		//std::shared_ptr<VertexBuffer> vertexBuffer;
+		//vertexBuffer.reset(VertexBuffer::Create(vertices2.data(), sizeof(Vertex) * vertices2.size()));
 
-		BufferLayout layout2 =
-		{
-			{ShaderDataType::FLOAT3, "position"},
-			{ShaderDataType::FLOAT2, "texCoord"},
-			//{ShaderDataType::FLOAT3, "normal"}
-		};
+		//BufferLayout layout2 =
+		//{
+		//	{ShaderDataType::FLOAT3, "position"},
+		//	{ShaderDataType::FLOAT2, "texCoord"},
+		//	//{ShaderDataType::FLOAT3, "normal"}
+		//};
 
-		vertexBuffer->SetLayout(layout2);
-		squareVA->AddVertexBuffer(vertexBuffer);
+		//vertexBuffer->SetLayout(layout2);
+		//squareVA->AddVertexBuffer(vertexBuffer);
 
 		//uint32_t indices2[6] = { 0, 1, 2, 2, 3, 0 };
-		std::shared_ptr<IndexBuffer> indexBuffer;
-		indexBuffer.reset(IndexBuffer::Create(indices2.data(), indices2.size()));
-		squareVA->AddIndexBuffer(indexBuffer);
+		//std::shared_ptr<IndexBuffer> indexBuffer;
+		//indexBuffer.reset(IndexBuffer::Create(indices2.data(), indices2.size()));
+		//squareVA->AddIndexBuffer(indexBuffer);
 
 		std::string vertex = R"(
 			#version 330 core
@@ -187,9 +187,12 @@ namespace Amethyst
 		texture->UploadUniformMat4("view", camera.GetViewMatrix());
 		texture->UploadUniformMat4("projection", camera.GetProjectionMatrix());
 		texture->UploadUniformMat4("model", model);
+
+		for (int i = 0; i < scene->GetWorld().size(); ++i)
+			scene->GetWorld()[i].Update();
 		//Renderer::Submit(squareVA);
 		//logo->Bind();
-		Renderer::Submit(squareVA);
+		//Renderer::Submit(squareVA);
 		//shader->Bind();
 		//shader->UploadUniformMat4("view", camera.GetViewMatrix());
 		//shader->UploadUniformMat4("projection", camera.GetProjectionMatrix());
@@ -267,8 +270,10 @@ namespace Amethyst
 		ImGuiWindowFlags viewportFlags = ImGuiWindowFlags_NoTitleBar;
 		static bool viewportEnabled = true;
 		
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
 
+		// Viewport Begin
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
+		
 		ImGui::Begin("Viewport", &viewportEnabled, viewportFlags);
 		ImVec2 size = ImGui::GetContentRegionAvail();
 		ImGui::Image((ImTextureID)fbo->GetID(), { viewSize.x, viewSize.y }, { 0, 1 }, { 1, 0 });
@@ -278,10 +283,31 @@ namespace Amethyst
 			fbo->Resize(viewSize.x, viewSize.y);
 			camera.SetDimensions(viewSize.x, viewSize.y);
 		}
-		ImGui::End();
-		ImGui::PopStyleVar();
-		//style.WindowMinSize.x = minWinSizeX;
 
+		// DragAndDrop Target
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER"))
+			{
+				const wchar_t* path = (const wchar_t*)payload->Data;
+				std::filesystem::path realPath = std::filesystem::path(assetsDir) / path;
+				if (realPath.has_extension())
+				{
+					MeshComponent* mesh = Importer::Load(realPath);
+
+					Entity& entity = scene->CreateEntity();
+					entity.AddComponent(mesh);
+				}
+			}
+
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::PopStyleVar();
+		ImGui::End();
+		// Viewport End
+
+		// Hierarchy Begin
 		ImGui::Begin("Hierarchy");
 		static Entity* entSelected;
 		std::vector<Entity>& entities = scene->GetWorld();
@@ -301,6 +327,7 @@ namespace Amethyst
 		}
 
 		ImGui::End();
+		// Hierarchy End
 
 		// Inspector begin
 		ImGui::Begin("Inspector");
@@ -334,14 +361,28 @@ namespace Amethyst
 
 		ImGui::Columns(columns, 0, false);
 
+		int i = 0;
 		for (const auto& file : std::filesystem::directory_iterator(currentDir))
 		{
+			ImGui::PushID(i++);
+			const auto& path = file.path();
+			auto relativePath = std::filesystem::relative(file.path(), assetsDir);
+			std::string filename = relativePath.filename().string();
+			
 			ImGui::ImageButton((ImTextureID)tex->GetID(), { 100, 100 }, { 0, 1 }, { 1, 0 });
+			// Drag objects from the Content Browser
+			if (ImGui::BeginDragDropSource())
+			{
+				const wchar_t* filePath = relativePath.c_str();
+				ImGui::SetDragDropPayload("CONTENT_BROWSER", filePath, (wcslen(filePath) + 1) * sizeof(const wchar_t), ImGuiCond_Once);
+				ImGui::EndDragDropSource();
+			}
+
 			if (ImGui::IsItemHovered())
 			{
 				if (ImGui::IsMouseDoubleClicked(0))
 				{
-					if (file.is_directory()) currentDir = selected;
+					if (file.is_directory()) currentDir /= path.filename();
 				}
 				else if (ImGui::IsMouseClicked(0))
 				{
@@ -349,9 +390,10 @@ namespace Amethyst
 				}
 			}
 			
-			ImGui::Text(file.path().filename().string().c_str());
+			ImGui::TextWrapped(filename.c_str());
 
 			ImGui::NextColumn();
+			ImGui::PopID();
 		}
 
 		ImGui::End();
@@ -372,7 +414,7 @@ namespace Amethyst
 		std::vector<std::string>& paths = e.GetPaths();
 		for (int i = 0; i < paths.size(); ++i)
 		{
-			//Importer::Import(std::filesystem::path(paths[i]), currentDir);
+			Importer::Import(std::filesystem::path(paths[i]), currentDir);
 		}
 
 		return true;

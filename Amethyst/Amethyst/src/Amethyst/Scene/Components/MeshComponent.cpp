@@ -1,30 +1,48 @@
 #include "amtpch.h"
 #include "MeshComponent.h"
 
+// TODO: This needs to be deleted
+#include "Amethyst/Renderer/Renderer.h"
+
 #include <imgui.h>
 
 namespace Amethyst
 {
-	MeshComponent::MeshComponent(std::vector<glm::vec3>& vertices, std::vector<uint32_t>& indices)
+	MeshComponent::MeshComponent(std::vector<Vertex>& vertices, std::vector<uint32_t>& indices)
 	{
-		//std::shared_ptr<VertexBuffer> vbo;
-		//vbo.reset(VertexBuffer::Create(vertices.data(), sizeof(vertices)));
+		vao.reset(VertexArray::Create());
 
-		//{
-		//	BufferLayout layout =
-		//	{
-		//		{ShaderDataType::FLOAT3, "position"},
-		//		{ShaderDataType::FLOAT4, "color"},
-		//		//{ShaderDataType::FLOAT3, "normal"}
-		//	};
+		std::shared_ptr<VertexBuffer> vbo;
+		vbo.reset(VertexBuffer::Create(vertices.data(), sizeof(Vertex) * vertices.size()));
 
-		//	vbo->SetLayout(layout);
-		//}
+		{
+			BufferLayout layout =
+			{
+				{ShaderDataType::FLOAT3, "position"},
+				{ShaderDataType::FLOAT2, "texCoords"},
+				//{ShaderDataType::FLOAT3, "normal"}
+			};
 
-		//vao->AddVertexBuffer(vbo);
+			vbo->SetLayout(layout);
+		}
+
+		std::shared_ptr<IndexBuffer> ebo;
+		ebo.reset(IndexBuffer::Create(indices.data(), indices.size()));
+		vao->AddIndexBuffer(ebo);
+
+		vao->AddVertexBuffer(vbo);
 	}
 	
 	MeshComponent::~MeshComponent()
+	{
+	}
+	
+	void MeshComponent::Update()
+	{
+		Renderer::Submit(vao);
+	}
+	
+	void MeshComponent::DrawInspector()
 	{
 	}
 }

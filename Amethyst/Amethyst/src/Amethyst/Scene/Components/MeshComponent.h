@@ -10,11 +10,15 @@ namespace Amethyst
 	class MeshComponent : public Component
 	{
 	public:
-		MeshComponent(std::vector<glm::vec3>& vertices, std::vector<uint32_t>& indices);
+		MeshComponent(std::vector<Vertex>& vertices, std::vector<uint32_t>& indices);
 
 		~MeshComponent();
 
+		void Update() override;
+
+		void DrawInspector() override;
+
 	private:
-		std::unique_ptr<VertexArray> vao;
+		std::shared_ptr<VertexArray> vao;
 	};
 }

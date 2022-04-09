@@ -22,4 +22,9 @@ namespace Amethyst
 	{
 
 	}
+	
+	Entity& Scene::CreateEntity()
+	{
+		return world.emplace_back("Baker_House");
+	}
 }

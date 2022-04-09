@@ -20,6 +20,8 @@ namespace Amethyst
 		template<typename T, typename... Args>
 		T* CreateComponent(Args&&... args);
 
+		void AddComponent(Component* component) { components.push_back(component); }
+
 	private:
 		std::string name;
 
