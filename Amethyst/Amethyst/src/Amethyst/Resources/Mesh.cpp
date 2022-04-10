@@ -16,12 +16,6 @@ namespace Amethyst
 	{
 
 	}
-
-	// This should not be here, needs to be removed
-	void Mesh::Update()
-	{
-		Renderer::Submit(vao);
-	}
 	
 	void Mesh::Load()
 	{

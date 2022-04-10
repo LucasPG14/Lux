@@ -16,11 +16,11 @@
     <Filter Include="src\Amethyst\ImGui">
       <UniqueIdentifier>{15BD3028-01A1-F17D-6A01-ECD05604DCFF}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\Amethyst\Importers">
-      <UniqueIdentifier>{FF3BBC64-EB35-E5B6-D4A2-7BC7C03B4B23}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\Amethyst\Renderer">
       <UniqueIdentifier>{B1072322-1D74-DE1C-E667-767A52930085}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Amethyst\Resources">
+      <UniqueIdentifier>{D56A3102-C164-5A54-AAD1-F064966AC0C0}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Amethyst\Scene">
       <UniqueIdentifier>{08B5E028-F498-A17E-5DF9-9BD149FC8B00}</UniqueIdentifier>
@@ -120,9 +120,6 @@
     <ClInclude Include="src\Amethyst\ImGui\ImGuiStyle.h">
       <Filter>src\Amethyst\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="src\Amethyst\Utils\Importer.h">
-      <Filter>src\Amethyst\Importers</Filter>
-    </ClInclude>
     <ClInclude Include="src\Amethyst\PerspectiveCamera.h">
       <Filter>src\Amethyst</Filter>
     </ClInclude>
@@ -147,11 +144,23 @@
     <ClInclude Include="src\Amethyst\Renderer\Shader.h">
       <Filter>src\Amethyst\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="src\Amethyst\Resources\Texture.h">
-      <Filter>src\Amethyst\Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="src\Amethyst\Renderer\VertexArray.h">
       <Filter>src\Amethyst\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Amethyst\Resources\Material.h">
+      <Filter>src\Amethyst\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Amethyst\Resources\Mesh.h">
+      <Filter>src\Amethyst\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Amethyst\Resources\Resource.h">
+      <Filter>src\Amethyst\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Amethyst\Resources\ResourceSystem.h">
+      <Filter>src\Amethyst\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Amethyst\Resources\Texture.h">
+      <Filter>src\Amethyst\Resources</Filter>
     </ClInclude>
     <ClInclude Include="src\Amethyst\Scene\Components\Component.h">
       <Filter>src\Amethyst\Scene\Components</Filter>
@@ -167,6 +176,12 @@
     </ClInclude>
     <ClInclude Include="src\Amethyst\Scene\Scene.h">
       <Filter>src\Amethyst\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Amethyst\Utils\Hash.h">
+      <Filter>src\Amethyst\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Amethyst\Utils\Importer.h">
+      <Filter>src\Amethyst\Utils</Filter>
     </ClInclude>
     <ClInclude Include="src\Amethyst\Utils\Vertex.h">
       <Filter>src\Amethyst\Utils</Filter>
@@ -1446,11 +1461,7 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="src\Amethyst\Resources\Resource.h" />
-    <ClInclude Include="src\Amethyst\Resources\Material.h" />
-    <ClInclude Include="src\Amethyst\Resources\Mesh.h" />
-    <ClInclude Include="src\Amethyst\Resources\ResourceSystem.h" />
-    <ClInclude Include="src\Amethyst\Utils\Hash.h" />
+    <ClInclude Include="src\Amethyst\Scene\Components\MaterialComponent.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Amethyst\Core\Application.cpp">
@@ -1470,9 +1481,6 @@
     </ClCompile>
     <ClCompile Include="src\Amethyst\ImGui\ImGuiLayer.cpp">
       <Filter>src\Amethyst\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Amethyst\Utils\Importer.cpp">
-      <Filter>src\Amethyst\Importers</Filter>
     </ClCompile>
     <ClCompile Include="src\Amethyst\PerspectiveCamera.cpp">
       <Filter>src\Amethyst</Filter>
@@ -1495,11 +1503,20 @@
     <ClCompile Include="src\Amethyst\Renderer\Shader.cpp">
       <Filter>src\Amethyst\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="src\Amethyst\Resources\Texture.cpp">
-      <Filter>src\Amethyst\Renderer</Filter>
-    </ClCompile>
     <ClCompile Include="src\Amethyst\Renderer\VertexArray.cpp">
       <Filter>src\Amethyst\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Amethyst\Resources\Material.cpp">
+      <Filter>src\Amethyst\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Amethyst\Resources\Mesh.cpp">
+      <Filter>src\Amethyst\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Amethyst\Resources\ResourceSystem.cpp">
+      <Filter>src\Amethyst\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Amethyst\Resources\Texture.cpp">
+      <Filter>src\Amethyst\Resources</Filter>
     </ClCompile>
     <ClCompile Include="src\Amethyst\Scene\Components\MeshComponent.cpp">
       <Filter>src\Amethyst\Scene\Components</Filter>
@@ -1512,6 +1529,9 @@
     </ClCompile>
     <ClCompile Include="src\Amethyst\Scene\Scene.cpp">
       <Filter>src\Amethyst\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Amethyst\Utils\Importer.cpp">
+      <Filter>src\Amethyst\Utils</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp">
       <Filter>src\Platform\OpenGL</Filter>
@@ -1546,8 +1566,6 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
-    <ClCompile Include="src\Amethyst\Resources\Material.cpp" />
-    <ClCompile Include="src\Amethyst\Resources\Mesh.cpp" />
-    <ClCompile Include="src\Amethyst\Resources\ResourceSystem.cpp" />
+    <ClCompile Include="src\Amethyst\Scene\Components\MaterialComponent.cpp" />
   </ItemGroup>
 </Project>

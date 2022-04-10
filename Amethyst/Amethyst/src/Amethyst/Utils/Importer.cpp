@@ -67,21 +67,49 @@ namespace Amethyst
 					
 					std::ofstream saveFile(pathToSave.string(), std::ios::binary);
 
+					// Storing the hash of Mesh to get the type when loading
+					constexpr std::uint32_t type = TypeID<Mesh>::id();
+
 					// Storing all information first to create the mesh correctly
-					std::uint32_t type = TypeID<Mesh>::id();
 					saveFile.write((char*)&type, sizeof(std::uint32_t));
 					saveFile.write((char*)&numVertices, sizeof(int));
 					saveFile.write((char*)&numIndices, sizeof(int));
 					saveFile.write((char*)vertices.data(), sizeof(Vertex) * vertices.size());
 					saveFile.write((char*)indices.data(), sizeof(uint32_t) * indices.size());
-					//saveFile << numIndices;
-					//saveFile << vertices.data();
-					//saveFile << indices.data();
 
 					saveFile.close();
 
 					ResourceSystem::Create<Mesh>(pathToSave);
+
+					// Reading the material of the mesh
+					aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+					
+					int index = material->GetTextureCount(aiTextureType_DIFFUSE);
+					if (index >= 0)
+					{
+						aiString str;
+						material->GetTexture(aiTextureType_DIFFUSE, index, &str);
+
+						int width = 0, height = 0;
+						int channels = 0;
+
+						stbi_uc* data = stbi_load(str.C_Str(), &width, &height, &channels, 0);
+
+						if (data)
+						{
+
+						}
+					}
 				}
+
+				// Check for embedded textures
+				//for (int i = 0; i < scene->mNumTextures; ++i)
+				//{
+				//	aiTexture* texture = scene->mTextures[i];
+
+				//	int width = texture->mWidth;
+				//	int height = texture->mHeight;
+				//}
 
 				for (int i = 0; i < scene->mNumMaterials; ++i)
 				{

@@ -25,18 +25,13 @@ namespace Amethyst
 		void AddToScene(std::filesystem::path& path);
 
 	private:
-		std::shared_ptr<Shader> shader;
-		std::shared_ptr<VertexArray> vao;
 		std::shared_ptr<Scene> scene;
 
 		std::shared_ptr<Framebuffer> fbo;
 
-		std::shared_ptr<Shader> shader2;
-		std::shared_ptr<Shader> texture;
+		std::shared_ptr<Shader> shader;
 		std::shared_ptr<Texture2D> tex;
-		std::shared_ptr<Texture2D> logo;
 		std::shared_ptr<Texture2D> folder;
-		std::shared_ptr<VertexArray> squareVA;
 
 		PerspectiveCamera camera;
 

@@ -13,12 +13,11 @@ namespace Amethyst
 
 		~Mesh();
 
-		// This should not be here, needs to be removed
-		void Update();
-
 		void Load() override;
 
 		void UnLoad() override;
+
+		std::shared_ptr<VertexArray> Get() { return vao; }
 
 	private:
 		std::shared_ptr<VertexArray> vao;

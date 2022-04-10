@@ -2,15 +2,14 @@
 #include "Scene.h"
 
 #include "Components/Component.h"
+#include "Components/MeshComponent.h"
+
+#include "Amethyst/Renderer/Renderer.h"
 
 namespace Amethyst
 {
 	Scene::Scene()
 	{
-		Entity entity = world.emplace_back("Entity1");
-		entity = world.emplace_back("Entity2");
-		entity = world.emplace_back("Entity3");
-		entity = world.emplace_back("Entity4");
 	}
 	
 	Scene::~Scene()
@@ -20,7 +19,14 @@ namespace Amethyst
 	
 	void Scene::Update()
 	{
-
+		for (int i = 0; i < world.size(); ++i)
+		{
+			Entity& entity = world[i];
+			if (MeshComponent* mesh = entity.Get<MeshComponent>())
+			{
+				Renderer::Submit(mesh->GetVAO());
+			}
+		}
 	}
 	
 	Entity& Scene::CreateEntity(const std::string& name)

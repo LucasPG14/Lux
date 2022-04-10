@@ -19,154 +19,22 @@ namespace Amethyst
 
 	void EditorLayer::OnCreate()
 	{
+		// Creating framebuffer
 		FramebufferSpecification spec;
 		spec.width = 1280;
 		spec.height = 720;
 		fbo = Framebuffer::Create(spec);
 
-		vao.reset(VertexArray::Create());
+		// Creating shader
+		shader = Shader::Create("assets/shaders/Texture.glsl");
 
-		float vertices[21] =
-		{
-			-0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-			 0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-			 0.0f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f
-		};
-
-		std::shared_ptr<VertexBuffer> vbo;
-		vbo.reset(VertexBuffer::Create(vertices, sizeof(vertices)));
-
-		{
-			BufferLayout layout =
-			{
-				{ShaderDataType::FLOAT3, "position"},
-				{ShaderDataType::FLOAT4, "color"},
-				//{ShaderDataType::FLOAT3, "normal"}
-			};
-
-			vbo->SetLayout(layout);
-		}
-
-		vao->AddVertexBuffer(vbo);
-
-		uint32_t indices[3] = { 0, 1, 2 };
-		std::shared_ptr<IndexBuffer> ebo;
-		ebo.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
-		vao->AddIndexBuffer(ebo);
-
-		squareVA.reset(VertexArray::Create());
-
-		//float vertices2[20] =
-		//{
-		//	-0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
-		//	 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
-		//	 0.5f,  0.5f, 0.0f, 1.0f, 1.0f,
-		//	-0.5f,  0.5f, 0.0f, 0.0f, 1.0f
-		//};
-
-		/*std::vector<Vertex> vertices2;
-		std::vector<uint32_t> indices2;
-
-		Importer::Import(std::filesystem::path("assets/Resources/Models/BakerHouse.obj"), std::filesystem::path(""), vertices2, indices2);*/
-
-		//std::shared_ptr<VertexBuffer> vertexBuffer;
-		//vertexBuffer.reset(VertexBuffer::Create(vertices2.data(), sizeof(Vertex) * vertices2.size()));
-
-		//BufferLayout layout2 =
-		//{
-		//	{ShaderDataType::FLOAT3, "position"},
-		//	{ShaderDataType::FLOAT2, "texCoord"},
-		//	//{ShaderDataType::FLOAT3, "normal"}
-		//};
-
-		//vertexBuffer->SetLayout(layout2);
-		//squareVA->AddVertexBuffer(vertexBuffer);
-
-		//uint32_t indices2[6] = { 0, 1, 2, 2, 3, 0 };
-		//std::shared_ptr<IndexBuffer> indexBuffer;
-		//indexBuffer.reset(IndexBuffer::Create(indices2.data(), indices2.size()));
-		//squareVA->AddIndexBuffer(indexBuffer);
-
-		std::string vertex = R"(
-			#version 330 core
-
-			layout(location = 0) in vec3 aPosition;
-			layout(location = 1) in vec4 aColor;
-
-			uniform mat4 view;
-			uniform mat4 projection;
-			uniform mat4 model;
-
-			out vec4 vColor;
-			
-			void main()
-			{
-				vColor = aColor;
-				gl_Position = projection * view * model * vec4(aPosition, 1.0);
-			}
-		
-		)";
-
-		std::string fragment = R"(
-			#version 330 core
-
-			layout(location = 0) out vec4 color;
-
-			in vec4 vColor;
-
-			void main()
-			{
-				color = vColor;
-			}
-		
-		)";
-
-		shader = Shader::Create("Hola", vertex, fragment);
-
-		std::string vertex2 = R"(
-			#version 330 core
-
-			layout(location = 0) in vec3 aPosition;
-
-			uniform mat4 view;
-			uniform mat4 projection;
-			uniform mat4 model;			
-
-			out vec3 vPosition;
-			
-			void main()
-			{
-				vPosition = aPosition;
-				gl_Position = projection * view * model * vec4(aPosition, 1.0);
-			}
-		
-		)";
-
-		std::string fragment2 = R"(
-			#version 330 core
-
-			layout(location = 0) out vec4 color;
-
-			in vec3 vPosition;
-
-			void main()
-			{
-				color = vec4(0.2, 0.3, 0.8, 1.0);
-			}
-		
-		)";
-
-		shader2 = Shader::Create("Hola2", vertex2, fragment2);
-
-		texture = Shader::Create("assets/shaders/Texture.glsl");
-
-		logo.reset(Texture2D::Create("assets/textures/deadpool.png"));
+		// Creating textures
 		tex.reset(Texture2D::Create("assets/textures/bakeHouse.png"));
 		folder.reset(Texture2D::Create("editor/textures/folder.png"));
 
-		texture->Bind();
-		texture->UploadUniformInt("ourTexture", 0);
-
+		// Binding shader
+		shader->Bind();
+		shader->UploadUniformInt("ourTexture", 0);
 
 		// Load Resources
 		std::stack<std::filesystem::path> resources;
@@ -209,21 +77,12 @@ namespace Amethyst
 		Renderer::BeginScene();
 
 		tex->Bind();
-		texture->Bind();
-		texture->UploadUniformMat4("view", camera.GetViewMatrix());
-		texture->UploadUniformMat4("projection", camera.GetProjectionMatrix());
-		texture->UploadUniformMat4("model", model);
+		shader->Bind();
+		shader->UploadUniformMat4("view", camera.GetViewMatrix());
+		shader->UploadUniformMat4("projection", camera.GetProjectionMatrix());
+		shader->UploadUniformMat4("model", model);
 
-		for (int i = 0; i < scene->GetWorld().size(); ++i)
-			scene->GetWorld()[i].Update();
-		//Renderer::Submit(squareVA);
-		//logo->Bind();
-		//Renderer::Submit(squareVA);
-		//shader->Bind();
-		//shader->UploadUniformMat4("view", camera.GetViewMatrix());
-		//shader->UploadUniformMat4("projection", camera.GetProjectionMatrix());
-		//shader->UploadUniformMat4("model", model);
-		//Amethyst::Renderer::Submit(vao);
+		scene->Update();
 
 		Renderer::EndScene();
 

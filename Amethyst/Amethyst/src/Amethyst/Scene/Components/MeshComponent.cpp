@@ -19,7 +19,6 @@ namespace Amethyst
 	
 	void MeshComponent::Update()
 	{
-		mesh->Update();
 	}
 	
 	void MeshComponent::DrawInspector()
@@ -28,5 +27,12 @@ namespace Amethyst
 		{
 
 		}
+	}
+	
+	std::shared_ptr<VertexArray> MeshComponent::GetVAO()
+	{
+		if (mesh) return mesh->Get();
+
+		return nullptr;
 	}
 }
