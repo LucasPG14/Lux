@@ -27,7 +27,7 @@ namespace Amethyst
 			// Check if the file has been readed correctly
 			if (scene)
 			{
-				for (int i = 0; i < scene->mNumMeshes; ++i)
+				for (unsigned int i = 0; i < scene->mNumMeshes; ++i)
 				{
 					aiMesh* mesh = scene->mMeshes[i];
 
@@ -35,14 +35,14 @@ namespace Amethyst
 					std::vector<uint32_t> indices;
 
 					std::string meshName = mesh->mName.C_Str();
-					int numVertices = mesh->mNumVertices;
-					int numIndices = mesh->mNumFaces * 3;
+					unsigned int numVertices = mesh->mNumVertices;
+					unsigned int numIndices = mesh->mNumFaces * 3;
 
 					vertices.reserve(numVertices);
 					indices.reserve(numIndices);
 
 					// Reading all the vertices
-					for (int j = 0; j < numVertices; ++j)
+					for (unsigned int j = 0; j < numVertices; ++j)
 					{
 						Vertex& vertex = vertices.emplace_back();
 
@@ -52,7 +52,7 @@ namespace Amethyst
 							vertex.texCoords = { mesh->mTextureCoords[0][j].x, mesh->mTextureCoords[0][j].y };
 					}
 
-					for (int j = 0; j < mesh->mNumFaces; ++j)
+					for (unsigned int j = 0; j < mesh->mNumFaces; ++j)
 					{
 						aiFace face = mesh->mFaces[j];
 
@@ -85,10 +85,10 @@ namespace Amethyst
 					aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 					
 					int index = material->GetTextureCount(aiTextureType_DIFFUSE);
-					if (index >= 0)
+					if (index > 0)
 					{
 						aiString str;
-						material->GetTexture(aiTextureType_DIFFUSE, index, &str);
+						material->GetTexture(aiTextureType_DIFFUSE, 0, &str);
 
 						int width = 0, height = 0;
 						int channels = 0;
@@ -97,21 +97,22 @@ namespace Amethyst
 
 						if (data)
 						{
-
+							bool ret = true;
+							ret = false;
 						}
 					}
 				}
 
 				// Check for embedded textures
-				//for (int i = 0; i < scene->mNumTextures; ++i)
-				//{
-				//	aiTexture* texture = scene->mTextures[i];
+				for (unsigned int i = 0; i < scene->mNumTextures; ++i)
+				{
+					aiTexture* texture = scene->mTextures[i];
 
-				//	int width = texture->mWidth;
-				//	int height = texture->mHeight;
-				//}
+					int width = texture->mWidth;
+					int height = texture->mHeight;
+				}
 
-				for (int i = 0; i < scene->mNumMaterials; ++i)
+				for (unsigned int i = 0; i < scene->mNumMaterials; ++i)
 				{
 					aiMaterial* material = scene->mMaterials[i];
 
@@ -122,6 +123,8 @@ namespace Amethyst
 					{
 						int width = 0, height = 0;
 						int channels = 0;
+						
+						std::string texPath = str.data;
 
 						stbi_uc* data = stbi_load(str.C_Str(), &width, &height, &channels, 0);
 

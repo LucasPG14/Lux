@@ -51,7 +51,7 @@ project "Assimp"
       "ASSIMP_BUILD_NO_NDO_IMPORTER",
       "ASSIMP_BUILD_NO_IFC_IMPORTER",
       "ASSIMP_BUILD_NO_XGL_IMPORTER",
-      "ASSIMP_BUILD_NO_FBX_IMPORTER",
+      -- "ASSIMP_BUILD_NO_FBX_IMPORTER",
       "ASSIMP_BUILD_NO_ASSBIN_IMPORTER",
       -- "ASSIMP_BUILD_NO_GLTF_IMPORTER",
       "ASSIMP_BUILD_NO_C4D_IMPORTER",
@@ -109,6 +109,24 @@ project "Assimp"
       "code/DefaultIOSystem.cpp",
       "code/DefaultLogger.cpp",
       "code/GenVertexNormalsProcess.cpp",
+      "code/FBXAnimation.cpp",
+      "code/FBXBinaryTokenizer.cpp",
+      "code/FBXConverter.cpp",
+      "code/FBXDeformer.cpp",
+      "code/FBXDocument.cpp",
+      "code/FBXDocumentUtil.cpp",
+      "code/FBXExporter.cpp",
+      "code/FBXExportNode.cpp",
+      "code/FBXExportProperty.cpp",
+      "code/FBXImporter.cpp",
+      "code/FBXMaterial.cpp",
+      "code/FBXMeshGeometry.cpp",
+      "code/FBXModel.cpp",
+      "code/FBXNodeAttribute.cpp",
+      "code/FBXParser.cpp",
+      "code/FBXProperties.cpp",
+      "code/FBXTokenizer.cpp",
+      "code/FBXUtil.cpp",
       "code/Importer.cpp",
       "code/ImporterRegistry.cpp",
       "code/MaterialSystem.cpp",
@@ -144,6 +162,10 @@ project "Assimp"
       "contrib/rapidjson/include",
     }
 
+    links
+    {
+      "contrib/zlib/lib/zlib.lib"
+    }
 
     filter "system:windows"
       systemversion "latest"

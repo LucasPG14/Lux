@@ -22,6 +22,7 @@ namespace Amethyst
 
 		static void Delete(std::filesystem::path& path);
 
+		// Needs to check if the resource exists
 		template<typename T>
 		static std::shared_ptr<T> Get(std::filesystem::path& path)
 		{

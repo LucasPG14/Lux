@@ -7,13 +7,13 @@ namespace Amethyst
 	template<typename Char>
 	class HashString
 	{
-		static constexpr std::uint16_t Hashed(const Char* curr)
+		static constexpr std::uint32_t Hashed(const Char* curr) noexcept
 		{
 			auto value = 2166136261;
 
 			while (*curr != 0) 
 			{
-				value = (value ^ static_cast<std::uint16_t>(*(curr++))) * 16777619;
+				value = (value ^ static_cast<std::uint32_t>(*(curr++))) * 16777619;
 			}
 
 			return value;
@@ -22,7 +22,7 @@ namespace Amethyst
 	public:
 
 		template<std::size_t N>
-		static constexpr std::uint16_t value(const Char (&str)[N])
+		static constexpr std::uint32_t value(const Char (&str)[N]) noexcept
 		{
 			return Hashed(str);
 		}
@@ -33,7 +33,7 @@ namespace Amethyst
 	template<typename T, typename = void>
 	struct TypeID
 	{
-		static constexpr std::uint16_t id()
+		static constexpr std::uint32_t id() noexcept
 		{
 			auto value = HashedString::value(__FUNCSIG__);
 			return value;
