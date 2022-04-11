@@ -2,6 +2,8 @@
 
 #include "Entity.h"
 
+#include "Amethyst/Renderer/Shader.h"
+
 namespace Amethyst
 {
 	class Scene
@@ -10,7 +12,7 @@ namespace Amethyst
 		Scene();
 		~Scene();
 
-		void Update();
+		void Update(const std::shared_ptr<Shader>& shader);
 
 		inline std::vector<Entity>& GetWorld() { return world; }
 

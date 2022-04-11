@@ -2,6 +2,8 @@
 
 #include "MaterialComponent.h"
 
+#include <imgui.h>
+
 namespace Amethyst
 {
 	MaterialComponent::MaterialComponent(std::shared_ptr<Material> mat) : material(mat)
@@ -19,5 +21,9 @@ namespace Amethyst
 	
 	void MaterialComponent::DrawInspector()
 	{
+		if (ImGui::CollapsingHeader("Material"))
+		{
+			
+		}
 	}
 }

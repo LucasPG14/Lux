@@ -65,42 +65,104 @@ namespace Amethyst
 					pathToSave += "_" + meshName;
 					pathToSave.replace_extension("bsres");
 					
-					std::ofstream saveFile(pathToSave.string(), std::ios::binary);
+					std::ofstream meshFile(pathToSave.string(), std::ios::binary);
 
 					// Storing the hash of Mesh to get the type when loading
 					constexpr std::uint32_t type = TypeID<Mesh>::id();
+					meshFile.write((char*)&type, sizeof(std::uint32_t));
 
-					// Storing all information first to create the mesh correctly
-					saveFile.write((char*)&type, sizeof(std::uint32_t));
-					saveFile.write((char*)&numVertices, sizeof(int));
-					saveFile.write((char*)&numIndices, sizeof(int));
-					saveFile.write((char*)vertices.data(), sizeof(Vertex) * vertices.size());
-					saveFile.write((char*)indices.data(), sizeof(uint32_t) * indices.size());
+					// Storing the material path attached to this mesh
+					aiString nameMat;
+					scene->mMaterials[mesh->mMaterialIndex]->Get(AI_MATKEY_NAME, nameMat);
+					std::filesystem::path materialPath = directory / nameMat.C_Str();
+					materialPath += ".bsres"; // This is the own format of the engine
 
-					saveFile.close();
+					size_t pathSize = materialPath.string().size();
+					meshFile.write((char*)&pathSize, sizeof(size_t));
+					meshFile.write(materialPath.string().data(), pathSize);
+
+					// Storing the geometry information
+					meshFile.write((char*)&numVertices, sizeof(int));
+					meshFile.write((char*)&numIndices, sizeof(int));
+					meshFile.write((char*)vertices.data(), sizeof(Vertex) * vertices.size());
+					meshFile.write((char*)indices.data(), sizeof(uint32_t) * indices.size());
+
+					meshFile.close();
 
 					ResourceSystem::Create<Mesh>(pathToSave);
+				}
 
-					// Reading the material of the mesh
-					aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-					
-					int index = material->GetTextureCount(aiTextureType_DIFFUSE);
-					if (index > 0)
+				for (int i = 0; i < scene->mNumMaterials; ++i)
+				{
+					aiMaterial* material = scene->mMaterials[i];
+
+					// Getting the name of the material
+					aiString matName; 
+					material->Get(AI_MATKEY_NAME, matName);
+
+					// Creating the material path and file
+					std::filesystem::path matPath(directory / matName.C_Str());
+					std::ofstream matFile(matPath.replace_extension(".bsres"), std::ios::binary);
+
+					constexpr std::uint32_t type = TypeID<Material>::id();
+					matFile.write((char*)&type, sizeof(std::uint32_t));
+
+					// Getting Diffuse Type first
+					aiString assimpTexPath;
+					material->GetTexture(aiTextureType_DIFFUSE, 0, &assimpTexPath);
+
+					std::filesystem::path texturePath(assimpTexPath.C_Str());
+
+					if (!texturePath.has_parent_path())
 					{
-						aiString str;
-						material->GetTexture(aiTextureType_DIFFUSE, 0, &str);
-
-						int width = 0, height = 0;
-						int channels = 0;
-
-						stbi_uc* data = stbi_load(str.C_Str(), &width, &height, &channels, 0);
-
-						if (data)
-						{
-							bool ret = true;
-							ret = false;
-						}
+						texturePath = std::filesystem::path(path).remove_filename() / texturePath.filename();
 					}
+
+					// Using STB to load the image
+					int width, height, channels;
+					stbi_uc* data = stbi_load(texturePath.string().c_str(), &width, &height, &channels, 0);
+
+					if (data)
+					{
+						// TODO: Now it's is used the OpenGLTexture but this needs to be changed
+						// because the engine will support more Render APIs 
+
+						// Setting the path for the texture
+						texturePath = directory / texturePath.filename().replace_extension("bsres");
+
+						// Creating the file to save the image
+						std::ofstream texFile(texturePath, std::ios::binary);
+
+						constexpr std::uint32_t type = TypeID<OpenGLTexture2D>::id();
+
+						texFile.write((char*)&type, sizeof(std::uint32_t));
+						texFile.write((char*)&width, sizeof(int));
+						texFile.write((char*)&height, sizeof(int));
+						texFile.write((char*)&channels, sizeof(int));
+
+						int buffSize = width * channels * height;
+
+						//int bufferSize = width * height;
+						texFile.write((char*)data, buffSize);
+
+						texFile.close(); // Important to close the file when finished
+
+						// Saving this texture in the material
+						size_t texSize = texturePath.string().size();
+
+						matFile.write((char*)&texSize, sizeof(size_t));
+						matFile.write(texturePath.string().data(), texSize);
+
+						// Finally creating the Texture resource
+						ResourceSystem::Create<OpenGLTexture2D>(texturePath);
+					}
+
+					stbi_image_free(data);
+
+					matFile.close();
+
+					// Creating the Material resource
+					ResourceSystem::Create<Material>(matPath);
 				}
 
 				// Check for embedded textures
@@ -110,35 +172,6 @@ namespace Amethyst
 
 					int width = texture->mWidth;
 					int height = texture->mHeight;
-				}
-
-				for (unsigned int i = 0; i < scene->mNumMaterials; ++i)
-				{
-					aiMaterial* material = scene->mMaterials[i];
-
-					int index = material->GetTextureCount(aiTextureType_DIFFUSE);
-
-					aiString str;
-					if (material->GetTexture(aiTextureType_DIFFUSE, index, &str))
-					{
-						int width = 0, height = 0;
-						int channels = 0;
-						
-						std::string texPath = str.data;
-
-						stbi_uc* data = stbi_load(str.C_Str(), &width, &height, &channels, 0);
-
-						if (data)
-						{
-							bool ret = true;
-							ret = false;
-
-							/*std::filesystem::path texPath = directory / 
-							std::ofstream file();*/
-
-							//ResourceSystem::Create<Texture2D>(std::filesystem::path(""));
-						}
-					}
 				}
 			}
 		}

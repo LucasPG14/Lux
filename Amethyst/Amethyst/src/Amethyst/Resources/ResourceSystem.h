@@ -6,6 +6,7 @@
 #include "Mesh.h"
 #include "Material.h"
 #include "Texture.h"
+#include "Platform/OpenGL/OpenGLTexture.h"
 
 namespace Amethyst
 {
@@ -30,6 +31,11 @@ namespace Amethyst
 		}
 
 		static void ImportResources(std::filesystem::path& path);
+
+		inline static bool Has(std::filesystem::path& path)
+		{
+			return resources.find(path.string()) != resources.end();
+		}
 
 	private:
 		static std::unordered_map<std::string, std::shared_ptr<Resource>> resources;

@@ -1,7 +1,5 @@
 #include "EditorLayer.h"
 
-#include "Amethyst/Resources/Mesh.h"
-
 #include "imgui/imgui.h"
 
 namespace Amethyst
@@ -67,22 +65,13 @@ namespace Amethyst
 	{
 		camera.Update(timer);
 
-		//AMT_INFO("ExampleLayer::Update");
-		glm::mat4 model(1.0f);
-
 		fbo->Bind();
 		RenderOrder::ClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 		RenderOrder::Clear();
 
-		Renderer::BeginScene();
+		Renderer::BeginScene(camera);
 
-		tex->Bind();
-		shader->Bind();
-		shader->UploadUniformMat4("view", camera.GetViewMatrix());
-		shader->UploadUniformMat4("projection", camera.GetProjectionMatrix());
-		shader->UploadUniformMat4("model", model);
-
-		scene->Update();
+		scene->Update(shader);
 
 		Renderer::EndScene();
 
@@ -124,11 +113,23 @@ namespace Amethyst
 		{
 			if (ImGui::BeginMenu("File"))
 			{
-				if (ImGui::MenuItem("New scene", "Ctrl + N"));
-				if (ImGui::MenuItem("Open scene", "Ctrl + O"));
+				if (ImGui::MenuItem("New scene", "Ctrl + N"))
+				{
+
+				}
+				if (ImGui::MenuItem("Open scene", "Ctrl + O"))
+				{
+
+				}
 				ImGui::Separator();
-				if (ImGui::MenuItem("Save scene", "Ctrl + S"));
-				if (ImGui::MenuItem("Save scene as...", "Ctrl + Shift + S"));
+				if (ImGui::MenuItem("Save scene", "Ctrl + S"))
+				{
+
+				}
+				if (ImGui::MenuItem("Save scene as...", "Ctrl + Shift + S"))
+				{
+
+				}
 				ImGui::Separator();
 				if (ImGui::MenuItem("Exit", "Alt + F4")) Application::Get().Close();
 
@@ -137,14 +138,35 @@ namespace Amethyst
 
 			if (ImGui::BeginMenu("Edit"))
 			{
-				if (ImGui::MenuItem("Undo", "Ctrl + Z"));
-				if (ImGui::MenuItem("Redo", "Ctrl + Y"));
+				if (ImGui::MenuItem("Undo", "Ctrl + Z"))
+				{
+
+				}
+				if (ImGui::MenuItem("Redo", "Ctrl + Y"))
+				{
+
+				}
 				ImGui::Separator();
-				if (ImGui::MenuItem("Cut", "Ctrl + X"));
-				if (ImGui::MenuItem("Copy", "Ctrl + C"));
-				if (ImGui::MenuItem("Paste", "Ctrl + V"));
-				if (ImGui::MenuItem("Duplicate", "Ctrl + D"));
-				if (ImGui::MenuItem("Delete", "Del"));
+				if (ImGui::MenuItem("Cut", "Ctrl + X"))
+				{
+
+				}
+				if (ImGui::MenuItem("Copy", "Ctrl + C"))
+				{
+
+				}
+				if (ImGui::MenuItem("Paste", "Ctrl + V"))
+				{
+
+				}
+				if (ImGui::MenuItem("Duplicate", "Ctrl + D"))
+				{
+
+				}
+				if (ImGui::MenuItem("Delete", "Del"))
+				{
+
+				}
 
 				ImGui::EndMenu();
 			}
@@ -234,6 +256,15 @@ namespace Amethyst
 
 		static std::filesystem::path selected;
 
+		if (ImGui::IsWindowFocused())
+		{
+			if (Input::IsKeyPressed(Keys::DEL))
+			{
+				ResourceSystem::Delete(selected);
+				std::filesystem::remove_all(selected);
+			}
+		}
+
 		// Setting the number of columns
 		float cell = 128;
 
@@ -292,6 +323,7 @@ namespace Amethyst
 		EventDispatcher dispatcher(e);
 
 		dispatcher.Dispatch<WindowDropEvent>(BIND_EVENT_FN(EditorLayer::FileDropped));
+		dispatcher.Dispatch<KeyPressedEvent>(BIND_EVENT_FN(EditorLayer::ShortCuts));
 	}
 	
 	bool EditorLayer::FileDropped(WindowDropEvent& e)
@@ -304,6 +336,40 @@ namespace Amethyst
 
 		return true;
 	}
+
+	bool EditorLayer::ShortCuts(KeyPressedEvent& e)
+	{
+		bool ctrl = Input::IsKeyPressed(Keys::LEFT_CONTROL) || Input::IsKeyPressed(Keys::RIGHT_CONTROL);
+		bool shift = Input::IsKeyPressed(Keys::LEFT_SHIFT) || Input::IsKeyPressed(Keys::RIGHT_SHIFT);
+		
+		switch (e.GetKeyCode())
+		{
+		case Keys::N:
+			if (ctrl)
+			{
+				// New Scene
+			}
+			break;
+		case Keys::O:
+			if (ctrl)
+			{
+				// Open Scene
+			}
+			break;
+		case Keys::S:
+			if (ctrl && shift)
+			{
+				// Save Scene As
+			}
+			else if (ctrl)
+			{
+				// Save Scene
+			}
+			break;
+		}
+
+		return true;
+	}
 	
 	void EditorLayer::AddToScene(std::filesystem::path& path)
 	{
@@ -312,19 +378,32 @@ namespace Amethyst
 		std::filesystem::path name = path;
 		name.replace_extension("");
 
-		Entity& entity = scene->CreateEntity(name.filename().string());
 		std::uint32_t type;
 		file.read((char*)&type, sizeof(std::uint32_t));
-
-		file.close();
 		
 		switch (type)
 		{
 		case TypeID<Mesh>::id(): 
 		{
+			Entity& entity = scene->CreateEntity(name.filename().string());
 			entity.CreateComponent<MeshComponent>(ResourceSystem::Get<Mesh>(path));
-			return;
+
+			// Reading the material path
+			size_t matSize = 0;
+			std::string material;
+			file.read((char*)&matSize, sizeof(size_t));
+			material.resize(matSize);
+			file.read(material.data(), matSize);
+
+			entity.CreateComponent<MaterialComponent>(ResourceSystem::Get<Material>(std::filesystem::path(material)));
+			break;
+		}
+		case TypeID<Material>::id():
+		{
+			break;
 		}
 		}
+
+		file.close();
 	}
 }

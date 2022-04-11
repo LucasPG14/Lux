@@ -31,6 +31,16 @@ namespace Amethyst
 			ResourceSystem::Create<Mesh>(path);
 			return;
 		}
+		case TypeID<Material>::id():
+		{
+			ResourceSystem::Create<Material>(path);
+			return;
+		}
+		case TypeID<OpenGLTexture2D>::id():
+		{
+			ResourceSystem::Create<OpenGLTexture2D>(path);
+			return;
+		}
 		}
 	}
 }

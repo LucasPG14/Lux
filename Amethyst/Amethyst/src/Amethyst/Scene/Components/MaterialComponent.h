@@ -17,6 +17,8 @@ namespace Amethyst
 
 		void DrawInspector() override;
 
+		std::shared_ptr<Material> GetMaterial() { return material; }
+
 	private:
 		std::shared_ptr<Material> material;
 	};

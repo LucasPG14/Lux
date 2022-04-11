@@ -29,7 +29,7 @@ namespace Amethyst
 		}
 	}
 	
-	std::shared_ptr<VertexArray> MeshComponent::GetVAO()
+	const std::shared_ptr<VertexArray>& MeshComponent::GetVAO()
 	{
 		if (mesh) return mesh->Get();
 

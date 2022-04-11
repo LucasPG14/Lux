@@ -22,6 +22,8 @@ namespace Amethyst
 	private:
 		bool FileDropped(WindowDropEvent& e);
 
+		bool ShortCuts(KeyPressedEvent& e);
+
 		void AddToScene(std::filesystem::path& path);
 
 	private:

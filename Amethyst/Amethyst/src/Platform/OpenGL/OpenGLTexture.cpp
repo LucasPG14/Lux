@@ -12,8 +12,8 @@ namespace Amethyst
 		int w, h, channels;
 		stbi_set_flip_vertically_on_load(1);
 		stbi_uc* data = stbi_load(path.c_str(), &w, &h, &channels, 0);
-		AMT_CORE_ASSERT(data, "Couldn't load the image!")
-			width = w;
+		AMT_CORE_ASSERT(data, "Couldn't load the image!");
+		width = w;
 		height = h;
 
 		GLenum internalFormat = 0;
@@ -61,12 +61,20 @@ namespace Amethyst
 		// TODO: This needs to be changed cause it's better store all the info in binary format
 		if (!loaded)
 		{
-			int w, h, channels;
-			stbi_set_flip_vertically_on_load(1);
-			stbi_uc* data = stbi_load(path.string().c_str(), &w, &h, &channels, 0);
+			std::ifstream file(path, std::ios::binary);
+
+			std::uint32_t type = 0;
+			int channels = 0;
+			file.read((char*)&type, sizeof(std::uint32_t));
+			file.read((char*)&width, sizeof(int));
+			file.read((char*)&height, sizeof(int));
+			file.read((char*)&channels, sizeof(int));
+			
+			int bufferSize = width * channels * height;
+			stbi_uc* data = new stbi_uc[bufferSize];
+			file.read((char*)data, bufferSize);
+			
 			AMT_CORE_ASSERT(data, "Couldn't load the image!");
-			width = w;
-			height = h;
 
 			GLenum internalFormat = 0;
 			GLenum dataFormat = 0;
@@ -93,13 +101,12 @@ namespace Amethyst
 
 			glTextureSubImage2D(textureID, 0, 0, 0, width, height, dataFormat, GL_UNSIGNED_BYTE, data);
 			glBindTexture(GL_TEXTURE_2D, 0);
-
-			stbi_image_free(data);
 		}
 	}
 
 	void OpenGLTexture2D::UnLoad()
 	{
+		loaded = false;
 	}
 	
 	void OpenGLTexture2D::Bind(uint32_t slot) const

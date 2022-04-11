@@ -28,6 +28,13 @@ namespace Amethyst
 			std::uint32_t type = 0;
 			file.read((char*)&type, sizeof(std::uint32_t));
 
+			// Reading the material path
+			size_t matSize = 0;
+			std::string material;
+			file.read((char*)&matSize, sizeof(size_t));
+			material.resize(matSize);
+			file.read(material.data(), matSize);
+
 			int numVertices = 0;
 			int numIndices = 0;
 			file.read((char*)&numVertices, sizeof(int));

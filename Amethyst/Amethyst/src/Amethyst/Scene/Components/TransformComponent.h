@@ -2,6 +2,9 @@
 
 #include "Component.h"
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+#include <glm/gtx/quaternion.hpp>
 
 namespace Amethyst
 {
@@ -15,6 +18,14 @@ namespace Amethyst
 		void Update() override;
 
 		void DrawInspector() override;
+
+		// TODO: Review this, maybe there's another better option
+		const glm::mat4& GetTransform()
+		{
+			glm::mat4 rotationMat = glm::toMat4(glm::quat(rotation));
+
+			return glm::translate(glm::mat4(1.0f), position) * rotationMat * glm::scale(glm::mat4(1.0f), scale);
+		}
 
 	private:
 		glm::vec3 position;

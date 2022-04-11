@@ -17,7 +17,7 @@ namespace Amethyst
 
 		void UnLoad() override;
 
-		std::shared_ptr<VertexArray> Get() { return vao; }
+		const std::shared_ptr<VertexArray>& Get() { return vao; }
 
 	private:
 		std::shared_ptr<VertexArray> vao;

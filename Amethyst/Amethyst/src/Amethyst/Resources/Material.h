@@ -2,7 +2,7 @@
 
 #include "Resource.h"
 
-//#include "Amethyst/Renderer/Texture.h"
+#include "Amethyst/Resources/Texture.h"
 
 namespace Amethyst
 {
@@ -17,8 +17,14 @@ namespace Amethyst
 
 		void UnLoad() override;
 
+		void Bind();
+
+		void Unbind();
+
+		const std::shared_ptr<Texture2D>& GetDiffuse() { return diffuse; }
+
 	private:
-		//Texture2D* diffuse;
+		std::shared_ptr<Texture2D> diffuse;
 		//Texture2D* normal;
 	};
 }
