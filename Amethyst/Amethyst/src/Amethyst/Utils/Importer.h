@@ -1,13 +1,10 @@
 #pragma once
 
-// TODO: Remove this when importing works correctly
-#include "Amethyst/Utils/Vertex.h"
-#include "Amethyst/Scene/Components/MeshComponent.h"
-
 namespace Amethyst
 {
 	namespace Importer
 	{
-		void Import(std::filesystem::path& path, std::filesystem::path directory);
+		void Import(const std::filesystem::path& path, const std::filesystem::path& directory);
+		void ImportTexture(const std::filesystem::path& path, const std::filesystem::path& directory);
 	}
 }

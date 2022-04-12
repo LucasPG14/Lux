@@ -6,7 +6,7 @@ namespace Amethyst
 {
 	#define BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
 
-	EditorLayer::EditorLayer() : currentDir("assets/"), assetsDir("assets/")
+	EditorLayer::EditorLayer() : currentDir("assets/"), assetsDir("assets/"), entSelected(nullptr)
 	{
 		scene = std::make_shared<Scene>();
 	}
@@ -32,7 +32,6 @@ namespace Amethyst
 
 		// Binding shader
 		shader->Bind();
-		shader->UploadUniformInt("ourTexture", 0);
 
 		// Load Resources
 		std::stack<std::filesystem::path> resources;
@@ -178,9 +177,9 @@ namespace Amethyst
 		ImGuiWindowFlags viewportFlags = ImGuiWindowFlags_NoTitleBar;
 		static bool viewportEnabled = true;
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
-		
+
 		ImGui::Begin("Viewport", &viewportEnabled, viewportFlags);
-		ImVec2 size = ImGui::GetContentRegionAvail();
+		ImVec2 size = ImGui::GetWindowContentRegionMax();
 		ImGui::Image((ImTextureID)fbo->GetID(), { viewSize.x, viewSize.y }, { 0, 1 }, { 1, 0 });
 		if (size.x != viewSize.x || size.y != viewSize.y)
 		{
@@ -198,10 +197,6 @@ namespace Amethyst
 				std::filesystem::path realPath = std::filesystem::path(assetsDir) / path;
 				if (realPath.has_extension())
 				{
-					//MeshComponent* mesh = Importer::Load(realPath);
-
-					//Entity& entity = scene->CreateEntity();
-					//entity.AddComponent(mesh);
 					AddToScene(realPath);
 				}
 			}
@@ -215,19 +210,19 @@ namespace Amethyst
 
 		// Hierarchy Begin
 		ImGui::Begin("Hierarchy");
-		static Entity* entSelected;
+
 		std::vector<Entity>& entities = scene->GetWorld();
 		for (int i = 0; i < entities.size(); ++i)
 		{
-			//entities.get<InfoComponent>(entities()[i]);
+			Entity& entity = entities[i];
 			ImGui::PushID(i);
-			if (ImGui::TreeNodeEx(entities[i].GetName().c_str(), entSelected == &entities[i] ? ImGuiTreeNodeFlags_Selected : 0))
+			if (ImGui::TreeNodeEx(entity.GetName().c_str(), entSelected == &entity ? ImGuiTreeNodeFlags_Selected : 0))
 			{
 				ImGui::TreePop();
 			}
 
 			if (ImGui::IsItemClicked())
-				entSelected = &entities[i];
+				entSelected = &entity;
 
 			ImGui::PopID();
 		}
@@ -329,9 +324,16 @@ namespace Amethyst
 	bool EditorLayer::FileDropped(WindowDropEvent& e)
 	{
 		std::vector<std::string>& paths = e.GetPaths();
+		std::string extension = ".png";
 		for (int i = 0; i < paths.size(); ++i)
 		{
-			Importer::Import(std::filesystem::path(paths[i]), currentDir);
+			std::filesystem::path path = paths[i];
+			if (path.extension() == extension)
+			{
+				Importer::ImportTexture(path, currentDir);
+				continue;
+			}
+			Importer::Import(path, currentDir);
 		}
 
 		return true;
@@ -396,6 +398,7 @@ namespace Amethyst
 			file.read(material.data(), matSize);
 
 			entity.CreateComponent<MaterialComponent>(ResourceSystem::Get<Material>(std::filesystem::path(material)));
+			entSelected = nullptr;
 			break;
 		}
 		case TypeID<Material>::id():

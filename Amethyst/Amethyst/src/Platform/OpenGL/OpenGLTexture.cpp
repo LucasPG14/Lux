@@ -58,18 +58,21 @@ namespace Amethyst
 
 	void OpenGLTexture2D::Load()
 	{
-		// TODO: This needs to be changed cause it's better store all the info in binary format
 		if (!loaded)
 		{
+			// Opening the file and getting the path
 			std::ifstream file(path, std::ios::binary);
 
 			std::uint32_t type = 0;
-			int channels = 0;
 			file.read((char*)&type, sizeof(std::uint32_t));
+			
+			// Getting the information of width, height and channels of the image
+			int channels = 0;
 			file.read((char*)&width, sizeof(int));
 			file.read((char*)&height, sizeof(int));
 			file.read((char*)&channels, sizeof(int));
 			
+			// Setting the buffer size to get all the image data
 			int bufferSize = width * channels * height;
 			stbi_uc* data = new stbi_uc[bufferSize];
 			file.read((char*)data, bufferSize);
@@ -92,6 +95,7 @@ namespace Amethyst
 
 			AMT_CORE_ASSERT(internalFormat && dataFormat, "Texture format not supported!");
 
+			// Creating the image for OpenGL, TODO: Needs must be rewriten to support other APIs
 			glCreateTextures(GL_TEXTURE_2D, 1, &textureID);
 			glBindTexture(GL_TEXTURE_2D, textureID);
 			glTextureStorage2D(textureID, 1, internalFormat, width, height);

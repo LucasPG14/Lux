@@ -15,6 +15,7 @@ namespace Amethyst
 	public:
 		virtual ~ResourceSystem();
 
+		// Needs to check if the resource exists
 		template<typename T>
 		static std::shared_ptr<T> Create(std::filesystem::path& path)
 		{

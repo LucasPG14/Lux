@@ -1,8 +1,6 @@
 #include "amtpch.h"
 #include "Importer.h"
 
-#include "Amethyst/Utils/Vertex.h"
-
 #include "Amethyst/Resources/ResourceSystem.h"
 
 #include "Amethyst/Utils/Hash.h"
@@ -17,7 +15,7 @@ namespace Amethyst
 {
 	namespace Importer
 	{
-		void Import(std::filesystem::path& path, std::filesystem::path directory)
+		void Import(const std::filesystem::path& path, const std::filesystem::path& directory)
 		{
 			Assimp::Importer importer;
 
@@ -176,27 +174,42 @@ namespace Amethyst
 			}
 		}
 		
-		//MeshComponent* Load(std::filesystem::path& path)
-		//{
-		//	std::ifstream file(path.c_str(), std::ios::binary);
+		void ImportTexture(const std::filesystem::path& path, const std::filesystem::path& directory)
+		{
+			int width, height, channels;
 
-		//	int numVertices = 0;
-		//	int numIndices = 0;
+			stbi_uc* data = stbi_load(path.string().c_str(), &width, &height, &channels, 0);
+			
+			if (data)
+			{
+				std::filesystem::path texturePath = directory / path.filename();
+				texturePath.replace_extension("bsres");
 
-		//	std::vector<Vertex> vertices;
-		//	std::vector<uint32_t> indices;
+				// Creating the file to save the image
+				std::ofstream texFile(texturePath, std::ios::binary);
 
-		//	file.read((char*)&numVertices, sizeof(int));
-		//	file.read((char*)&numIndices, sizeof(int));
-		//	
-		//	vertices.resize(numVertices);
-		//	indices.resize(numIndices);
-		//	
-		//	file.read((char*)vertices.data(), sizeof(Vertex) * numVertices);
-		//	file.read((char*)indices.data(), sizeof(uint32_t) * numIndices);
+				constexpr std::uint32_t type = TypeID<OpenGLTexture2D>::id();
 
-		//	//MeshComponent* mesh = new MeshComponent(vertices, indices);
-		//	return mesh;
-		//}
+				texFile.write((char*)&type, sizeof(std::uint32_t));
+				texFile.write((char*)&width, sizeof(int));
+				texFile.write((char*)&height, sizeof(int));
+				texFile.write((char*)&channels, sizeof(int));
+
+				int buffSize = width * channels * height;
+
+				texFile.write((char*)data, buffSize);
+
+				texFile.close(); // Important to close the file when finished
+
+				// Finally creating the Texture resource
+				ResourceSystem::Create<OpenGLTexture2D>(texturePath);
+
+				AMT_CORE_INFO("Image {0} loaded succesfully", path);
+			}
+			else
+			{
+				AMT_CORE_WARN("Cannot load the image {0}", path);
+			}
+		}
 	}
 }

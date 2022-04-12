@@ -26,8 +26,7 @@ namespace Amethyst
 			Entity& entity = world[i];
 			if (MeshComponent* mesh = entity.Get<MeshComponent>())
 			{
-				// TODO: Fix why doesn't render the mesh with a transform component
-				Renderer::Submit(shader, mesh->GetVAO(), entity.Get<MaterialComponent>()->GetMaterial()/*, entity.Get<TransformComponent>()->GetTransform()*/);
+				Renderer::Submit(shader, mesh->GetVAO(), entity.Get<MaterialComponent>()->GetMaterial(), entity.Get<TransformComponent>()->GetTransform());
 			}
 		}
 	}

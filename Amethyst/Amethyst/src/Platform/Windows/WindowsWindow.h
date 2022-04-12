@@ -30,7 +30,7 @@ namespace Amethyst
 		virtual void Shutdown();
 	private:
 		GLFWwindow* window;
-		GraphicsContext* context;
+		std::unique_ptr<GraphicsContext> context;
 
 		struct WindowData
 		{

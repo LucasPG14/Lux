@@ -5,8 +5,6 @@
 #include "Amethyst/Events/MouseEvent.h"
 #include "Amethyst/Events/KeyEvent.h"
 
-#include "Platform/OpenGL/OpenGLContext.h"
-
 #include <GLFW/glfw3.h>
 
 namespace Amethyst 
@@ -48,7 +46,7 @@ namespace Amethyst
 		// Creating GLFW window
 		window = glfwCreateWindow((int)data.width, (int)data.height, data.title.c_str(), nullptr, nullptr);
 		
-		context = new OpenGLContext(window);
+		context = GraphicsContext::Create(window);
 		context->Init();
 
 		// Setting GLFW User Pointer

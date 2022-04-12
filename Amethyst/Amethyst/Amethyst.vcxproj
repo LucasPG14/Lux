@@ -184,6 +184,7 @@
     <ClInclude Include="src\Amethyst\Scene\Scene.h" />
     <ClInclude Include="src\Amethyst\Utils\Hash.h" />
     <ClInclude Include="src\Amethyst\Utils\Importer.h" />
+    <ClInclude Include="src\Amethyst\Utils\Math.h" />
     <ClInclude Include="src\Amethyst\Utils\Vertex.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLBuffer.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLContext.h" />
@@ -621,6 +622,7 @@
     <ClCompile Include="src\Amethyst\PerspectiveCamera.cpp" />
     <ClCompile Include="src\Amethyst\Renderer\Buffer.cpp" />
     <ClCompile Include="src\Amethyst\Renderer\Framebuffer.cpp" />
+    <ClCompile Include="src\Amethyst\Renderer\GraphicsContext.cpp" />
     <ClCompile Include="src\Amethyst\Renderer\Render.cpp" />
     <ClCompile Include="src\Amethyst\Renderer\RenderOrder.cpp" />
     <ClCompile Include="src\Amethyst\Renderer\Renderer.cpp" />

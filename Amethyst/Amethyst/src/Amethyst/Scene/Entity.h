@@ -15,7 +15,7 @@ namespace Amethyst
 		void DrawInspector();
 
 		// Getters
-		inline std::string& GetName() { return name; }
+		inline const std::string& GetName() const { return name; }
 
 		template<typename T, typename... Args>
 		T* CreateComponent(Args&&... args)

@@ -24,7 +24,6 @@ namespace Amethyst
 			// Reading the file
 			std::ifstream file(path, std::ios::binary);
 
-			// TODO: Read the mesh information and create the vao
 			std::uint32_t type = 0;
 			file.read((char*)&type, sizeof(std::uint32_t));
 
@@ -35,6 +34,7 @@ namespace Amethyst
 			material.resize(matSize);
 			file.read(material.data(), matSize);
 
+			// Reading the information of the geometry
 			int numVertices = 0;
 			int numIndices = 0;
 			file.read((char*)&numVertices, sizeof(int));

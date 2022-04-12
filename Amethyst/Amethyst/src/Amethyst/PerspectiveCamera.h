@@ -19,8 +19,10 @@ namespace Amethyst
 		inline glm::mat4 GetProjectionMatrix() const { return projectionMatrix; }
 
 		void SetDimensions(float width, float height);
-	private:
+	
+	private:	
 		glm::mat3x4 ComputeViewMatrix();
+
 	private:
 		glm::mat4 viewMatrix;
 		glm::mat4 projectionMatrix;

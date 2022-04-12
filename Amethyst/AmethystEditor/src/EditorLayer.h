@@ -27,6 +27,7 @@ namespace Amethyst
 		void AddToScene(std::filesystem::path& path);
 
 	private:
+		Entity* entSelected;
 		std::shared_ptr<Scene> scene;
 
 		std::shared_ptr<Framebuffer> fbo;

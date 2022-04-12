@@ -1,9 +1,6 @@
 #include "amtpch.h"
 #include "MeshComponent.h"
 
-// TODO: This needs to be deleted
-#include "Amethyst/Renderer/Renderer.h"
-
 #include <imgui.h>
 
 namespace Amethyst

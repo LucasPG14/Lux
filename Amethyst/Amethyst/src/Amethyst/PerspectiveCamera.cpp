@@ -87,12 +87,17 @@ namespace Amethyst
 	glm::mat3x4 PerspectiveCamera::ComputeViewMatrix()
 	{
 		glm::vec3 worldRight = glm::normalize(glm::cross(front, up));
+
 		glm::mat3x4 matrix =
 		{
-			worldRight.x, up.x, -front.x, position.x,
-			worldRight.y, up.y, -front.y, position.y,
-			worldRight.z, up.z, -front.z, position.z,
+			worldRight.x, worldRight.y, worldRight.z, position.x,
+			up.x, up.y, up.z, position.y,
+			-front.x, -front.y, -front.z, position.z,
 		};
+
+		matrix[0][3] = (worldRight.x * position.x) + (worldRight.y * position.y) + (worldRight.z * position.z);
+		matrix[1][3] = (up.x * position.x) + (up.y * position.y) + (up.z * position.z);
+		matrix[2][3] = (-front.x * position.x) + (-front.y * position.y) + (-front.z * position.z);
 
 		return matrix;
 	}
