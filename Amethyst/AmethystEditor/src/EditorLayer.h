@@ -42,5 +42,7 @@ namespace Amethyst
 
 		std::filesystem::path currentDir;
 		std::filesystem::path assetsDir;
+
+		int guizmoState;
 	};
 }

@@ -30,6 +30,10 @@ namespace Amethyst
 			return glm::transpose(transform * rotationMat * scaleMat);
 		}
 
+		inline void SetPosition(glm::vec3& pos) { position = pos; }
+		inline void SetDeltaRotation(glm::vec3& rot) { rotation = rot; }
+		inline void SetScale(glm::vec3& sca) { scale = sca; }
+
 	private:
 		glm::vec3 position;
 		glm::vec3 rotation;

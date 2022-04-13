@@ -24,6 +24,7 @@ IncludeDir["ImGui"] = "Amethyst/vendor/ImGui"
 IncludeDir["Assimp"] = "Amethyst/vendor/Assimp/include"
 IncludeDir["glm"] = "Amethyst/vendor/glm"
 IncludeDir["stb_image"] = "Amethyst/vendor/stb_image"
+IncludeDir["ImGuizmo"] = "Amethyst/vendor/ImGuizmo"
 
 group "Dependencies"
 	include "Amethyst/vendor/GLFW"
@@ -52,7 +53,9 @@ project "Amethyst"
 		"%{prj.name}/vendor/stb_image/**.h",
 		"%{prj.name}/vendor/stb_image/**.cpp",
 		"%{prj.name}/vendor/glm/glm/**.hpp",
-		"%{prj.name}/vendor/glm/glm/**.inl"
+		"%{prj.name}/vendor/glm/glm/**.inl",
+		"%{prj.name}/vendor/ImGuizmo/**.h",
+		"%{prj.name}/vendor/ImGuizmo/**.cpp"
 	}
 
 	includedirs
@@ -64,7 +67,8 @@ project "Amethyst"
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.Assimp}",
 		"%{IncludeDir.glm}",
-		"%{IncludeDir.stb_image}"
+		"%{IncludeDir.stb_image}",
+		"%{IncludeDir.ImGuizmo}"
 	}
 
 	links 
@@ -81,6 +85,9 @@ project "Amethyst"
 		"_CRT_SECURE_NO_WARNINGS",
 		"GLFW_INCLUDE_NONE"
 	}
+
+	filter "files:{%prj.name}/vendor/ImGuizmo.**cpp"
+	flags { "NoPCH" }
 
 	filter "system:windows"
 		systemversion "latest"
@@ -127,7 +134,8 @@ project "AmethystEditor"
 		"Amethyst/vendor/spdlog/include",
 		"Amethyst/src",
 		"Amethyst/vendor",
-		"%{IncludeDir.glm}"
+		"%{IncludeDir.glm}",
+		"%{IncludeDir.ImGuizmo}"
 	}
 
 	links

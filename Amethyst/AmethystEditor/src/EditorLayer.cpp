@@ -1,12 +1,16 @@
 #include "EditorLayer.h"
 
+#include "glm/gtc/type_ptr.hpp"
 #include "imgui/imgui.h"
+#include "ImGuizmo/ImGuizmo.h"
+
+#include "Amethyst/Utils/Math.h"
 
 namespace Amethyst
 {
 	#define BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
 
-	EditorLayer::EditorLayer() : currentDir("assets/"), assetsDir("assets/"), entSelected(nullptr)
+	EditorLayer::EditorLayer() : currentDir("assets/"), assetsDir("assets/"), entSelected(nullptr), guizmoState(ImGuizmo::TRANSLATE)
 	{
 		scene = std::make_shared<Scene>();
 	}
@@ -204,6 +208,33 @@ namespace Amethyst
 			ImGui::EndDragDropTarget();
 		}
 
+		// ImGuizmo Begin
+		if (entSelected)
+		{
+			ImGuizmo::SetOrthographic(false);
+			ImGuizmo::SetDrawlist();
+			ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, ImGui::GetWindowWidth(), ImGui::GetWindowHeight());
+		
+			glm::mat4& camView = glm::transpose(camera.GetViewMatrix());
+			const glm::mat4& camProj = glm::transpose(camera.GetProjectionMatrix());
+
+			TransformComponent* tComponent = entSelected->Get<TransformComponent>();
+			glm::mat4 transform = glm::transpose(entSelected->Get<TransformComponent>()->GetTransform());
+
+			ImGuizmo::Manipulate(glm::value_ptr(camView), glm::value_ptr(camProj), (ImGuizmo::OPERATION)guizmoState, ImGuizmo::LOCAL, glm::value_ptr(transform));
+		
+			if (ImGuizmo::IsUsing())
+			{
+				glm::vec3 position = {}, rotation = {}, scale = {};
+				Math::Decompose(transform, position, rotation, scale);
+
+				tComponent->SetPosition(position);
+				tComponent->SetDeltaRotation(glm::degrees(rotation));
+				tComponent->SetScale(scale);
+			}
+		}
+		// ImGuizmo End
+
 		ImGui::PopStyleVar();
 		ImGui::End();
 		// Viewport End
@@ -367,6 +398,15 @@ namespace Amethyst
 			{
 				// Save Scene
 			}
+			break;
+		case Keys::W:
+			guizmoState = ImGuizmo::TRANSLATE;
+			break;
+		case Keys::E:
+			guizmoState = ImGuizmo::ROTATE;
+			break;
+		case Keys::R:
+			guizmoState = ImGuizmo::SCALE;
 			break;
 		}
 

@@ -10,6 +10,7 @@
 #include "Amethyst/PerspectiveCamera.h"
 #include "Amethyst/Scene/Scene.h"
 #include "Amethyst/Scene/Components/Component.h"
+#include "Amethyst/Scene/Components/TransformComponent.h"
 #include "Amethyst/Scene/Components/MeshComponent.h"
 #include "Amethyst/Scene/Components/MaterialComponent.h"
 
