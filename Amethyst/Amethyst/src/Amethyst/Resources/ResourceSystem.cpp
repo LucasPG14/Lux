@@ -17,7 +17,7 @@ namespace Amethyst
 		resources.erase(path.string());
 	}
 	
-	void ResourceSystem::ImportResources(std::filesystem::path& path)
+	void ResourceSystem::ImportResources(const std::filesystem::path& path)
 	{
 		std::ifstream file(path, std::ios::binary);
 

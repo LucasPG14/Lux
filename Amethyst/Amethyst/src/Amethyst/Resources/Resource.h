@@ -17,6 +17,8 @@ namespace Amethyst
 		virtual void Load() = 0;
 
 		virtual void UnLoad() = 0;
+
+		const std::string GetPath() { return path.string(); }
 		
 	protected:
 		bool loaded;

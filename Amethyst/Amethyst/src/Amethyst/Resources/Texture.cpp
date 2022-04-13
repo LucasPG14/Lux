@@ -6,7 +6,7 @@
 
 namespace Amethyst
 {
-	Texture2D* Texture2D::Create(const std::string& path)
+	std::shared_ptr<Texture2D> Texture2D::Create(const std::string& path)
 	{
 		switch (Renderer::GetRenderer())
 		{
@@ -15,7 +15,7 @@ namespace Amethyst
 			AMT_CORE_ASSERT(false, "There's no RendererAPI");
 			return nullptr;
 		}
-		case Render::API::OPENGL: return new OpenGLTexture2D(path);
+		case Render::API::OPENGL: return std::make_shared<OpenGLTexture2D>(path);
 		}
 
 		AMT_CORE_ASSERT(false, "RendererAPI not defined!");

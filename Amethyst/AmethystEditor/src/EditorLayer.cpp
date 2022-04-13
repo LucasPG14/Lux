@@ -31,8 +31,8 @@ namespace Amethyst
 		shader = Shader::Create("assets/shaders/Texture.glsl");
 
 		// Creating textures
-		tex.reset(Texture2D::Create("assets/textures/bakeHouse.png"));
-		folder.reset(Texture2D::Create("editor/textures/folder.png"));
+		tex = Texture2D::Create("assets/textures/bakeHouse.png");
+		folder = Texture2D::Create("editor/textures/folder.png");
 
 		// Binding shader
 		shader->Bind();
@@ -50,7 +50,7 @@ namespace Amethyst
 
 			for (auto& entry : std::filesystem::directory_iterator(path))
 			{
-				std::filesystem::path filePath = entry.path();
+				const std::filesystem::path& filePath = entry.path();
 				if (entry.is_directory()) resources.push(entry);
 				else if (filePath.extension().string() == extension)
 				{
@@ -127,7 +127,8 @@ namespace Amethyst
 				ImGui::Separator();
 				if (ImGui::MenuItem("Save scene", "Ctrl + S"))
 				{
-
+					SceneSerializer serializer(scene);
+					serializer.Serialize(currentDir / "Scene.bsscene");
 				}
 				if (ImGui::MenuItem("Save scene as...", "Ctrl + Shift + S"))
 				{
@@ -229,7 +230,7 @@ namespace Amethyst
 				Math::Decompose(transform, position, rotation, scale);
 
 				tComponent->SetPosition(position);
-				tComponent->SetDeltaRotation(glm::degrees(rotation));
+				tComponent->SetRotation(glm::degrees(rotation));
 				tComponent->SetScale(scale);
 			}
 		}

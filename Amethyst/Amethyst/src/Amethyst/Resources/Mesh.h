@@ -9,7 +9,7 @@ namespace Amethyst
 	class Mesh : public Resource
 	{
 	public:
-		Mesh(std::filesystem::path& filePath);
+		Mesh(const std::filesystem::path& filePath);
 
 		~Mesh();
 

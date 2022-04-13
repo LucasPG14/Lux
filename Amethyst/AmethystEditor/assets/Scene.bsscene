@@ -1,0 +1,20 @@
+Scene: Untitled
+Entities:
+  - Name: BakerHouse_Chimney
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshComponent:
+      Path: assets/BakerHouse_Chimney.bsres
+    MaterialComponent:
+      Path: assets/lambert2.bsres
+  - Name: BakerHouse_Baker_house
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshComponent:
+      Path: assets/BakerHouse_Baker_house.bsres
+    MaterialComponent:
+      Path: assets/lambert2.bsres

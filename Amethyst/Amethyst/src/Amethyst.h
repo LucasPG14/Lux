@@ -9,11 +9,15 @@
 #include "Amethyst/Core/MouseCodes.h"
 #include "Amethyst/PerspectiveCamera.h"
 #include "Amethyst/Scene/Scene.h"
+#include "Amethyst/Scene/SceneSerializer.h"
+
+// Components
 #include "Amethyst/Scene/Components/Component.h"
 #include "Amethyst/Scene/Components/TransformComponent.h"
 #include "Amethyst/Scene/Components/MeshComponent.h"
 #include "Amethyst/Scene/Components/MaterialComponent.h"
 
+// Timer
 #include "Amethyst/Core/Timer.h"
 
 // For the editor
@@ -26,7 +30,6 @@
 // Renderer
 #include "Amethyst/Renderer/Renderer.h"
 #include "Amethyst/Renderer/RenderOrder.h"
-
 #include "Amethyst/Renderer/Buffer.h"
 #include "Amethyst/Renderer/Shader.h"
 #include "Amethyst/Renderer/Framebuffer.h"

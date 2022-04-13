@@ -183,10 +183,16 @@
     <ClInclude Include="src\Amethyst\Scene\Scene.h">
       <Filter>src\Amethyst\Scene</Filter>
     </ClInclude>
+    <ClInclude Include="src\Amethyst\Scene\SceneSerializer.h">
+      <Filter>src\Amethyst\Scene</Filter>
+    </ClInclude>
     <ClInclude Include="src\Amethyst\Utils\Hash.h">
       <Filter>src\Amethyst\Utils</Filter>
     </ClInclude>
     <ClInclude Include="src\Amethyst\Utils\Importer.h">
+      <Filter>src\Amethyst\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Amethyst\Utils\Math.h">
       <Filter>src\Amethyst\Utils</Filter>
     </ClInclude>
     <ClInclude Include="src\Amethyst\Utils\Vertex.h">
@@ -1470,7 +1476,6 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="src\Amethyst\Utils\Math.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Amethyst\Core\Application.cpp">
@@ -1543,6 +1548,9 @@
       <Filter>src\Amethyst\Scene</Filter>
     </ClCompile>
     <ClCompile Include="src\Amethyst\Scene\Scene.cpp">
+      <Filter>src\Amethyst\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Amethyst\Scene\SceneSerializer.cpp">
       <Filter>src\Amethyst\Scene</Filter>
     </ClCompile>
     <ClCompile Include="src\Amethyst\Utils\Importer.cpp">

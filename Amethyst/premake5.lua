@@ -23,6 +23,7 @@ IncludeDir["Glad"] = "Amethyst/vendor/Glad/include"
 IncludeDir["ImGui"] = "Amethyst/vendor/ImGui"
 IncludeDir["Assimp"] = "Amethyst/vendor/Assimp/include"
 IncludeDir["glm"] = "Amethyst/vendor/glm"
+IncludeDir["yamlcpp"] = "Amethyst/vendor/yaml-cpp/include"
 IncludeDir["stb_image"] = "Amethyst/vendor/stb_image"
 IncludeDir["ImGuizmo"] = "Amethyst/vendor/ImGuizmo"
 
@@ -31,6 +32,7 @@ group "Dependencies"
 	include "Amethyst/vendor/Glad"
 	include "Amethyst/vendor/ImGui"
 	include "Amethyst/vendor/Assimp"
+	include "Amethyst/vendor/yaml-cpp"
 group ""
 
 project "Amethyst"
@@ -50,12 +52,12 @@ project "Amethyst"
 	{
 		"%{prj.name}/src/**.h",
 		"%{prj.name}/src/**.cpp",
-		"%{prj.name}/vendor/stb_image/**.h",
-		"%{prj.name}/vendor/stb_image/**.cpp",
 		"%{prj.name}/vendor/glm/glm/**.hpp",
 		"%{prj.name}/vendor/glm/glm/**.inl",
+		"%{prj.name}/vendor/stb_image/**.h",
+		"%{prj.name}/vendor/stb_image/**.cpp",
 		"%{prj.name}/vendor/ImGuizmo/**.h",
-		"%{prj.name}/vendor/ImGuizmo/**.cpp"
+		"%{prj.name}/vendor/ImGuizmo/**.cpp",
 	}
 
 	includedirs
@@ -67,6 +69,7 @@ project "Amethyst"
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.Assimp}",
 		"%{IncludeDir.glm}",
+		"%{IncludeDir.yamlcpp}",
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.ImGuizmo}"
 	}
@@ -77,6 +80,7 @@ project "Amethyst"
 		"Glad",
 		"ImGui",
 		"Assimp",
+		"yaml-cpp",
 		"opengl32.lib"
 	}
 
@@ -86,7 +90,10 @@ project "Amethyst"
 		"GLFW_INCLUDE_NONE"
 	}
 
-	filter "files:{%prj.name}/vendor/ImGuizmo.**cpp"
+	filter "files:Amethyst/vendor/parson/**.c"
+	flags { "NoPCH" }
+
+	filter "files:Amethyst/vendor/ImGuizmo/**.cpp"
 	flags { "NoPCH" }
 
 	filter "system:windows"

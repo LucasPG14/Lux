@@ -9,7 +9,7 @@ namespace Amethyst
 	class Material : public Resource
 	{
 	public:
-		Material(std::filesystem::path& filePath);
+		Material(const std::filesystem::path& filePath);
 
 		~Material();
 

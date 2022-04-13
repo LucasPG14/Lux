@@ -27,7 +27,13 @@ namespace Amethyst
 		void AddToScene(std::filesystem::path& path);
 
 	private:
+		std::filesystem::path currentDir;
+		std::filesystem::path assetsDir;
+		
 		Entity* entSelected;
+		
+		int guizmoState;
+		
 		std::shared_ptr<Scene> scene;
 
 		std::shared_ptr<Framebuffer> fbo;
@@ -39,10 +45,5 @@ namespace Amethyst
 		PerspectiveCamera camera;
 
 		glm::vec2 viewSize;
-
-		std::filesystem::path currentDir;
-		std::filesystem::path assetsDir;
-
-		int guizmoState;
 	};
 }

@@ -6,7 +6,7 @@
 
 namespace Amethyst
 {
-	Mesh::Mesh(std::filesystem::path& filePath)
+	Mesh::Mesh(const std::filesystem::path& filePath)
 	{
 		loaded = false;
 		path = filePath;

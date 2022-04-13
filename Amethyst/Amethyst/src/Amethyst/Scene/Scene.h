@@ -20,5 +20,7 @@ namespace Amethyst
 	
 	private:
 		std::vector<Entity> world;
+
+		friend class SceneSerializer;
 	};
 }

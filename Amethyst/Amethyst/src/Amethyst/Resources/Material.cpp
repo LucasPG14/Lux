@@ -5,7 +5,7 @@
 
 namespace Amethyst
 {
-	Material::Material(std::filesystem::path& filePath)
+	Material::Material(const std::filesystem::path& filePath)
 	{
 		loaded = false;
 		path = filePath;
