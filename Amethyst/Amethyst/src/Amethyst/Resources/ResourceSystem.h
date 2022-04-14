@@ -26,7 +26,7 @@ namespace Amethyst
 
 		// Needs to check if the resource exists
 		template<typename T>
-		static std::shared_ptr<T> Get(std::filesystem::path& path)
+		static std::shared_ptr<T> Get(const std::filesystem::path& path)
 		{
 			return std::static_pointer_cast<T>(resources[path.string()]);
 		}

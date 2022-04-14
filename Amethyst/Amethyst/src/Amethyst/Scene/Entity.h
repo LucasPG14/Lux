@@ -42,6 +42,7 @@ namespace Amethyst
 
 		void AddComponent(Component* component) { components.push_back(component); }
 
+		operator bool() const { return name != ""; }
 	private:
 		std::string name;
 

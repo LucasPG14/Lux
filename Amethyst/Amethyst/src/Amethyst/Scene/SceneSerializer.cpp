@@ -5,7 +5,38 @@
 #include "Components/MeshComponent.h"
 #include "Components/MaterialComponent.h"
 
+#include "Amethyst/Resources/ResourceSystem.h"
+
 #include <yaml-cpp/yaml.h>
+
+// YAML functions to deserialize the glm::vec
+namespace YAML
+{
+	template<>
+	struct convert<glm::vec3>
+	{
+		static Node encode(const glm::vec3& rhs)
+		{
+			Node node;
+			node.push_back(rhs.x);
+			node.push_back(rhs.y);
+			node.push_back(rhs.z);
+			node.SetStyle(EmitterStyle::Flow);
+			return node;
+		}
+
+		static bool decode(const Node& node, glm::vec3& rhs)
+		{
+			if (!node.IsSequence() || node.size() != 3)
+				return false;
+
+			rhs.x = node[0].as<float>();
+			rhs.y = node[1].as<float>();
+			rhs.z = node[2].as<float>();
+			return true;
+		}
+	};
+}
 
 namespace Amethyst
 {
@@ -92,6 +123,46 @@ namespace Amethyst
 	
 	bool SceneSerializer::Deserialize(const std::filesystem::path& path)
 	{
-		return false;
+		YAML::Node data = YAML::LoadFile(path.string());
+
+		if (!data["Scene"])
+		{
+			AMT_CORE_WARN("Couldn't deserialize the scene {0}", path);
+			return false;
+		}
+
+		YAML::Node entities = data["Entities"];
+
+		for (YAML::iterator::value_type yamlEntity : entities)
+		{
+			const std::string& name = yamlEntity["Name"].as<std::string>();
+
+			Entity& entity = scene->CreateEntity(name);
+
+			YAML::Node transform = yamlEntity["TransformComponent"];
+			if (transform)
+			{
+				TransformComponent& comp = *entity.Get<TransformComponent>();
+				comp.SetPosition(transform["Position"].as<glm::vec3>());
+				comp.SetRotation(transform["Rotation"].as<glm::vec3>());
+				comp.SetScale(transform["Scale"].as<glm::vec3>());
+			}
+
+			YAML::Node mesh = yamlEntity["MeshComponent"];
+			if (mesh)
+			{
+				const std::string& path = mesh["Path"].as<std::string>();
+				MeshComponent& comp = *entity.CreateComponent<MeshComponent>(ResourceSystem::Get<Mesh>(path));
+			}
+
+			YAML::Node material = yamlEntity["MaterialComponent"];
+			if (material)
+			{
+				const std::string& path = material["Path"].as<std::string>();
+				MaterialComponent& comp = *entity.CreateComponent<MaterialComponent>(ResourceSystem::Get<Material>(path));
+			}
+		}
+
+		return true;
 	}
 }

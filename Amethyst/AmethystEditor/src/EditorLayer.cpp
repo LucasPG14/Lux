@@ -6,6 +6,8 @@
 
 #include "Amethyst/Utils/Math.h"
 
+#include "Amethyst/Utils/FileDialogs.h"
+
 namespace Amethyst
 {
 	#define BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
@@ -118,21 +120,20 @@ namespace Amethyst
 			{
 				if (ImGui::MenuItem("New scene", "Ctrl + N"))
 				{
-
+					NewScene();
 				}
 				if (ImGui::MenuItem("Open scene", "Ctrl + O"))
 				{
-
+					OpenScene();
 				}
 				ImGui::Separator();
 				if (ImGui::MenuItem("Save scene", "Ctrl + S"))
 				{
-					SceneSerializer serializer(scene);
-					serializer.Serialize(currentDir / "Scene.bsscene");
+					// Still not implemented
 				}
 				if (ImGui::MenuItem("Save scene as...", "Ctrl + Shift + S"))
 				{
-
+					SaveScene();
 				}
 				ImGui::Separator();
 				if (ImGui::MenuItem("Exit", "Alt + F4")) Application::Get().Close();
@@ -202,7 +203,8 @@ namespace Amethyst
 				std::filesystem::path realPath = std::filesystem::path(assetsDir) / path;
 				if (realPath.has_extension())
 				{
-					AddToScene(realPath);
+					if (realPath.extension().string() == ".bsscene") OpenScene(realPath);
+					else AddToScene(realPath);
 				}
 			}
 
@@ -326,6 +328,7 @@ namespace Amethyst
 				if (ImGui::IsMouseDoubleClicked(0))
 				{
 					if (file.is_directory()) currentDir /= path.filename();
+					else if (path.extension().string() == ".bsscene") OpenScene(path);
 				}
 				else if (ImGui::IsMouseClicked(0))
 				{
@@ -382,22 +385,26 @@ namespace Amethyst
 			if (ctrl)
 			{
 				// New Scene
+				NewScene();
 			}
 			break;
 		case Keys::O:
 			if (ctrl)
 			{
 				// Open Scene
+				OpenScene();
 			}
 			break;
 		case Keys::S:
-			if (ctrl && shift)
+			if (ctrl)
 			{
-				// Save Scene As
-			}
-			else if (ctrl)
-			{
-				// Save Scene
+				if (shift)
+				{
+					// Save Scene As
+					SaveScene();
+					return true;
+				}
+				// Save Current Scene
 			}
 			break;
 		case Keys::W:
@@ -449,5 +456,50 @@ namespace Amethyst
 		}
 
 		file.close();
+	}
+	
+	void EditorLayer::NewScene()
+	{
+		scene = std::make_shared<Scene>();
+	}
+	
+	void EditorLayer::OpenScene()
+	{
+		std::string path = OpenFile("Black Sapphire Scene (*.bsscene)\0*.bsscene\0");
+
+		if (!path.empty())
+			OpenScene(path);
+	}
+	
+	void EditorLayer::OpenScene(const std::filesystem::path& path)
+	{
+		if (path.extension().string() != ".bsscene")
+		{
+			AMT_WARN("This isn't a Black Sapphire Scene");
+			return;
+		}
+
+		std::shared_ptr<Scene> newScene = std::make_shared<Scene>();
+		SceneSerializer serializer(newScene);
+
+		// If the scene is well deserialized, then copy into the active scene
+		if (serializer.Deserialize(path))
+		{
+			scene = newScene;
+		}
+	}
+	
+	void EditorLayer::SaveScene()
+	{
+		std::string path = SaveFile("Black Sapphire Scene (*.bsscene)\0*.bsscene\0");
+
+		if (!path.empty())
+			SaveScene(path);
+	}
+	
+	void EditorLayer::SaveScene(const std::filesystem::path& path)
+	{
+		SceneSerializer serializer(scene);
+		serializer.Serialize(path);
 	}
 }

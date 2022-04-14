@@ -26,6 +26,13 @@ namespace Amethyst
 
 		void AddToScene(std::filesystem::path& path);
 
+		void NewScene();
+
+		void OpenScene();
+		void OpenScene(const std::filesystem::path& path);
+		
+		void SaveScene();
+		void SaveScene(const std::filesystem::path& path);
 	private:
 		std::filesystem::path currentDir;
 		std::filesystem::path assetsDir;
