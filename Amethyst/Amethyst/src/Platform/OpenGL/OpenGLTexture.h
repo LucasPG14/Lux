@@ -8,7 +8,7 @@ namespace Amethyst
 	{
 	public:
 		OpenGLTexture2D(const std::string& path);
-		OpenGLTexture2D(const std::filesystem::path& path);
+		OpenGLTexture2D(UUID id, const std::filesystem::path& path);
 		~OpenGLTexture2D();
 
 		void Load() override;

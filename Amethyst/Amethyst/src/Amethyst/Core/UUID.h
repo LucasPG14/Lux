@@ -1,5 +1,7 @@
 #pragma once
 
+#include <xhash>
+
 namespace Amethyst
 {
 	class UUID
@@ -19,7 +21,7 @@ namespace std
 	template<>
 	struct hash<Amethyst::UUID>
 	{
-		std::size_t operator()(const Amethyst::UUID& uuid)
+		std::size_t operator()(const Amethyst::UUID& uuid) const
 		{
 			return hash<uint64_t>()((uint64_t)uuid);
 		}

@@ -289,7 +289,12 @@ namespace Amethyst
 		{
 			if (Input::IsKeyPressed(Keys::DEL))
 			{
-				ResourceSystem::Delete(selected);
+				std::ifstream file(selected, std::ios::binary);
+
+				uint64_t uuid = 0;
+				file.read((char*)&uuid, sizeof(uint64_t));
+
+				ResourceSystem::Delete(uuid);
 				std::filesystem::remove_all(selected);
 			}
 		}
@@ -428,6 +433,9 @@ namespace Amethyst
 		std::filesystem::path name = path;
 		name.replace_extension("");
 
+		uint64_t uuid;
+		file.read((char*)&uuid, sizeof(uint64_t));
+
 		std::uint32_t type;
 		file.read((char*)&type, sizeof(std::uint32_t));
 		
@@ -436,16 +444,13 @@ namespace Amethyst
 		case TypeID<Mesh>::id(): 
 		{
 			Entity& entity = scene->CreateEntity(name.filename().string());
-			entity.CreateComponent<MeshComponent>(ResourceSystem::Get<Mesh>(path));
+			entity.CreateComponent<MeshComponent>(ResourceSystem::Get<Mesh>(uuid));
 
 			// Reading the material path
-			size_t matSize = 0;
-			std::string material;
-			file.read((char*)&matSize, sizeof(size_t));
-			material.resize(matSize);
-			file.read(material.data(), matSize);
+			uint64_t matUUID = 0;
+			file.read((char*)&matUUID, sizeof(uint64_t));
 
-			entity.CreateComponent<MaterialComponent>(ResourceSystem::Get<Material>(std::filesystem::path(material)));
+			entity.CreateComponent<MaterialComponent>(ResourceSystem::Get<Material>(matUUID));
 			entSelected = nullptr;
 			break;
 		}

@@ -6,10 +6,11 @@
 
 namespace Amethyst
 {
-	Mesh::Mesh(const std::filesystem::path& filePath)
+	Mesh::Mesh(UUID id, const std::filesystem::path& filePath)
 	{
 		loaded = false;
 		path = filePath;
+		uuid = id;
 	}
 
 	Mesh::~Mesh()
@@ -24,15 +25,16 @@ namespace Amethyst
 			// Reading the file
 			std::ifstream file(path, std::ios::binary);
 
+			// Mesh UUID
+			file.read((char*)&uuid, sizeof(uint64_t));
+
+			// Type of the resource
 			std::uint32_t type = 0;
 			file.read((char*)&type, sizeof(std::uint32_t));
 
 			// Reading the material path
-			size_t matSize = 0;
-			std::string material;
-			file.read((char*)&matSize, sizeof(size_t));
-			material.resize(matSize);
-			file.read(material.data(), matSize);
+			uint64_t matUUID = 0;
+			file.read((char*)&matUUID, sizeof(uint64_t));
 
 			// Reading the information of the geometry
 			int numVertices = 0;

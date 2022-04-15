@@ -45,10 +45,11 @@ namespace Amethyst
 		stbi_image_free(data);
 	}
 
-	OpenGLTexture2D::OpenGLTexture2D(const std::filesystem::path& texPath)
+	OpenGLTexture2D::OpenGLTexture2D(UUID id, const std::filesystem::path& texPath)
 	{
 		loaded = false;
 		path = texPath;
+		uuid = id;
 	}
 
 	OpenGLTexture2D::~OpenGLTexture2D()
@@ -63,6 +64,10 @@ namespace Amethyst
 			// Opening the file and getting the path
 			std::ifstream file(path, std::ios::binary);
 
+			// Reading the UUID
+			file.read((char*)&uuid, sizeof(uint64_t));
+
+			// Reading the type of the resource
 			std::uint32_t type = 0;
 			file.read((char*)&type, sizeof(std::uint32_t));
 			

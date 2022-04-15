@@ -93,7 +93,7 @@ namespace Amethyst
 				// Mesh map begin
 				emitter << YAML::BeginMap;
 
-				emitter << YAML::Key << "Path" << YAML::Value << comp->GetMesh()->GetPath();
+				emitter << YAML::Key << "UUID" << YAML::Value << comp->GetMesh()->GetUUID();
 
 				emitter << YAML::EndMap;
 				// Mesh map end
@@ -105,7 +105,7 @@ namespace Amethyst
 				// Material map begin
 				emitter << YAML::BeginMap;
 
-				emitter << YAML::Key << "Path" << YAML::Value << comp->GetMaterial()->GetPath();
+				emitter << YAML::Key << "UUID" << YAML::Value << comp->GetMaterial()->GetUUID();
 
 				emitter << YAML::EndMap;
 				// Material map end
@@ -153,15 +153,15 @@ namespace Amethyst
 			YAML::Node mesh = yamlEntity["MeshComponent"];
 			if (mesh)
 			{
-				const std::string& path = mesh["Path"].as<std::string>();
-				MeshComponent& comp = *entity.CreateComponent<MeshComponent>(ResourceSystem::Get<Mesh>(path));
+				uint64_t uuid = mesh["UUID"].as<uint64_t>();
+				MeshComponent& comp = *entity.CreateComponent<MeshComponent>(ResourceSystem::Get<Mesh>(uuid));
 			}
 
 			YAML::Node material = yamlEntity["MaterialComponent"];
 			if (material)
 			{
-				const std::string& path = material["Path"].as<std::string>();
-				MaterialComponent& comp = *entity.CreateComponent<MaterialComponent>(ResourceSystem::Get<Material>(path));
+				uint64_t uuid = material["UUID"].as<uint64_t>();
+				MaterialComponent& comp = *entity.CreateComponent<MaterialComponent>(ResourceSystem::Get<Material>(uuid));
 			}
 		}
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Amethyst/Core/UUID.h"
+
 namespace Amethyst
 {
 	enum class ResourceType
@@ -19,10 +21,12 @@ namespace Amethyst
 		virtual void UnLoad() = 0;
 
 		const std::string GetPath() { return path.string(); }
+		const UUID GetUUID() { return uuid; }
 		
 	protected:
 		bool loaded;
 		std::filesystem::path path;
+		UUID uuid;
 	//	std::filesystem::path originalPath;
 	};
 }

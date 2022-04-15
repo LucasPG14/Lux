@@ -6,20 +6,23 @@
 
 namespace Amethyst
 {
-	std::unordered_map<std::string, std::shared_ptr<Resource>> ResourceSystem::resources = {};
+	std::unordered_map<UUID, std::shared_ptr<Resource>> ResourceSystem::resources = {};
 
 	ResourceSystem::~ResourceSystem()
 	{
 	}
 
-	void ResourceSystem::Delete(std::filesystem::path& path)
+	void ResourceSystem::Delete(UUID uuid)
 	{
-		resources.erase(path.string());
+		resources.erase(uuid);
 	}
 	
 	void ResourceSystem::ImportResources(const std::filesystem::path& path)
 	{
 		std::ifstream file(path, std::ios::binary);
+
+		uint64_t uuid = 0;
+		file.read((char*)&uuid, sizeof(uint64_t));
 
 		std::uint32_t type = 0;
 		file.read((char*)&type, sizeof(std::uint32_t));
@@ -28,17 +31,17 @@ namespace Amethyst
 		{
 		case TypeID<Mesh>::id():
 		{
-			ResourceSystem::Create<Mesh>(path);
+			ResourceSystem::CreateWithUUID<Mesh>(uuid, path);
 			return;
 		}
 		case TypeID<Material>::id():
 		{
-			ResourceSystem::Create<Material>(path);
+			ResourceSystem::CreateWithUUID<Material>(uuid, path);
 			return;
 		}
 		case TypeID<OpenGLTexture2D>::id():
 		{
-			ResourceSystem::Create<OpenGLTexture2D>(path);
+			ResourceSystem::CreateWithUUID<OpenGLTexture2D>(uuid, path);
 			return;
 		}
 		}

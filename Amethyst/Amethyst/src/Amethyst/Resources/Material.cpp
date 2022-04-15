@@ -5,10 +5,11 @@
 
 namespace Amethyst
 {
-	Material::Material(const std::filesystem::path& filePath)
+	Material::Material(UUID id, const std::filesystem::path& filePath)
 	{
 		loaded = false;
 		path = filePath;
+		uuid = id;
 	}
 
 	Material::~Material()
@@ -22,17 +23,18 @@ namespace Amethyst
 		{
 			std::ifstream file(path, std::ios::binary);
 
+			// Reading the UUID
+			file.read((char*)&uuid, sizeof(uint64_t));
+			
 			// Read all the material information
 			std::uint32_t type = 0;
 			file.read((char*)&type, sizeof(std::uint32_t));
 
-			size_t strSize = 0;
-			std::string path;
-			file.read((char*)&strSize, sizeof(size_t));
-			path.resize(strSize);
-			file.read(path.data(), strSize);
+			// Reading the UUID
+			uint64_t diffUUID = 0;
+			file.read((char*)&diffUUID, sizeof(uint64_t));
 			
-			diffuse = ResourceSystem::Get<OpenGLTexture2D>(std::filesystem::path(path));
+			diffuse = ResourceSystem::Get<OpenGLTexture2D>(diffUUID);
 			diffuse->Load();
 
 			loaded = true;
