@@ -7,7 +7,7 @@
 
 namespace Amethyst
 {
-	VertexArray* VertexArray::Create()
+	std::shared_ptr<VertexArray> VertexArray::Create()
 	{
 		switch (Renderer::GetRenderer())
 		{
@@ -16,7 +16,7 @@ namespace Amethyst
 			AMT_CORE_ASSERT(false, "There's no RendererAPI");
 			return nullptr;
 		}
-		case Render::API::OPENGL: return new OpenGLVertexArray();
+		case Render::API::OPENGL: return std::make_shared<OpenGLVertexArray>();
 		}
 
 		AMT_CORE_ASSERT(false, "RendererAPI not defined!");

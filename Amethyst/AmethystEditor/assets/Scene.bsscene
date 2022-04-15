@@ -1,6 +1,7 @@
 Scene: Untitled
 Entities:
-  - Name: BakerHouse_Chimney
+  - UUID: 15450349868651581777
+    Name: BakerHouse_Chimney
     TransformComponent:
       Position: [0, 0, 0]
       Rotation: [0, 0, 0]
@@ -9,7 +10,8 @@ Entities:
       Path: assets/BakerHouse_Chimney.bsres
     MaterialComponent:
       Path: assets/lambert2.bsres
-  - Name: BakerHouse_Baker_house
+  - UUID: 18096554432236836822
+    Name: BakerHouse_Baker_house
     TransformComponent:
       Position: [0, 0, 0]
       Rotation: [0, 0, 0]
@@ -18,7 +20,28 @@ Entities:
       Path: assets/BakerHouse_Baker_house.bsres
     MaterialComponent:
       Path: assets/lambert2.bsres
-  - Name: BakerHouse_Chimney
+  - UUID: 12975489214422065578
+    Name: BakerHouse_Chimney
+    TransformComponent:
+      Position: [2.0038147, 0, 0]
+      Rotation: [0, -0, 0]
+      Scale: [1, 1, 1]
+    MeshComponent:
+      Path: assets/BakerHouse_Chimney.bsres
+    MaterialComponent:
+      Path: assets/lambert2.bsres
+  - UUID: 8608952911854322937
+    Name: BakerHouse_Baker_house
+    TransformComponent:
+      Position: [-4.7293396, 0, 0]
+      Rotation: [0, -0, 0]
+      Scale: [1, 1, 1]
+    MeshComponent:
+      Path: assets/BakerHouse_Baker_house.bsres
+    MaterialComponent:
+      Path: assets/lambert2.bsres
+  - UUID: 17443738970065599809
+    Name: BakerHouse_Chimney
     TransformComponent:
       Position: [0, 0, 0]
       Rotation: [0, 0, 0]
@@ -27,84 +50,13 @@ Entities:
       Path: assets/BakerHouse_Chimney.bsres
     MaterialComponent:
       Path: assets/lambert2.bsres
-  - Name: BakerHouse_Baker_house
+  - UUID: 8213200244713614228
+    Name: BakerHouse_Baker_house
     TransformComponent:
       Position: [0, 0, 0]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     MeshComponent:
       Path: assets/BakerHouse_Baker_house.bsres
-    MaterialComponent:
-      Path: assets/lambert2.bsres
-  - Name: BakerHouse_Chimney
-    TransformComponent:
-      Position: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    MeshComponent:
-      Path: assets/BakerHouse_Chimney.bsres
-    MaterialComponent:
-      Path: assets/lambert2.bsres
-  - Name: BakerHouse_Baker_house
-    TransformComponent:
-      Position: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    MeshComponent:
-      Path: assets/BakerHouse_Baker_house.bsres
-    MaterialComponent:
-      Path: assets/lambert2.bsres
-  - Name: BakerHouse_Chimney
-    TransformComponent:
-      Position: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    MeshComponent:
-      Path: assets/BakerHouse_Chimney.bsres
-    MaterialComponent:
-      Path: assets/lambert2.bsres
-  - Name: BakerHouse_Baker_house
-    TransformComponent:
-      Position: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    MeshComponent:
-      Path: assets/BakerHouse_Baker_house.bsres
-    MaterialComponent:
-      Path: assets/lambert2.bsres
-  - Name: BakerHouse_Baker_house
-    TransformComponent:
-      Position: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    MeshComponent:
-      Path: assets/BakerHouse_Baker_house.bsres
-    MaterialComponent:
-      Path: assets/lambert2.bsres
-  - Name: BakerHouse_Chimney
-    TransformComponent:
-      Position: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    MeshComponent:
-      Path: assets/BakerHouse_Chimney.bsres
-    MaterialComponent:
-      Path: assets/lambert2.bsres
-  - Name: BakerHouse_Baker_house
-    TransformComponent:
-      Position: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    MeshComponent:
-      Path: assets/BakerHouse_Baker_house.bsres
-    MaterialComponent:
-      Path: assets/lambert2.bsres
-  - Name: BakerHouse_Chimney
-    TransformComponent:
-      Position: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    MeshComponent:
-      Path: assets/BakerHouse_Chimney.bsres
     MaterialComponent:
       Path: assets/lambert2.bsres

@@ -20,6 +20,20 @@ namespace Amethyst
 
 		inline static Render::API GetRenderer() { return Render::GetAPI(); }
 
+		struct Statistics
+		{
+			uint32_t drawCalls;
+			uint32_t trianglesCount;
+
+			uint32_t GetTotalDrawCalls() { return drawCalls; }
+			uint32_t GetTotalTriangles() { return trianglesCount; }
+		};
+
+	private:
+		static void StartBatch();
+		static void Flush();
+		static void NextBatch();
+
 	private:
 		struct SceneInfo
 		{

@@ -21,5 +21,6 @@ namespace Amethyst
 
 	private:
 		std::shared_ptr<VertexArray> vao;
+		AABB aabb;
 	};
 }

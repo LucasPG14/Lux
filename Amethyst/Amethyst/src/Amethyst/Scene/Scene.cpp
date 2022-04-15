@@ -33,6 +33,11 @@ namespace Amethyst
 	
 	Entity& Scene::CreateEntity(const std::string& name)
 	{
-		return world.emplace_back(name);
+		return CreateEntityWithUUID(UUID(), name);
+	}
+	
+	Entity& Scene::CreateEntityWithUUID(UUID id, const std::string& name)
+	{
+		return world.emplace_back(id, name);
 	}
 }

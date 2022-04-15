@@ -102,6 +102,9 @@
     <ClInclude Include="src\Amethyst\Core\Timer.h">
       <Filter>src\Amethyst\Core</Filter>
     </ClInclude>
+    <ClInclude Include="src\Amethyst\Core\UUID.h">
+      <Filter>src\Amethyst\Core</Filter>
+    </ClInclude>
     <ClInclude Include="src\Amethyst\Core\Window.h">
       <Filter>src\Amethyst\Core</Filter>
     </ClInclude>
@@ -185,6 +188,9 @@
     </ClInclude>
     <ClInclude Include="src\Amethyst\Scene\SceneSerializer.h">
       <Filter>src\Amethyst\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Amethyst\Utils\FileDialogs.h">
+      <Filter>src\Amethyst\Utils</Filter>
     </ClInclude>
     <ClInclude Include="src\Amethyst\Utils\Hash.h">
       <Filter>src\Amethyst\Utils</Filter>
@@ -1476,7 +1482,6 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="src\Amethyst\Utils\FileDialogs.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Amethyst\Core\Application.cpp">
@@ -1489,6 +1494,9 @@
       <Filter>src\Amethyst\Core</Filter>
     </ClCompile>
     <ClCompile Include="src\Amethyst\Core\Log.cpp">
+      <Filter>src\Amethyst\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Amethyst\Core\UUID.cpp">
       <Filter>src\Amethyst\Core</Filter>
     </ClCompile>
     <ClCompile Include="src\Amethyst\ImGui\ImGuiBuild.cpp">
@@ -1554,6 +1562,9 @@
     <ClCompile Include="src\Amethyst\Scene\SceneSerializer.cpp">
       <Filter>src\Amethyst\Scene</Filter>
     </ClCompile>
+    <ClCompile Include="src\Amethyst\Utils\FileDialogs.cpp">
+      <Filter>src\Amethyst\Utils</Filter>
+    </ClCompile>
     <ClCompile Include="src\Amethyst\Utils\Importer.cpp">
       <Filter>src\Amethyst\Utils</Filter>
     </ClCompile>
@@ -1593,6 +1604,5 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
-    <ClCompile Include="src\Amethyst\Utils\FileDialogs.cpp" />
   </ItemGroup>
 </Project>

@@ -23,9 +23,9 @@ IncludeDir["Glad"] = "Amethyst/vendor/Glad/include"
 IncludeDir["ImGui"] = "Amethyst/vendor/ImGui"
 IncludeDir["Assimp"] = "Amethyst/vendor/Assimp/include"
 IncludeDir["glm"] = "Amethyst/vendor/glm"
-IncludeDir["yamlcpp"] = "Amethyst/vendor/yaml-cpp/include"
-IncludeDir["stb_image"] = "Amethyst/vendor/stb_image"
 IncludeDir["ImGuizmo"] = "Amethyst/vendor/ImGuizmo"
+IncludeDir["stb_image"] = "Amethyst/vendor/stb_image"
+IncludeDir["yamlcpp"] = "Amethyst/vendor/yaml-cpp/include"
 
 group "Dependencies"
 	include "Amethyst/vendor/GLFW"
@@ -54,10 +54,10 @@ project "Amethyst"
 		"%{prj.name}/src/**.cpp",
 		"%{prj.name}/vendor/glm/glm/**.hpp",
 		"%{prj.name}/vendor/glm/glm/**.inl",
-		"%{prj.name}/vendor/stb_image/**.h",
-		"%{prj.name}/vendor/stb_image/**.cpp",
 		"%{prj.name}/vendor/ImGuizmo/**.h",
 		"%{prj.name}/vendor/ImGuizmo/**.cpp",
+		"%{prj.name}/vendor/stb_image/**.h",
+		"%{prj.name}/vendor/stb_image/**.cpp"
 	}
 
 	includedirs
@@ -69,9 +69,9 @@ project "Amethyst"
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.Assimp}",
 		"%{IncludeDir.glm}",
-		"%{IncludeDir.yamlcpp}",
+		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.stb_image}",
-		"%{IncludeDir.ImGuizmo}"
+		"%{IncludeDir.yamlcpp}"
 	}
 
 	links 
@@ -102,7 +102,7 @@ project "Amethyst"
 		defines
 		{
 			"AMT_PLATFORM_WINDOWS",
-			"AMT_BUILD_DLL"
+			"AMT_BUILD_DLL",
 		}
 
 	filter "configurations:Debug"

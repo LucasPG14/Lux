@@ -49,8 +49,10 @@ namespace Amethyst
 			file.read((char*)vertices.data(), sizeof(Vertex) * numVertices);
 			file.read((char*)indices.data(), sizeof(uint32_t) * numIndices);
 
+			file.read((char*)&aabb, sizeof(AABB));
+
 			// Setting the vertex array with all the information
-			vao.reset(VertexArray::Create());
+			vao = VertexArray::Create();
 
 			std::shared_ptr<VertexBuffer> vbo;
 			vbo.reset(VertexBuffer::Create(vertices.data(), sizeof(Vertex) * vertices.size()));
@@ -59,8 +61,8 @@ namespace Amethyst
 				BufferLayout layout =
 				{
 					{ShaderDataType::FLOAT3, "position"},
-					{ShaderDataType::FLOAT2, "texCoords"},
-					//{ShaderDataType::FLOAT3, "normal"}
+					{ShaderDataType::FLOAT3, "normal"},
+					{ShaderDataType::FLOAT2, "texCoords"}
 				};
 
 				vbo->SetLayout(layout);

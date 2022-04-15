@@ -33,8 +33,8 @@ namespace Amethyst
 		shader = Shader::Create("assets/shaders/Texture.glsl");
 
 		// Creating textures
-		tex = Texture2D::Create("assets/textures/bakeHouse.png");
 		folder = Texture2D::Create("editor/textures/folder.png");
+		tex = Texture2D::Create("assets/textures/bakeHouse.png");
 
 		// Binding shader
 		shader->Bind();

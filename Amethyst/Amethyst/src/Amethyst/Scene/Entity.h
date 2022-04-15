@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Amethyst/Core/UUID.h"
+
 namespace Amethyst
 {
 	class Component;
@@ -7,7 +9,7 @@ namespace Amethyst
 	class Entity
 	{
 	public:
-		Entity(const std::string& n = "Entity");
+		Entity(UUID id, const std::string& n = "Entity");
 		~Entity();
 
 		void Update();
@@ -16,6 +18,7 @@ namespace Amethyst
 
 		// Getters
 		inline const std::string& GetName() const { return name; }
+		inline const UUID& GetUUID() const { return uuid; }
 
 		template<typename T, typename... Args>
 		T* CreateComponent(Args&&... args)
@@ -44,6 +47,7 @@ namespace Amethyst
 
 		operator bool() const { return name != ""; }
 	private:
+		UUID uuid;
 		std::string name;
 
 		std::vector<Entity> childrens;

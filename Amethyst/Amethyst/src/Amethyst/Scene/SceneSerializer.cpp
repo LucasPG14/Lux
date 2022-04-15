@@ -70,6 +70,7 @@ namespace Amethyst
 			// Entity map begin
 			emitter << YAML::BeginMap;
 
+			emitter << YAML::Key << "UUID" << YAML::Value << entity.GetUUID();
 			emitter << YAML::Key << "Name" << YAML::Value << entity.GetName();
 
 			if (TransformComponent* comp = entity.Get<TransformComponent>())
@@ -136,8 +137,9 @@ namespace Amethyst
 		for (YAML::iterator::value_type yamlEntity : entities)
 		{
 			const std::string& name = yamlEntity["Name"].as<std::string>();
+			uint64_t uuid = yamlEntity["UUID"].as<uint64_t>();
 
-			Entity& entity = scene->CreateEntity(name);
+			Entity& entity = scene->CreateEntityWithUUID(uuid, name);
 
 			YAML::Node transform = yamlEntity["TransformComponent"];
 			if (transform)

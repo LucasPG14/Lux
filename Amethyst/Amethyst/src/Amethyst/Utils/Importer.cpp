@@ -39,12 +39,32 @@ namespace Amethyst
 					vertices.reserve(numVertices);
 					indices.reserve(numIndices);
 
+					AABB aabb;
+					aabb.min = { FLT_MAX, FLT_MAX, FLT_MAX };
+					aabb.max = { FLT_MIN, FLT_MIN, FLT_MIN };
 					// Reading all the vertices
 					for (unsigned int j = 0; j < numVertices; ++j)
 					{
 						Vertex& vertex = vertices.emplace_back();
 
 						vertex.position = { mesh->mVertices[j].x, mesh->mVertices[j].y , mesh->mVertices[j].z };
+
+						if (mesh->HasTangentsAndBitangents())
+						{
+							//vertex.tangents = { mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z };
+							//vertex.bitangents = { mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z };
+						}
+
+						if (mesh->HasNormals())
+							vertex.normals = { mesh->mNormals[j].x, mesh->mNormals[j].y, mesh->mNormals[j].z };
+
+						aabb.min.x = glm::min(aabb.min.x, vertex.position.x);
+						aabb.min.y = glm::min(aabb.min.y, vertex.position.y);
+						aabb.min.z = glm::min(aabb.min.z, vertex.position.z);
+						
+						aabb.max.x = glm::max(aabb.max.x, vertex.position.x);
+						aabb.max.y = glm::max(aabb.max.y, vertex.position.y);
+						aabb.max.z = glm::max(aabb.max.z, vertex.position.z);
 
 						if (mesh->HasTextureCoords(0))
 							vertex.texCoords = { mesh->mTextureCoords[0][j].x, mesh->mTextureCoords[0][j].y };
@@ -84,6 +104,8 @@ namespace Amethyst
 					meshFile.write((char*)&numIndices, sizeof(int));
 					meshFile.write((char*)vertices.data(), sizeof(Vertex) * vertices.size());
 					meshFile.write((char*)indices.data(), sizeof(uint32_t) * indices.size());
+
+					meshFile.write((char*)&aabb, sizeof(AABB));
 
 					meshFile.close();
 

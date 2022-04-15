@@ -8,7 +8,7 @@
 
 namespace Amethyst
 {
-	Entity::Entity(const std::string& n) : name(n)
+	Entity::Entity(UUID id, const std::string& n) : uuid(id), name(n)
 	{
 		TransformComponent* transform = new TransformComponent({ 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f }, { 1.0f,1.0f,1.0f });
 		components.push_back(transform);
