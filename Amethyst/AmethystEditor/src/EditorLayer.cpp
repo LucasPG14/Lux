@@ -8,6 +8,8 @@
 
 #include "Amethyst/Utils/FileDialogs.h"
 
+#include <Optick/src/optick.h>
+
 namespace Amethyst
 {
 	#define BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
@@ -23,21 +25,17 @@ namespace Amethyst
 
 	void EditorLayer::OnCreate()
 	{
+		OPTICK_EVENT("Editor Layer Create");
+
 		// Creating framebuffer
 		FramebufferSpecification spec;
 		spec.width = 1280;
 		spec.height = 720;
 		fbo = Framebuffer::Create(spec);
 
-		// Creating shader
-		shader = Shader::Create("assets/shaders/Texture.glsl");
-
 		// Creating textures
 		folder = Texture2D::Create("editor/textures/folder.png");
 		tex = Texture2D::Create("assets/textures/bakeHouse.png");
-
-		// Binding shader
-		shader->Bind();
 
 		// Load Resources
 		std::stack<std::filesystem::path> resources;
@@ -64,10 +62,13 @@ namespace Amethyst
 
 	void EditorLayer::OnDestroy()
 	{
+		OPTICK_EVENT("Editor Layer Destroy");
 	}
 
 	void EditorLayer::Update(Timer timer)
 	{
+		OPTICK_EVENT("Editor Layer Update");
+
 		camera.Update(timer);
 
 		fbo->Bind();
@@ -76,7 +77,7 @@ namespace Amethyst
 
 		Renderer::BeginScene(camera);
 
-		scene->Update(shader);
+		scene->Update();
 
 		Renderer::EndScene();
 
@@ -85,6 +86,8 @@ namespace Amethyst
 
 	void EditorLayer::RenderImGui()
 	{
+		OPTICK_EVENT("Editor Layer Render");
+
 		static bool dockspaceOpen = true;
 		static ImGuiDockNodeFlags dockspaceFlags = ImGuiDockNodeFlags_None;
 

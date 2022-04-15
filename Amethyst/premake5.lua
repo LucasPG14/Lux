@@ -24,6 +24,7 @@ IncludeDir["ImGui"] = "Amethyst/vendor/ImGui"
 IncludeDir["Assimp"] = "Amethyst/vendor/Assimp/include"
 IncludeDir["glm"] = "Amethyst/vendor/glm"
 IncludeDir["ImGuizmo"] = "Amethyst/vendor/ImGuizmo"
+IncludeDir["Optick"] = "Amethyst/vendor/Optick/src"
 IncludeDir["stb_image"] = "Amethyst/vendor/stb_image"
 IncludeDir["yamlcpp"] = "Amethyst/vendor/yaml-cpp/include"
 
@@ -33,6 +34,7 @@ group "Dependencies"
 	include "Amethyst/vendor/ImGui"
 	include "Amethyst/vendor/Assimp"
 	include "Amethyst/vendor/yaml-cpp"
+	include "Amethyst/vendor/Optick"
 group ""
 
 project "Amethyst"
@@ -70,6 +72,7 @@ project "Amethyst"
 		"%{IncludeDir.Assimp}",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.ImGuizmo}",
+		"%{IncludeDir.Optick}",
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.yamlcpp}"
 	}
@@ -81,6 +84,7 @@ project "Amethyst"
 		"ImGui",
 		"Assimp",
 		"yaml-cpp",
+		"Optick",
 		"opengl32.lib"
 	}
 

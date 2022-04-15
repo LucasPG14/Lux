@@ -1,22 +1,22 @@
 Scene: Untitled
 Entities:
-  - UUID: 14674301278995864052
+  - UUID: 13363259154844506437
     Name: BakerHouse_Chimney
     TransformComponent:
       Position: [0, 0, 0]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     MeshComponent:
-      UUID: 15440162092050372353
+      UUID: 14030086521116174079
     MaterialComponent:
-      UUID: 3820656386951185262
-  - UUID: 16079773554257335877
+      UUID: 6298019165955972287
+  - UUID: 4546770520899976354
     Name: BakerHouse_Baker_house
     TransformComponent:
       Position: [0, 0, 0]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     MeshComponent:
-      UUID: 13280979632508265273
+      UUID: 9407158530335972725
     MaterialComponent:
-      UUID: 3820656386951185262
+      UUID: 6298019165955972287

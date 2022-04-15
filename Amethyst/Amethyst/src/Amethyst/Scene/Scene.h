@@ -12,7 +12,7 @@ namespace Amethyst
 		Scene();
 		~Scene();
 
-		void Update(const std::shared_ptr<Shader>& shader);
+		void Update();
 
 		inline std::vector<Entity>& GetWorld() { return world; }
 

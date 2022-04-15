@@ -19,14 +19,14 @@ namespace Amethyst
 
 	}
 	
-	void Scene::Update(const std::shared_ptr<Shader>& shader)
+	void Scene::Update()
 	{
 		for (int i = 0; i < world.size(); ++i)
 		{
 			Entity& entity = world[i];
 			if (MeshComponent* mesh = entity.Get<MeshComponent>())
 			{
-				Renderer::Submit(shader, mesh->GetVAO(), entity.Get<MaterialComponent>()->GetMaterial(), entity.Get<TransformComponent>()->GetTransform());
+				Renderer::Submit(mesh->GetMesh()->GetShader(), mesh->GetMesh()->GetVAO(), entity.Get<MaterialComponent>()->GetMaterial(), entity.Get<TransformComponent>()->GetTransform());
 			}
 		}
 	}

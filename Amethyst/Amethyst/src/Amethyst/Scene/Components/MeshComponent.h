@@ -18,8 +18,6 @@ namespace Amethyst
 
 		void DrawInspector() override;
 
-		const std::shared_ptr<VertexArray>& GetVAO();
-
 		const std::shared_ptr<Mesh>& GetMesh() { return mesh; }
 	private:
 		std::shared_ptr<Mesh> mesh;

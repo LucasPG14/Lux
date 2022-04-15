@@ -19,6 +19,7 @@ namespace Amethyst
 		static void Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, const std::shared_ptr<Material>& material, const glm::mat4& model = glm::mat4(1.0f));
 
 		inline static Render::API GetRenderer() { return Render::GetAPI(); }
+		inline static const std::unique_ptr<ShaderLibrary>& GetShaderLibrary() { return shaderLibrary; }
 
 		struct Statistics
 		{
@@ -37,10 +38,10 @@ namespace Amethyst
 	private:
 		struct SceneInfo
 		{
-			glm::mat4 view;
-			glm::mat4 projection;
+			glm::mat4 viewProjection;
 		};
 
 		static std::unique_ptr<SceneInfo> sceneInfo;
+		static std::unique_ptr<ShaderLibrary> shaderLibrary;
 	};
 }

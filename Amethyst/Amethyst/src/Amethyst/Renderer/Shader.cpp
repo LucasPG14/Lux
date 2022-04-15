@@ -66,7 +66,7 @@ namespace Amethyst
 		return shader;
 	}
 
-	std::shared_ptr<Shader> ShaderLibrary::Get(const std::string& name)
+	const std::shared_ptr<Shader>& ShaderLibrary::Get(const std::string& name)
 	{
 		AMT_CORE_ASSERT(shaders.find(name) != shaders.end(), "This shader doesn't exists!");
 		return shaders[name];

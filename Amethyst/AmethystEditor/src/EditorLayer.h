@@ -33,6 +33,7 @@ namespace Amethyst
 		
 		void SaveScene();
 		void SaveScene(const std::filesystem::path& path);
+	
 	private:
 		std::filesystem::path currentDir;
 		std::filesystem::path assetsDir;
@@ -45,7 +46,6 @@ namespace Amethyst
 
 		std::shared_ptr<Framebuffer> fbo;
 
-		std::shared_ptr<Shader> shader;
 		std::shared_ptr<Texture2D> tex;
 		std::shared_ptr<Texture2D> folder;
 

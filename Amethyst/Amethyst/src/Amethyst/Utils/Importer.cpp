@@ -93,6 +93,11 @@ namespace Amethyst
 
 						matFile.write((char*)&texUUID, sizeof(uint64_t));
 					}
+					else
+					{
+						uint64_t texUUID = 0;
+						matFile.write((char*)&texUUID, sizeof(uint64_t));
+					}
 
 					stbi_image_free(data);
 
@@ -118,6 +123,7 @@ namespace Amethyst
 					AABB aabb;
 					aabb.min = { FLT_MAX, FLT_MAX, FLT_MAX };
 					aabb.max = { FLT_MIN, FLT_MIN, FLT_MIN };
+					
 					// Reading all the vertices
 					for (unsigned int j = 0; j < numVertices; ++j)
 					{
@@ -127,8 +133,8 @@ namespace Amethyst
 
 						if (mesh->HasTangentsAndBitangents())
 						{
-							//vertex.tangents = { mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z };
-							//vertex.bitangents = { mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z };
+							vertex.tangents = { mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z };
+							vertex.bitangents = { mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z };
 						}
 
 						if (mesh->HasNormals())
@@ -182,6 +188,12 @@ namespace Amethyst
 					meshFile.write((char*)indices.data(), sizeof(uint32_t) * indices.size());
 
 					meshFile.write((char*)&aabb, sizeof(AABB));
+
+					std::string shaderName = "Texture";
+
+					size_t strSize = shaderName.size();
+					meshFile.write((char*)&strSize, sizeof(size_t));
+					meshFile.write(shaderName.data(), strSize);
 
 					meshFile.close();
 				}

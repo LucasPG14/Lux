@@ -121,8 +121,8 @@ namespace Amethyst
 		virtual const BufferLayout& GetLayout() = 0;
 		virtual void SetLayout(const BufferLayout& lay) = 0;
 
-		static VertexBuffer* Create(float* vertices, uint32_t size);
-		static VertexBuffer* Create(Vertex* vertices, uint32_t size);
+		static std::shared_ptr<VertexBuffer> Create(float* vertices, uint32_t size);
+		static std::shared_ptr<VertexBuffer> Create(Vertex* vertices, uint32_t size);
 	};
 
 	class IndexBuffer
@@ -135,6 +135,6 @@ namespace Amethyst
 
 		virtual uint32_t GetCount() const = 0;
 
-		static IndexBuffer* Create(uint32_t* indices, uint32_t size);
+		static std::shared_ptr<IndexBuffer> Create(uint32_t* indices, uint32_t size);
 	};
 }

@@ -14,6 +14,7 @@
 #include <glad/glad.h>
 
 #include <ImGuizmo.h>
+#include <optick.h>
 
 namespace Amethyst
 {
@@ -67,7 +68,6 @@ namespace Amethyst
 	
 	void ImGuiLayer::Update(Timer timer)
 	{
-		
 	}
 
 	void ImGuiLayer::RenderImGui()
@@ -76,6 +76,8 @@ namespace Amethyst
 
 	void ImGuiLayer::Begin()
 	{
+		OPTICK_EVENT("ImGui Layer Begin");
+
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
@@ -84,6 +86,8 @@ namespace Amethyst
 
 	void ImGuiLayer::End()
 	{
+		OPTICK_EVENT("ImGui Layer End");
+
 		ImGuiIO& io = ImGui::GetIO();
 		Application& app = Application::Get();
 		io.DisplaySize = ImVec2((float)app.GetWindow().GetWidth(), (float)app.GetWindow().GetHeight());

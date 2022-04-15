@@ -4,6 +4,7 @@
 namespace Amethyst
 {
 	std::unique_ptr<Renderer::SceneInfo> Renderer::sceneInfo = std::make_unique<SceneInfo>();
+	std::unique_ptr<ShaderLibrary> Renderer::shaderLibrary = std::make_unique<ShaderLibrary>();
 
 	struct RendererData
 	{
@@ -31,13 +32,16 @@ namespace Amethyst
 	{
 		RenderOrder::Init();
 
+		// Loading all shaders
+		std::shared_ptr<Shader> shader = Shader::Create("assets/shaders/Texture.glsl");
+		shaderLibrary->Add(shader);
+
 		data.vao = VertexArray::Create();
 	}
 
 	void Renderer::BeginScene(const PerspectiveCamera& camera)
 	{
-		sceneInfo->view = camera.GetViewMatrix();
-		sceneInfo->projection = camera.GetProjectionMatrix();
+		sceneInfo->viewProjection = camera.GetViewMatrix() * camera.GetProjectionMatrix();
 
 		StartBatch();
 	}
@@ -52,8 +56,7 @@ namespace Amethyst
 		material->Bind();
 
 		shader->Bind();
-		shader->UploadUniformMat4("view", sceneInfo->view);
-		shader->UploadUniformMat4("projection", sceneInfo->projection);
+		shader->UploadUniformMat4("viewProjection", sceneInfo->viewProjection);
 		shader->UploadUniformMat4("model", model);
 
 		vertexArray->Bind();

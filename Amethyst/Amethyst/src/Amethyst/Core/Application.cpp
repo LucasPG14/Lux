@@ -6,6 +6,7 @@
 #include "Amethyst/Core/Input.h"
 
 #include <GLFW/glfw3.h>
+#include <optick.h>
 
 namespace Amethyst
 {
@@ -37,6 +38,8 @@ namespace Amethyst
 	{
 		while (running)
 		{
+			OPTICK_FRAME("MainThread");
+
 			float time = (float)glfwGetTime();
 			Timer timer = time - lastFrameTime;
 			lastFrameTime = time;
