@@ -22,7 +22,9 @@ namespace Amethyst
 	{
 		if (ImGui::CollapsingHeader("Mesh"))
 		{
-
+			ImGui::TextWrapped("UUID:");
+			ImGui::SameLine();
+			ImGui::TextWrapped(std::to_string(mesh->GetUUID()).c_str());
 		}
 	}
 }

@@ -23,17 +23,17 @@ namespace Amethyst
 	{
 		if (ImGui::CollapsingHeader("Transform"))
 		{
-			ImGui::DragFloat3("##Position", glm::value_ptr(position));
-			ImGui::SameLine();
 			ImGui::Text("Position");
-
-			ImGui::DragFloat3("##Rotation", glm::value_ptr(rotation));
 			ImGui::SameLine();
+			ImGui::DragFloat3("##Position", glm::value_ptr(position));
+
 			ImGui::Text("Rotation");
-
-			ImGui::DragFloat3("##Scale", glm::value_ptr(scale));
 			ImGui::SameLine();
+			ImGui::DragFloat3("##Rotation", glm::value_ptr(rotation));
+
 			ImGui::Text("Scale");
+			ImGui::SameLine();
+			ImGui::DragFloat3("##Scale", glm::value_ptr(scale));
 		}
 	}
 }

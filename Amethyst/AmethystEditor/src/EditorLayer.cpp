@@ -14,9 +14,13 @@ namespace Amethyst
 {
 	#define BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
 
-	EditorLayer::EditorLayer() : currentDir("assets/"), assetsDir("assets/"), entSelected(nullptr), guizmoState(ImGuizmo::TRANSLATE)
+	extern const std::filesystem::path assetsDir;
+
+	EditorLayer::EditorLayer() : guizmoState(ImGuizmo::TRANSLATE)
 	{
 		scene = std::make_shared<Scene>();
+		contentBrowser = ContentBrowserWindow();
+		hierarchy = SceneHierarchyWindow(scene);
 	}
 
 	EditorLayer::~EditorLayer()
@@ -33,31 +37,6 @@ namespace Amethyst
 		spec.height = 720;
 		fbo = Framebuffer::Create(spec);
 
-		// Creating textures
-		folder = Texture2D::Create("editor/textures/folder.png");
-		tex = Texture2D::Create("assets/textures/bakeHouse.png");
-
-		// Load Resources
-		std::stack<std::filesystem::path> resources;
-		resources.push(assetsDir);
-
-		std::string extension = ".bsres";
-
-		while (!resources.empty())
-		{
-			std::filesystem::path path = resources.top();
-			resources.pop();
-
-			for (auto& entry : std::filesystem::directory_iterator(path))
-			{
-				const std::filesystem::path& filePath = entry.path();
-				if (entry.is_directory()) resources.push(entry);
-				else if (filePath.extension().string() == extension)
-				{
-					ResourceSystem::ImportResources(filePath);
-				}
-			}
-		}
 	}
 
 	void EditorLayer::OnDestroy()
@@ -215,7 +194,7 @@ namespace Amethyst
 		}
 
 		// ImGuizmo Begin
-		if (entSelected)
+		if (Entity* entitySelected = hierarchy.GetSelected())
 		{
 			ImGuizmo::SetOrthographic(false);
 			ImGuizmo::SetDrawlist();
@@ -224,8 +203,8 @@ namespace Amethyst
 			glm::mat4& camView = glm::transpose(camera.GetViewMatrix());
 			const glm::mat4& camProj = glm::transpose(camera.GetProjectionMatrix());
 
-			TransformComponent* tComponent = entSelected->Get<TransformComponent>();
-			glm::mat4 transform = glm::transpose(entSelected->Get<TransformComponent>()->GetTransform());
+			TransformComponent* tComponent = entitySelected->Get<TransformComponent>();
+			glm::mat4 transform = glm::transpose(entitySelected->Get<TransformComponent>()->GetTransform());
 
 			ImGuizmo::Manipulate(glm::value_ptr(camView), glm::value_ptr(camProj), (ImGuizmo::OPERATION)guizmoState, ImGuizmo::LOCAL, glm::value_ptr(transform));
 		
@@ -245,113 +224,8 @@ namespace Amethyst
 		ImGui::End();
 		// Viewport End
 
-		// Hierarchy Begin
-		ImGui::Begin("Hierarchy");
-
-		std::vector<Entity>& entities = scene->GetWorld();
-		for (int i = 0; i < entities.size(); ++i)
-		{
-			Entity& entity = entities[i];
-			ImGui::PushID(i);
-			if (ImGui::TreeNodeEx(entity.GetName().c_str(), entSelected == &entity ? ImGuiTreeNodeFlags_Selected : 0))
-			{
-				ImGui::TreePop();
-			}
-
-			if (ImGui::IsItemClicked())
-				entSelected = &entity;
-
-			ImGui::PopID();
-		}
-
-		ImGui::End();
-		// Hierarchy End
-
-		// Inspector begin
-		ImGui::Begin("Inspector");
-
-		if (entSelected)
-		{
-			entSelected->DrawInspector();
-		}
-
-		ImGui::End();
-		// Inspector end
-
-		// Content Browser begin
-		static bool ret = true;
-		ImGui::Begin("Content Browser", &ret, ImGuiWindowFlags_MenuBar);
-
-		ImGui::BeginMenuBar();
-
-		ImGui::EndMenuBar();
-
-		static std::filesystem::path selected;
-
-		if (ImGui::IsWindowFocused())
-		{
-			if (Input::IsKeyPressed(Keys::DEL))
-			{
-				std::ifstream file(selected, std::ios::binary);
-
-				uint64_t uuid = 0;
-				file.read((char*)&uuid, sizeof(uint64_t));
-
-				ResourceSystem::Delete(uuid);
-				std::filesystem::remove_all(selected);
-			}
-		}
-
-		// Setting the number of columns
-		float cell = 128;
-
-		float width = ImGui::GetContentRegionAvail().x;
-		int columns = (int)(width / cell);
-		
-		if (columns < 1)
-			columns = 1;
-
-		ImGui::Columns(columns, 0, false);
-
-		int i = 0;
-		for (const auto& file : std::filesystem::directory_iterator(currentDir))
-		{
-			ImGui::PushID(i++);
-			const auto& path = file.path();
-			auto relativePath = std::filesystem::relative(file.path(), assetsDir);
-			std::string filename = relativePath.filename().string();
-			
-			if (file.is_directory()) ImGui::ImageButton((ImTextureID)folder->GetID(), { 100, 100 }, { 0, 1 }, { 1, 0 });
-			else ImGui::ImageButton((ImTextureID)tex->GetID(), { 100, 100 }, { 0, 1 }, { 1, 0 });
-			// Drag objects from the Content Browser
-			if (ImGui::BeginDragDropSource())
-			{
-				const wchar_t* filePath = relativePath.c_str();
-				ImGui::SetDragDropPayload("CONTENT_BROWSER", filePath, (wcslen(filePath) + 1) * sizeof(const wchar_t), ImGuiCond_Once);
-				ImGui::EndDragDropSource();
-			}
-
-			if (ImGui::IsItemHovered())
-			{
-				if (ImGui::IsMouseDoubleClicked(0))
-				{
-					if (file.is_directory()) currentDir /= path.filename();
-					else if (path.extension().string() == ".bsscene") OpenScene(path);
-				}
-				else if (ImGui::IsMouseClicked(0))
-				{
-					selected = file.path();
-				}
-			}
-			
-			ImGui::TextWrapped(filename.c_str());
-
-			ImGui::NextColumn();
-			ImGui::PopID();
-		}
-
-		ImGui::End();
-		// Content Browser end
+		hierarchy.Render();
+		contentBrowser.Render();
 
 		ImGui::End();
 	}
@@ -360,26 +234,9 @@ namespace Amethyst
 	{
 		EventDispatcher dispatcher(e);
 
-		dispatcher.Dispatch<WindowDropEvent>(BIND_EVENT_FN(EditorLayer::FileDropped));
-		dispatcher.Dispatch<KeyPressedEvent>(BIND_EVENT_FN(EditorLayer::ShortCuts));
-	}
-	
-	bool EditorLayer::FileDropped(WindowDropEvent& e)
-	{
-		std::vector<std::string>& paths = e.GetPaths();
-		std::string extension = ".png";
-		for (int i = 0; i < paths.size(); ++i)
-		{
-			std::filesystem::path path = paths[i];
-			if (path.extension() == extension)
-			{
-				Importer::ImportTexture(path, currentDir);
-				continue;
-			}
-			Importer::Import(path, currentDir);
-		}
+		contentBrowser.OnEvent(e);
 
-		return true;
+		dispatcher.Dispatch<KeyPressedEvent>(BIND_EVENT_FN(EditorLayer::ShortCuts));
 	}
 
 	bool EditorLayer::ShortCuts(KeyPressedEvent& e)
@@ -454,7 +311,7 @@ namespace Amethyst
 			file.read((char*)&matUUID, sizeof(uint64_t));
 
 			entity.CreateComponent<MaterialComponent>(ResourceSystem::Get<Material>(matUUID));
-			entSelected = nullptr;
+			hierarchy.SetSelected(nullptr);
 			break;
 		}
 		case TypeID<Material>::id():
@@ -494,6 +351,7 @@ namespace Amethyst
 		if (serializer.Deserialize(path))
 		{
 			scene = newScene;
+			hierarchy.SetScene(scene);
 		}
 	}
 	

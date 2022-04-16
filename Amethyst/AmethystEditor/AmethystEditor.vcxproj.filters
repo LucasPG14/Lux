@@ -16,8 +16,12 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\EditorLayer.cpp" />
+    <ClCompile Include="src\ImGuiWindows\SceneHierarchyWindow.cpp" />
+    <ClCompile Include="src\ImGuiWindows\ContentBrowserWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\EditorLayer.h" />
+    <ClInclude Include="src\ImGuiWindows\SceneHierarchyWindow.h" />
+    <ClInclude Include="src\ImGuiWindows\ContentBrowserWindow.h" />
   </ItemGroup>
 </Project>

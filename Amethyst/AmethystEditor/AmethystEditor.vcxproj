@@ -136,10 +136,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\EditorLayer.h" />
+    <ClInclude Include="src\ImGuiWindows\ContentBrowserWindow.h" />
+    <ClInclude Include="src\ImGuiWindows\SceneHierarchyWindow.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\AmethystEditor.cpp" />
     <ClCompile Include="src\EditorLayer.cpp" />
+    <ClCompile Include="src\ImGuiWindows\ContentBrowserWindow.cpp" />
+    <ClCompile Include="src\ImGuiWindows\SceneHierarchyWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Amethyst\Amethyst.vcxproj">

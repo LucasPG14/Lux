@@ -2,6 +2,9 @@
 
 #include <Amethyst.h>
 
+#include "ImGuiWindows/SceneHierarchyWindow.h"
+#include "ImGuiWindows/ContentBrowserWindow.h"
+
 namespace Amethyst
 {
 	class EditorLayer : public Layer
@@ -20,8 +23,6 @@ namespace Amethyst
 		void OnEvent(Event& e) override;
 
 	private:
-		bool FileDropped(WindowDropEvent& e);
-
 		bool ShortCuts(KeyPressedEvent& e);
 
 		void AddToScene(std::filesystem::path& path);
@@ -35,19 +36,14 @@ namespace Amethyst
 		void SaveScene(const std::filesystem::path& path);
 	
 	private:
-		std::filesystem::path currentDir;
-		std::filesystem::path assetsDir;
-		
-		Entity* entSelected;
+		SceneHierarchyWindow hierarchy;
+		ContentBrowserWindow contentBrowser;
 		
 		int guizmoState;
 		
 		std::shared_ptr<Scene> scene;
 
 		std::shared_ptr<Framebuffer> fbo;
-
-		std::shared_ptr<Texture2D> tex;
-		std::shared_ptr<Texture2D> folder;
 
 		PerspectiveCamera camera;
 
