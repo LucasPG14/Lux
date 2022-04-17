@@ -98,6 +98,13 @@ namespace Amethyst
 			glm::vec3 direction = farPlanePos - nearPlanePos;
 			float length = glm::length(direction);
 
+			if (length <= 1e-4f)
+			{
+				return aabb.min.x <= nearPlanePos.x && nearPlanePos.x <= aabb.max.x &&
+					aabb.min.y <= nearPlanePos.y && nearPlanePos.y <= aabb.max.y &&
+					aabb.min.z <= nearPlanePos.z && nearPlanePos.z <= aabb.max.z;
+			}
+
 			float invLen = 1.0f / length;
 			direction *= invLen;
 			float tNear = 0.0f;

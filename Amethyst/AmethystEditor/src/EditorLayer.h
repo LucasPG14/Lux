@@ -7,6 +7,12 @@
 
 namespace Amethyst
 {
+	enum class SceneState
+	{
+		EDITOR = 0,
+		RUNTIME = 1
+	};
+
 	class EditorLayer : public Layer
 	{
 	public:
@@ -34,12 +40,16 @@ namespace Amethyst
 		
 		void SaveScene();
 		void SaveScene(const std::filesystem::path& path);
+
+		void PlayScene();
+		void StopScene();
 	
 	private:
 		SceneHierarchyWindow hierarchy;
 		ContentBrowserWindow contentBrowser;
 		
 		int guizmoState;
+		SceneState sceneState;
 		
 		std::shared_ptr<Scene> scene;
 

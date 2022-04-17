@@ -17,7 +17,7 @@ namespace Amethyst
 
 	extern const std::filesystem::path assetsDir;
 
-	EditorLayer::EditorLayer() : guizmoState(ImGuizmo::TRANSLATE)
+	EditorLayer::EditorLayer() : guizmoState(ImGuizmo::TRANSLATE), sceneState(SceneState::EDITOR)
 	{
 		scene = std::make_shared<Scene>();
 		contentBrowser = ContentBrowserWindow();
@@ -37,7 +37,6 @@ namespace Amethyst
 		spec.width = 1280;
 		spec.height = 720;
 		fbo = Framebuffer::Create(spec);
-
 	}
 
 	void EditorLayer::OnDestroy()
@@ -102,24 +101,22 @@ namespace Amethyst
 			if (ImGui::BeginMenu("File"))
 			{
 				if (ImGui::MenuItem("New scene", "Ctrl + N"))
-				{
 					NewScene();
-				}
+
 				if (ImGui::MenuItem("Open scene", "Ctrl + O"))
-				{
 					OpenScene();
-				}
+
 				ImGui::Separator();
 				if (ImGui::MenuItem("Save scene", "Ctrl + S"))
 				{
 					// Still not implemented
 				}
 				if (ImGui::MenuItem("Save scene as...", "Ctrl + Shift + S"))
-				{
 					SaveScene();
-				}
+
 				ImGui::Separator();
-				if (ImGui::MenuItem("Exit", "Alt + F4")) Application::Get().Close();
+				if (ImGui::MenuItem("Exit", "Alt + F4")) 
+					Application::Get().Close();
 
 				ImGui::EndMenu();
 			}
@@ -265,6 +262,26 @@ namespace Amethyst
 		hierarchy.Render();
 		contentBrowser.Render();
 
+		// Play/Stop begin
+
+		ImGui::Begin("##PlayStop", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+
+		float buttonSize = ImGui::GetWindowHeight() - 10.0f;
+
+		ImGui::SetCursorPosX((ImGui::GetWindowContentRegionMax().x * 0.5f) - (buttonSize * 2 * 0.5f) - 1.5f);
+		if (ImGui::ColorButton("Play", ImVec4(1.0f, 0.0f, 0.0f, 1.0f), 0, ImVec2(buttonSize, buttonSize)))
+		{
+			PlayScene();
+		}
+		ImGui::SameLine();
+		ImGui::SetCursorPosX((ImGui::GetWindowContentRegionMax().x * 0.5f) - (buttonSize * 2 * 0.5f) + buttonSize + 1.5f);
+		if (ImGui::ColorButton("Stop", ImVec4(0.0f, 0.0f, 1.0f, 1.0f), 0, ImVec2(buttonSize, buttonSize)))
+		{
+			StopScene();
+		}
+
+		ImGui::End();
+
 		ImGui::End();
 	}
 
@@ -405,5 +422,17 @@ namespace Amethyst
 	{
 		SceneSerializer serializer(scene);
 		serializer.Serialize(path);
+	}
+	
+	void EditorLayer::PlayScene()
+	{
+		sceneState = SceneState::RUNTIME;
+		ImGui::StyleColorsClassic();
+	}
+	
+	void EditorLayer::StopScene()
+	{
+		sceneState = SceneState::EDITOR;
+		ImGui::StyleColorsDark();
 	}
 }
