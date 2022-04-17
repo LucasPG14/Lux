@@ -92,5 +92,95 @@ namespace Amethyst
 
 			return true;
 		}
+
+		bool AABBIntersects(const AABB& aabb, const glm::vec3& nearPlanePos, const glm::vec3& farPlanePos)
+		{
+			glm::vec3 direction = farPlanePos - nearPlanePos;
+			float length = glm::length(direction);
+
+			float invLen = 1.0f / length;
+			direction *= invLen;
+			float tNear = 0.0f;
+			float tFar = length;
+
+			direction = glm::normalize(direction);
+
+			// Line x
+			if (glm::epsilonEqual(direction.x, 0.0f, glm::epsilon<float>()))
+			{
+				float recipDir = 1.0f / direction.x;
+
+				float t1 = (aabb.min.x - nearPlanePos.x) * recipDir;
+				float t2 = (aabb.max.x - nearPlanePos.x) * recipDir;
+
+				if (t1 < t2)
+				{
+					tNear = glm::max(t1, tNear);
+					tFar = glm::min(t2, tFar);
+				}
+				else
+				{
+					tNear = glm::max(t2, tNear);
+					tFar = glm::min(t1, tFar);
+				}
+
+				if (tNear > tFar)
+					return false;
+			}
+			else if (nearPlanePos.x < aabb.min.x || nearPlanePos.x > aabb.max.x)
+				return false;
+
+			// Line y
+			if (glm::epsilonEqual(direction.y, 0.0f, glm::epsilon<float>()))
+			{
+				float recipDir = 1.0f / direction.y;
+
+				float t1 = (aabb.min.y - nearPlanePos.y) * recipDir;
+				float t2 = (aabb.max.y - nearPlanePos.y) * recipDir;
+
+				if (t1 < t2)
+				{
+					tNear = glm::max(t1, tNear);
+					tFar = glm::min(t2, tFar);
+				}
+				else
+				{
+					tNear = glm::max(t2, tNear);
+					tFar = glm::min(t1, tFar);
+				}
+
+				if (tNear > tFar)
+					return false;
+			}
+			else if (nearPlanePos.y < aabb.min.y || nearPlanePos.y > aabb.max.y)
+				return false;
+
+			// Line z
+			if (glm::epsilonEqual(direction.z, 0.0f, glm::epsilon<float>()))
+			{
+				float recipDir = 1.0f / direction.z;
+
+				float t1 = (aabb.min.z - nearPlanePos.z) * recipDir;
+				float t2 = (aabb.max.z - nearPlanePos.z) * recipDir;
+
+				if (t1 < t2)
+				{
+					tNear = glm::max(t1, tNear);
+					tFar = glm::min(t2, tFar);
+				}
+				else
+				{
+					tNear = glm::max(t2, tNear);
+					tFar = glm::min(t1, tFar);
+				}
+
+				if (tNear > tFar)
+					return false;
+			}
+			else if (nearPlanePos.z < aabb.min.z || nearPlanePos.z > aabb.max.z)
+				return false;
+
+			return tNear <= tFar;
+		}
 	}
 }

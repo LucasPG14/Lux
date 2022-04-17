@@ -8,6 +8,7 @@
 
 #include "Amethyst/Utils/FileDialogs.h"
 
+#include <glm/gtx/intersect.hpp>
 #include <Optick/src/optick.h>
 
 namespace Amethyst
@@ -219,6 +220,43 @@ namespace Amethyst
 			}
 		}
 		// ImGuizmo End
+
+		// Begin Mouse Picking
+		if (ImGui::IsWindowFocused())
+		{
+			if (Input::IsMouseButtonPressed(Mouse::BUTTON_LEFT))
+			{
+				glm::vec4 viewportBounds = { ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, size.x, size.y };
+				glm::vec2 mousePos = { Input::GetMouseX(), Input::GetMouseY() };
+
+				mousePos.x = 2 * ((mousePos.x - viewportBounds.x) / (viewportBounds.z)) - 1.0f;
+				mousePos.y = -(2 * ((mousePos.y - (viewportBounds.y + 10.0f)) / (viewportBounds.w)) - 1.0f);
+
+				glm::vec3 lineNearVec = glm::normalize(camera.NearPlanePos(mousePos));
+				glm::vec3 lineFarVec = glm::normalize(camera.FarPlanePos(mousePos));
+
+				std::vector<Entity>& entities = scene->GetWorld();
+
+				for (int i = 0; i < entities.size(); ++i)
+				{
+					MeshComponent* meshComp = entities[i].Get<MeshComponent>();
+					if (!meshComp)
+						continue;
+					if (!meshComp->GetMesh())
+						continue;
+
+					AABB aabb = meshComp->GetMesh()->GetAABB();
+					aabb.min = entities[i].Get<TransformComponent>()->GetTransform() * glm::vec4(aabb.min, 1.0f);
+					aabb.max = entities[i].Get<TransformComponent>()->GetTransform() * glm::vec4(aabb.max, 1.0f);
+					if (!Math::AABBIntersects(aabb, lineNearVec, lineFarVec))
+						continue;
+
+					hierarchy.SetSelected(&entities[i]);
+				}
+			}
+		}
+
+		// End Mouse Picking
 
 		ImGui::PopStyleVar();
 		ImGui::End();

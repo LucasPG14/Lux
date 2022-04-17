@@ -83,6 +83,32 @@ namespace Amethyst
 		vFov = 2 * glm::atan(glm::tan(hFov / 2) * aspectRatio);
 		projectionMatrix = glm::perspective(vFov, aspectRatio, nearPlane, farPlane);
 	}
+
+	glm::vec3 PerspectiveCamera::NearPlanePos(glm::vec2 pos)
+	{
+		float nearPlaneWidth = tan(hFov * 0.5f) * nearPlane;
+		float nearPlaneHeight = tan(vFov * 0.5f) * nearPlane;
+
+		pos.x = pos.x * nearPlaneWidth;
+		pos.y = pos.y * nearPlaneHeight;
+
+		glm::vec3 right = glm::cross(front, up);
+
+		return position + (front * nearPlane) + (pos.x * right) + (pos.y * up);
+	}
+
+	glm::vec3 PerspectiveCamera::FarPlanePos(glm::vec2 pos)
+	{
+		float farPlaneWidth = tan(hFov * 0.5f) * farPlane;
+		float farPlaneHeight = tan(vFov * 0.5f) * farPlane;
+
+		pos.x = pos.x * farPlaneWidth;
+		pos.y = pos.y * farPlaneHeight;
+
+		glm::vec3 right = glm::cross(front, up);
+
+		return position + (front * farPlane) + (pos.x * right) + (pos.y * up);
+	}
 	
 	glm::mat3x4 PerspectiveCamera::ComputeViewMatrix()
 	{

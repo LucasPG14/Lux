@@ -19,6 +19,9 @@ namespace Amethyst
 		inline glm::mat4 GetProjectionMatrix() const { return projectionMatrix; }
 
 		void SetDimensions(float width, float height);
+
+		glm::vec3 NearPlanePos(glm::vec2 pos);
+		glm::vec3 FarPlanePos(glm::vec2 pos);
 	
 	private:	
 		glm::mat3x4 ComputeViewMatrix();
