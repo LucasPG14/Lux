@@ -7,6 +7,19 @@
 
 namespace Amethyst
 {
+	OpenGLTexture2D::OpenGLTexture2D(const void* data, int w, int h) : width(w), height(h)
+	{
+		glCreateTextures(GL_TEXTURE_2D, 1, &textureID);
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glTextureStorage2D(textureID, 1, GL_RGBA8, width, height);
+
+		glTextureParameteri(textureID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTextureParameteri(textureID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		glTextureSubImage2D(textureID, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
 	OpenGLTexture2D::OpenGLTexture2D(const std::string& path)
 	{
 		int w, h, channels;

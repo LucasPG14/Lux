@@ -21,9 +21,10 @@ namespace Amethyst
 		const std::shared_ptr<VertexArray>& GetVAO() { return vao; }
 		const std::shared_ptr<Shader>& GetShader() { return meshShader; }
 
-		inline const std::vector<Vertex>& GetVertices() { return vertices; }
+		inline std::vector<Vertex>& GetVertices() { return vertices; }
 		inline const size_t GetIndicesSize() { return indices.size(); }
 
+		inline const AABB& GetAABB() { return aabb; }
 	private:
 		std::vector<Vertex> vertices;
 		std::vector<uint32_t> indices;

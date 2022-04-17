@@ -7,6 +7,7 @@ namespace Amethyst
 	class OpenGLTexture2D : public Texture2D
 	{
 	public:
+		OpenGLTexture2D(const void* data, int width, int height);
 		OpenGLTexture2D(const std::string& path);
 		OpenGLTexture2D(UUID id, const std::filesystem::path& path);
 		~OpenGLTexture2D();

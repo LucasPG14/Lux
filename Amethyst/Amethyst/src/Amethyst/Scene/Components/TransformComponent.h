@@ -23,11 +23,9 @@ namespace Amethyst
 		// TODO: Review this, maybe there's another better option
 		const glm::mat4 GetTransform()
 		{
-			glm::mat4& rotationMat = glm::toMat4(glm::quat(glm::radians(rotation)));
-			glm::mat4& transform = glm::translate(glm::mat4(1.0f), position);
-			glm::mat4& scaleMat = glm::scale(glm::mat4(1.0f), scale);
+			const glm::mat4& rotationMat = glm::toMat4(glm::quat(glm::radians(rotation)));
 			
-			return glm::transpose(transform * rotationMat * scaleMat);
+			return glm::translate(glm::mat4(1.0f), position) * rotationMat * glm::scale(glm::mat4(1.0f), scale);
 		}
 
 		// Setters

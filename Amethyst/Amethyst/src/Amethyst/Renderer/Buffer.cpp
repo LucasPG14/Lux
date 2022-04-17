@@ -7,16 +7,16 @@
 
 namespace Amethyst
 {
-	std::shared_ptr<VertexBuffer> VertexBuffer::Create(float* vertices, uint32_t size)
+	std::shared_ptr<VertexBuffer> VertexBuffer::Create(uint32_t size)
 	{
 		switch (Renderer::GetRenderer())
 		{
-			case Render::API::NONE: 
-			{
-				AMT_CORE_ASSERT(false, "There's no RendererAPI");
-				return nullptr;
-			}
-			case Render::API::OPENGL: return std::make_shared<OpenGLVertexBuffer>(vertices, size);
+		case Render::API::NONE:
+		{
+			AMT_CORE_ASSERT(false, "There's no RendererAPI");
+			return nullptr;
+		}
+		case Render::API::OPENGL: return std::make_shared<OpenGLVertexBuffer>(size);
 		}
 
 		AMT_CORE_ASSERT(false, "RendererAPI not defined!");

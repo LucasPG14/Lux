@@ -18,6 +18,8 @@ namespace Amethyst
 		inline Entity* GetSelected() { return selected; }
 
 	private:
+		bool focused;
+
 		std::shared_ptr<Scene> scene;
 		Entity* selected;
 	};

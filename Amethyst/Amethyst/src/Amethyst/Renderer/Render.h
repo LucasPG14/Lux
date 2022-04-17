@@ -21,7 +21,7 @@ namespace Amethyst
 		virtual void ClearColor(const glm::vec4& color) const = 0;
 		virtual void Clear() const = 0;
 
-		virtual void Draw(const std::shared_ptr<VertexArray>& vertexArray) = 0;
+		virtual void Draw(const std::shared_ptr<VertexArray>& vertexArray, uint32_t count = 0) = 0;
 	
 		inline static API GetAPI() { return api; }
 	private:

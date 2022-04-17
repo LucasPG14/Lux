@@ -18,5 +18,6 @@ namespace Amethyst
 		virtual void Unbind(uint32_t slot = 0) const = 0;
 
 		static std::shared_ptr<Texture2D> Create(const std::string& path);
+		static std::shared_ptr<Texture2D> Create(const void* data, int width, int height);
 	};
 }

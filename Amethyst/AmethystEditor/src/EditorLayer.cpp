@@ -204,7 +204,7 @@ namespace Amethyst
 			const glm::mat4& camProj = glm::transpose(camera.GetProjectionMatrix());
 
 			TransformComponent* tComponent = entitySelected->Get<TransformComponent>();
-			glm::mat4 transform = glm::transpose(entitySelected->Get<TransformComponent>()->GetTransform());
+			glm::mat4 transform = entitySelected->Get<TransformComponent>()->GetTransform();
 
 			ImGuizmo::Manipulate(glm::value_ptr(camView), glm::value_ptr(camProj), (ImGuizmo::OPERATION)guizmoState, ImGuizmo::LOCAL, glm::value_ptr(transform));
 		

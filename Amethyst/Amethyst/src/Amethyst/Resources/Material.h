@@ -9,6 +9,7 @@ namespace Amethyst
 	class Material : public Resource
 	{
 	public:
+		Material(const void* data, int width, int height);
 		Material(UUID id, const std::filesystem::path& filePath);
 
 		~Material();

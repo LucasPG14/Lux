@@ -8,6 +8,9 @@
 
 #include "Amethyst/Renderer/Renderer.h"
 
+// TODO: Remove this
+#include <glm/gtc/type_ptr.hpp>
+
 namespace Amethyst
 {
 	Scene::Scene()

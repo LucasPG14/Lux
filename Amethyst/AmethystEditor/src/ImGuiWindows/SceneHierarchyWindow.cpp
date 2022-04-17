@@ -15,6 +15,9 @@ namespace Amethyst
 		// Hierarchy Begin
 		ImGui::Begin("Hierarchy");
 
+		focused = false;
+		if (ImGui::IsWindowFocused()) focused = true;
+
 		std::vector<Entity>& entities = scene->GetWorld();
 		for (int i = 0; i < entities.size(); ++i)
 		{

@@ -5,6 +5,11 @@
 
 namespace Amethyst
 {
+	Material::Material(const void* data, int width, int height)
+	{
+		diffuse = Texture2D::Create(data, width, height);
+	}
+
 	Material::Material(UUID id, const std::filesystem::path& filePath)
 	{
 		loaded = false;
@@ -48,7 +53,7 @@ namespace Amethyst
 	
 	void Material::Bind()
 	{
-		diffuse->Bind();
+		diffuse->Bind(0);
 	}
 	
 	void Material::Unbind()
