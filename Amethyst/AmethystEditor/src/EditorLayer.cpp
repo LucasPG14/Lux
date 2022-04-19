@@ -4,9 +4,8 @@
 #include "imgui/imgui.h"
 #include "ImGuizmo/ImGuizmo.h"
 
-#include "Amethyst/Utils/Math.h"
-
 #include "Amethyst/Utils/FileDialogs.h"
+#include "Amethyst/Utils/Math.h"
 
 #include <glm/gtx/intersect.hpp>
 #include <Optick/src/optick.h>
@@ -224,29 +223,37 @@ namespace Amethyst
 			if (Input::IsMouseButtonPressed(Mouse::BUTTON_LEFT))
 			{
 				glm::vec4 viewportBounds = { ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, size.x, size.y };
-				glm::vec2 mousePos = { Input::GetMouseX(), Input::GetMouseY() };
+				ImVec2 mousePos = ImGui::GetMousePos();
 
 				mousePos.x = 2 * ((mousePos.x - viewportBounds.x) / (viewportBounds.z)) - 1.0f;
 				mousePos.y = -(2 * ((mousePos.y - (viewportBounds.y + 10.0f)) / (viewportBounds.w)) - 1.0f);
 
-				glm::vec3 lineNearVec = glm::normalize(camera.NearPlanePos(mousePos));
-				glm::vec3 lineFarVec = glm::normalize(camera.FarPlanePos(mousePos));
+				glm::vec3 lineNearVec = glm::normalize(camera.NearPlanePos({ mousePos.x,  mousePos.y }));
+				glm::vec3 lineFarVec = glm::normalize(camera.FarPlanePos({ mousePos.x,  mousePos.y }));
+
+				AMT_TRACE("Mouse Pos X:{0}, Mouse Pos Y:{1}", mousePos.x, mousePos.y);
+				AMT_TRACE("Near Plane:{0}, {1}, {2}", lineNearVec.x, lineNearVec.y, lineNearVec.z);
+				AMT_TRACE("Far Plane:{0}, {1}, {2}", lineFarVec.x, lineFarVec.y, lineFarVec.z);
 
 				std::vector<Entity>& entities = scene->GetWorld();
 
 				for (int i = 0; i < entities.size(); ++i)
 				{
 					MeshComponent* meshComp = entities[i].Get<MeshComponent>();
-					if (!meshComp)
+					if (!meshComp || !meshComp->GetMesh())
+					{
+						hierarchy.SetSelected(nullptr);
 						continue;
-					if (!meshComp->GetMesh())
-						continue;
+					}
 
 					AABB aabb = meshComp->GetMesh()->GetAABB();
-					aabb.min = entities[i].Get<TransformComponent>()->GetTransform() * glm::vec4(aabb.min, 1.0f);
-					aabb.max = entities[i].Get<TransformComponent>()->GetTransform() * glm::vec4(aabb.max, 1.0f);
+					aabb.min = glm::transpose(entities[i].Get<TransformComponent>()->GetTransform()) * glm::vec4(aabb.min, 1.0f);
+					aabb.max = glm::transpose(entities[i].Get<TransformComponent>()->GetTransform()) * glm::vec4(aabb.max, 1.0f);
 					if (!Math::AABBIntersects(aabb, lineNearVec, lineFarVec))
+					{
+						hierarchy.SetSelected(nullptr);
 						continue;
+					}
 
 					hierarchy.SetSelected(&entities[i]);
 				}
@@ -428,11 +435,14 @@ namespace Amethyst
 	{
 		sceneState = SceneState::RUNTIME;
 		ImGui::StyleColorsClassic();
+		SaveScene("editor/scenes/ScenePlay.bsscene");
 	}
 	
 	void EditorLayer::StopScene()
 	{
 		sceneState = SceneState::EDITOR;
 		ImGui::StyleColorsDark();
+		OpenScene("editor/scenes/ScenePlay.bsscene");
+		hierarchy.SetSelected(nullptr);
 	}
 }

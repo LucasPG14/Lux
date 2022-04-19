@@ -22,6 +22,11 @@ namespace Amethyst
 			render->Clear();
 		}
 
+		inline static void ChangeState(bool change)
+		{
+			render->ChangeState(change);
+		}
+
 		inline static void Draw(const std::shared_ptr<VertexArray>& vertexArray, uint32_t indexCount = 0)
 		{
 			render->Draw(vertexArray, indexCount);

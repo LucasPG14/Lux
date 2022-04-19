@@ -124,6 +124,7 @@ namespace Amethyst
 		virtual void SetLayout(const BufferLayout& lay) = 0;
 
 		static std::shared_ptr<VertexBuffer> Create(uint32_t size);
+		static std::shared_ptr<VertexBuffer> Create(float* vertices, uint32_t size);
 		static std::shared_ptr<VertexBuffer> Create(Vertex* vertices, uint32_t size);
 	};
 

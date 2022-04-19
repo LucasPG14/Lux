@@ -45,10 +45,14 @@ namespace Amethyst
 
 		void AddComponent(Component* component) { components.push_back(component); }
 
+		bool GetAABBDebug() { return aabbDebug; }
+
 		operator bool() const { return name != ""; }
 	private:
 		UUID uuid;
 		std::string name;
+
+		bool aabbDebug;
 
 		std::vector<Entity> childrens;
 		std::vector<Component*> components;

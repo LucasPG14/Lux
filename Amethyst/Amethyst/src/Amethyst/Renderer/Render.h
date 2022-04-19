@@ -20,6 +20,8 @@ namespace Amethyst
 
 		virtual void ClearColor(const glm::vec4& color) const = 0;
 		virtual void Clear() const = 0;
+		
+		virtual void ChangeState(bool change) const = 0;
 
 		virtual void Draw(const std::shared_ptr<VertexArray>& vertexArray, uint32_t count = 0) = 0;
 	

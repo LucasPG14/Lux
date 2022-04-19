@@ -8,7 +8,7 @@
 
 namespace Amethyst
 {
-	Entity::Entity(UUID id, const std::string& n) : uuid(id), name(n)
+	Entity::Entity(UUID id, const std::string& n) : uuid(id), name(n), aabbDebug(false)
 	{
 		TransformComponent* transform = new TransformComponent({ 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f }, { 1.0f,1.0f,1.0f });
 		components.push_back(transform);
@@ -28,6 +28,7 @@ namespace Amethyst
 	void Entity::DrawInspector()
 	{
 		ImGui::InputText("##name", name.data(), 128);
+		ImGui::Checkbox("Draw AABB", &aabbDebug);
 		for (int i = 0; i < components.size(); ++i)
 		{
 			components[i]->DrawInspector();

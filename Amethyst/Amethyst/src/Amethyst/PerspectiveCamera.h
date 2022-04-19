@@ -26,6 +26,8 @@ namespace Amethyst
 	private:	
 		glm::mat3x4 ComputeViewMatrix();
 
+		glm::vec3 Cross(const glm::vec3& v1, const glm::vec3& v2);
+
 	private:
 		glm::mat4 viewMatrix;
 		glm::mat4 projectionMatrix;

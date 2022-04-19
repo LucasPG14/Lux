@@ -100,9 +100,9 @@ namespace Amethyst
 
 			if (length <= 1e-4f)
 			{
-				return aabb.min.x <= nearPlanePos.x && nearPlanePos.x <= aabb.max.x &&
-					aabb.min.y <= nearPlanePos.y && nearPlanePos.y <= aabb.max.y &&
-					aabb.min.z <= nearPlanePos.z && nearPlanePos.z <= aabb.max.z;
+				return	aabb.min.x <= nearPlanePos.x && nearPlanePos.x <= aabb.max.x &&
+						aabb.min.y <= nearPlanePos.y && nearPlanePos.y <= aabb.max.y &&
+						aabb.min.z <= nearPlanePos.z && nearPlanePos.z <= aabb.max.z;
 			}
 
 			float invLen = 1.0f / length;

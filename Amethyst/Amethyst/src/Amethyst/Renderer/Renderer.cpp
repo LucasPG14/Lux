@@ -156,6 +156,11 @@ namespace Amethyst
 
 		data.stats.trianglesCount++;
 	}
+
+	void Renderer::ChangeState(bool change)
+	{
+		RenderOrder::ChangeState(change);
+	}
 	
 	void Renderer::StartBatch()
 	{

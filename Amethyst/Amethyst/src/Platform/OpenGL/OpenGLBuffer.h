@@ -8,6 +8,7 @@ namespace Amethyst
 	{
 	public:
 		OpenGLVertexBuffer(uint32_t size);
+		OpenGLVertexBuffer(float* vertices, uint32_t size);
 		OpenGLVertexBuffer(Vertex* vertices, uint32_t size);
 		~OpenGLVertexBuffer();
 

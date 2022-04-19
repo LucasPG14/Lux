@@ -23,6 +23,12 @@ namespace Amethyst
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
+	void OpenGLRender::ChangeState(bool change) const
+	{
+		if (change) glDisable(GL_CULL_FACE);
+		else glEnable(GL_CULL_FACE);
+	}
+
 	void OpenGLRender::Draw(const std::shared_ptr<VertexArray>& vertexArray, uint32_t indexCount)
 	{
 		uint32_t count = indexCount ? indexCount : vertexArray->GetIndexBuffer()->GetCount();

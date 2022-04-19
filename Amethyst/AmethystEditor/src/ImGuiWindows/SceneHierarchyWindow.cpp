@@ -36,7 +36,7 @@ namespace Amethyst
 			ImGui::PopID();
 		}
 
-		if (!ImGui::IsAnyItemHovered() && ImGui::IsMouseClicked(0))
+		if (focused && !ImGui::IsAnyItemHovered() && ImGui::IsMouseClicked(0))
 			selected = nullptr;
 
 		ImGui::End();

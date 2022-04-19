@@ -40,7 +40,7 @@ namespace Amethyst
 
 		// Initializing GLFW
 		int success = glfwInit();
-		AMT_CORE_ASSERT(success, "Could not intialize GLFW!");
+		AMT_CORE_ASSERT(success, "Could not initialize GLFW!");
 		glfwSetErrorCallback(GLFWErrorCallback);
 
 		// Creating GLFW window

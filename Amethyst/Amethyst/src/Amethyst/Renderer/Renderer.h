@@ -20,6 +20,8 @@ namespace Amethyst
 		static void Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, const std::shared_ptr<Material>& material, const glm::mat4& model = glm::mat4(1.0f));
 		static void Submit(const std::shared_ptr<Mesh>& mesh, const std::shared_ptr<Material>& material, const glm::mat4 model);
 
+		static void ChangeState(bool change);
+
 		inline static Render::API GetRenderer() { return Render::GetAPI(); }
 		inline static const std::unique_ptr<ShaderLibrary>& GetShaderLibrary() { return shaderLibrary; }
 

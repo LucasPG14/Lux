@@ -12,6 +12,13 @@ namespace Amethyst
 		glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
 	}
 
+	OpenGLVertexBuffer::OpenGLVertexBuffer(float* vertices, uint32_t size)
+	{
+		glCreateBuffers(1, &vertexID);
+		glBindBuffer(GL_ARRAY_BUFFER, vertexID);
+		glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW);
+	}
+
 	OpenGLVertexBuffer::OpenGLVertexBuffer(Vertex* vertices, uint32_t size)
 	{
 		glCreateBuffers(1, &vertexID);

@@ -6,6 +6,8 @@
 #include "Core/MouseCodes.h"
 #include "Core/KeyCodes.h"
 
+//#include "Utils/Math.h"
+
 #include <GLM/gtx/orthonormalize.hpp>
 
 namespace Amethyst
@@ -94,7 +96,7 @@ namespace Amethyst
 
 		glm::vec3 right = glm::cross(front, up);
 
-		return position + (front * nearPlane) + (pos.x * right) + (pos.y * up);
+		return position + front * nearPlane + pos.x * right + pos.y * up;
 	}
 
 	glm::vec3 PerspectiveCamera::FarPlanePos(glm::vec2 pos)
@@ -108,6 +110,13 @@ namespace Amethyst
 		glm::vec3 right = glm::cross(front, up);
 
 		return position + (front * farPlane) + (pos.x * right) + (pos.y * up);
+	}
+
+	glm::vec3 PerspectiveCamera::Cross(const glm::vec3& v1, const glm::vec3& v2)
+	{
+		return glm::vec3(v1.y * v2.z - v1.z - v2.y,
+			v1.z * v2.x - v1.x * v2.z,
+			v1.x * v2.y - v1.y * v2.x);
 	}
 	
 	glm::mat3x4 PerspectiveCamera::ComputeViewMatrix()
