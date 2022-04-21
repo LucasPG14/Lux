@@ -12,6 +12,8 @@ namespace Amethyst
 		OpenGLContext(GLFWwindow* glfwWindow);
 
 		void Init() override;
+		void Shutdown() override;
+
 		void SwapBuffers() override;
 	private:
 		GLFWwindow* window;

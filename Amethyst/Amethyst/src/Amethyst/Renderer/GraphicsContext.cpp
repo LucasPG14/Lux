@@ -4,6 +4,7 @@
 #include "Renderer.h"
 
 #include "Platform/OpenGL/OpenGLContext.h"
+#include "Platform/Vulkan/VulkanContext.h"
 
 namespace Amethyst
 {
@@ -13,6 +14,7 @@ namespace Amethyst
 		{
 		case Render::API::NONE: AMT_CORE_ASSERT(false, ""); return nullptr;
 		case Render::API::OPENGL: return std::make_unique<OpenGLContext>(static_cast<GLFWwindow*>(window));
+		case Render::API::VULKAN: return std::make_unique<VulkanContext>(static_cast<GLFWwindow*>(window));
 		}
 	}
 }

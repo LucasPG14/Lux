@@ -15,9 +15,11 @@ workspace "Amethyst"
 	}
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+VULKAN_SDK = os.getenv("VULKAN_SDK")
 
 -- Include directories relative to root folder (solution directory)
 IncludeDir = {}
+IncludeDir["VulkanSDK"] = "%{VULKAN_SDK}/Include"
 IncludeDir["GLFW"] = "Amethyst/vendor/GLFW/include"
 IncludeDir["Glad"] = "Amethyst/vendor/Glad/include"
 IncludeDir["ImGui"] = "Amethyst/vendor/ImGui"
@@ -27,6 +29,12 @@ IncludeDir["ImGuizmo"] = "Amethyst/vendor/ImGuizmo"
 IncludeDir["Optick"] = "Amethyst/vendor/Optick/src"
 IncludeDir["stb_image"] = "Amethyst/vendor/stb_image"
 IncludeDir["yamlcpp"] = "Amethyst/vendor/yaml-cpp/include"
+
+LibraryDir = {}
+LibraryDir["VulkanSDK"] = "%{VULKAN_SDK}/Lib"
+
+Library = {}
+Library["Vulkan"] = "%{LibraryDir.VulkanSDK}/vulkan-1.lib"
 
 group "Dependencies"
 	include "Amethyst/vendor/GLFW"
@@ -74,7 +82,9 @@ project "Amethyst"
 		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.Optick}",
 		"%{IncludeDir.stb_image}",
-		"%{IncludeDir.yamlcpp}"
+		"%{IncludeDir.yamlcpp}",
+
+		"%{IncludeDir.VulkanSDK}",
 	}
 
 	links 
@@ -85,7 +95,9 @@ project "Amethyst"
 		"Assimp",
 		"yaml-cpp",
 		"Optick",
-		"opengl32.lib"
+		"opengl32.lib",
+
+		"%{Library.Vulkan}",
 	}
 
 	defines
