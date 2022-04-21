@@ -177,6 +177,7 @@
     <ClInclude Include="src\Amethyst\Resources\Resource.h" />
     <ClInclude Include="src\Amethyst\Resources\ResourceSystem.h" />
     <ClInclude Include="src\Amethyst\Resources\Texture.h" />
+    <ClInclude Include="src\Amethyst\Scene\Components\CameraComponent.h" />
     <ClInclude Include="src\Amethyst\Scene\Components\Component.h" />
     <ClInclude Include="src\Amethyst\Scene\Components\MaterialComponent.h" />
     <ClInclude Include="src\Amethyst\Scene\Components\MeshComponent.h" />
@@ -637,6 +638,7 @@
     <ClCompile Include="src\Amethyst\Resources\Mesh.cpp" />
     <ClCompile Include="src\Amethyst\Resources\ResourceSystem.cpp" />
     <ClCompile Include="src\Amethyst\Resources\Texture.cpp" />
+    <ClCompile Include="src\Amethyst\Scene\Components\CameraComponent.cpp" />
     <ClCompile Include="src\Amethyst\Scene\Components\MaterialComponent.cpp" />
     <ClCompile Include="src\Amethyst\Scene\Components\MeshComponent.cpp" />
     <ClCompile Include="src\Amethyst\Scene\Components\TransformComponent.cpp" />

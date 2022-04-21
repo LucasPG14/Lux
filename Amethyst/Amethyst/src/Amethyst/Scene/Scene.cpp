@@ -5,6 +5,7 @@
 #include "Components/TransformComponent.h"
 #include "Components/MeshComponent.h"
 #include "Components/MaterialComponent.h"
+#include "Components/CameraComponent.h"
 
 #include "Amethyst/Renderer/Renderer.h"
 
@@ -15,6 +16,8 @@ namespace Amethyst
 {
 	Scene::Scene()
 	{
+		Entity& entity = CreateEntity("Main Camera");
+		entity.CreateComponent<CameraComponent>();
 	}
 	
 	Scene::~Scene()

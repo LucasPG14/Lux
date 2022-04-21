@@ -24,7 +24,7 @@ namespace Amethyst
 		glm::vec3 FarPlanePos(glm::vec2 pos);
 	
 	private:	
-		glm::mat3x4 ComputeViewMatrix();
+		const glm::mat3x4& ComputeViewMatrix();
 
 		glm::vec3 Cross(const glm::vec3& v1, const glm::vec3& v2);
 
