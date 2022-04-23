@@ -4,6 +4,7 @@
 #include "Renderer.h"
 
 #include "Platform/OpenGL/OpenGLShader.h"
+#include "Platform/Vulkan/VulkanShader.h"
 
 namespace Amethyst
 {
@@ -17,6 +18,7 @@ namespace Amethyst
 			return nullptr;
 		}
 		case Render::API::OPENGL: return std::make_shared<OpenGLShader>(filePath);
+		case Render::API::VULKAN: return std::make_shared<VulkanShader>(filePath);
 		}
 		AMT_CORE_ASSERT(false, "RendererAPI not defined!");
 		return nullptr;
@@ -32,6 +34,7 @@ namespace Amethyst
 			return nullptr;
 		}
 		case Render::API::OPENGL: return std::make_shared<OpenGLShader>(name, vertex, fragment);
+		case Render::API::VULKAN: return std::make_shared<VulkanShader>(name, vertex, fragment);
 		}
 		AMT_CORE_ASSERT(false, "RendererAPI not defined!");
 		return nullptr;

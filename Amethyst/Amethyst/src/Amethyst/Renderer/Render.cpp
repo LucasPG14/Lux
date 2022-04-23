@@ -3,5 +3,5 @@
 
 namespace Amethyst
 {
-	Render::API Render::api = Render::API::VULKAN;
+	Render::API Render::api = Render::API::OPENGL;
 }

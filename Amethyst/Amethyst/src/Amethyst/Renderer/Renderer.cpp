@@ -50,6 +50,10 @@ namespace Amethyst
 		RenderOrder::Init();
 
 		// Loading all shaders
+		// Vulkan
+		//std::shared_ptr<Shader> shader = Shader::Create("Default", "assets/shaders/VulkanVert.spv", "assets/shaders/VulkanFrag.spv");
+		
+		// OpenGL
 		std::shared_ptr<Shader> shader = Shader::Create("assets/shaders/Texture.glsl");
 		data.shader = Shader::Create("assets/shaders/TextureBatch.glsl");
 		shaderLibrary->Add(data.shader);
@@ -86,7 +90,7 @@ namespace Amethyst
 		data.vao->AddIndexBuffer(ebo);
 		delete[] quadIndices;
 
-		uint32_t whiteTextureData = 0xffffffff;
+		//uint32_t whiteTextureData = 0xffffffff;
 		//data.whiteMaterial = std::make_shared<Material>(&whiteTextureData, 1, 1);
 	}
 

@@ -105,7 +105,7 @@ namespace Amethyst
 		}
 	}
 	
-	/*void ImGuiLayer::OnEvent(Event& event)
+	/*void ImGuiOpenGLLayer::OnEvent(Event& event)
 	{
 		EventDispatcher dispatcher(event);
 
@@ -118,7 +118,7 @@ namespace Amethyst
 		dispatcher.Dispatch<WindowResizeEvent>(AMT_BIND_EVENT_FN(ImGuiLayer::OnWindowResized));
 	}
 	
-	bool ImGuiLayer::OnMousePressed(MouseButtonPressedEvent& event)
+	bool ImGuiOpenGLLayer::OnMousePressed(MouseButtonPressedEvent& event)
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		io.MouseDown[event.GetMouseButton()] = true;
@@ -126,7 +126,7 @@ namespace Amethyst
 		return false;
 	}
 	
-	bool ImGuiLayer::OnMouseReleased(MouseButtonReleasedEvent& event)
+	bool ImGuiOpenGLLayer::OnMouseReleased(MouseButtonReleasedEvent& event)
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		io.MouseDown[event.GetMouseButton()] = false;
@@ -134,7 +134,7 @@ namespace Amethyst
 		return false;
 	}
 	
-	bool ImGuiLayer::OnMouseMoved(MouseMovedEvent& event)
+	bool ImGuiOpenGLLayer::OnMouseMoved(MouseMovedEvent& event)
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		io.MousePos = ImVec2(event.GetX(), event.GetY());
@@ -142,7 +142,7 @@ namespace Amethyst
 		return false;
 	}
 	
-	bool ImGuiLayer::OnMouseScrolled(MouseScrolledEvent& event)
+	bool ImGuiOpenGLLayer::OnMouseScrolled(MouseScrolledEvent& event)
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		io.MouseWheelH += event.GetXOffset();
@@ -151,7 +151,7 @@ namespace Amethyst
 		return false;
 	}
 	
-	bool ImGuiLayer::OnKeyPressed(KeyPressedEvent& event)
+	bool ImGuiOpenGLLayer::OnKeyPressed(KeyPressedEvent& event)
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		io.KeysDown[event.GetKeyCode()] = true;
@@ -164,7 +164,7 @@ namespace Amethyst
 		return false;
 	}
 
-	bool ImGuiLayer::OnKeyTyped(KeyTypedEvent& event)
+	bool ImGuiOpenGLLayer::OnKeyTyped(KeyTypedEvent& event)
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		int key = event.GetKeyCode();
@@ -175,7 +175,7 @@ namespace Amethyst
 		return false;
 	}
 	
-	bool ImGuiLayer::OnKeyReleased(KeyReleasedEvent& event)
+	bool ImGuiOpenGLLayer::OnKeyReleased(KeyReleasedEvent& event)
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		io.KeysDown[event.GetKeyCode()] = false;
@@ -183,7 +183,7 @@ namespace Amethyst
 		return false;
 	}
 	
-	bool ImGuiLayer::OnWindowResized(WindowResizeEvent& event)
+	bool ImGuiOpenGLLayer::OnWindowResized(WindowResizeEvent& event)
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		io.DisplaySize = ImVec2(event.GetWidth(), event.GetHeight());

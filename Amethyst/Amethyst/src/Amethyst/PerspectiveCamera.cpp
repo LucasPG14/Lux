@@ -119,7 +119,7 @@ namespace Amethyst
 			v1.x * v2.y - v1.y * v2.x);
 	}
 	
-	const glm::mat3x4& PerspectiveCamera::ComputeViewMatrix()
+	glm::mat3x4 PerspectiveCamera::ComputeViewMatrix()
 	{
 		glm::vec3 worldRight = glm::normalize(glm::cross(front, up));
 

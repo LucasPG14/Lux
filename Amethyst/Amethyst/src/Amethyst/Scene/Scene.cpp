@@ -16,8 +16,8 @@ namespace Amethyst
 {
 	Scene::Scene()
 	{
-		Entity& entity = CreateEntity("Main Camera");
-		entity.CreateComponent<CameraComponent>();
+		//Entity& entity = CreateEntity("Main Camera");
+		//entity.CreateComponent<CameraComponent>();
 	}
 	
 	Scene::~Scene()

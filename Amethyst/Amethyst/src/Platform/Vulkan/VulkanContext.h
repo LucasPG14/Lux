@@ -28,5 +28,16 @@ namespace Amethyst
 		VkQueue queue;
 
 		VkDevice device;
+		VkDescriptorPool descriptorPool;
+
+		VkSurfaceKHR surface;
+
+		VkSwapchainKHR swapChain;
+		uint32_t imgCount;
+		VkImage* images;
+		VkImageView* imageViews;
+
+		VkFormat format;
+		VkExtent2D extent;
 	};
 }
