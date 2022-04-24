@@ -8,21 +8,56 @@
 
 namespace Amethyst
 {
+	static const int maxFramesInFlight = 2;
+
 	// Temporary
+	VkInstance VulkanContext::context = VK_NULL_HANDLE;
 	VkQueue VulkanContext::queue = VK_NULL_HANDLE;
 	VkDevice VulkanContext::device = VK_NULL_HANDLE;
-	VkCommandBuffer VulkanContext::commandBuffer = VK_NULL_HANDLE;
+	VkPhysicalDevice VulkanContext::physicalDevice = VK_NULL_HANDLE;
+	
+	uint32_t VulkanContext::imgCount = 0;
+	VkAllocationCallbacks* VulkanContext::callbacksAllocator = VK_NULL_HANDLE;
+	VkSurfaceKHR VulkanContext::surface = VK_NULL_HANDLE;
+	VkFormat VulkanContext::format = {};
+
+	std::vector<VkImage> VulkanContext::images = {};
+	std::vector<VkImageView> VulkanContext::imageViews = {};
+	
+	VkShaderModule VulkanContext::vertexModule = VK_NULL_HANDLE;
+	VkShaderModule VulkanContext::fragmentModule = VK_NULL_HANDLE;
+
+	VkPipelineShaderStageCreateInfo VulkanContext::stages[2] = {};
+	
+	std::vector<VkCommandBuffer> VulkanContext::commandBuffer = {};
 	VkRenderPass VulkanContext::renderPass = VK_NULL_HANDLE;
 	VkPipeline VulkanContext::graphicsPipeline = VK_NULL_HANDLE;
 	
 	VkSwapchainKHR VulkanContext::swapChain = VK_NULL_HANDLE;
+	VkPipelineLayout VulkanContext::pipelineLayout = VK_NULL_HANDLE;
 	
-	VkSemaphore VulkanContext::imageAvailable = VK_NULL_HANDLE;
-	VkSemaphore VulkanContext::renderFinished = VK_NULL_HANDLE;
-	VkFence VulkanContext::inFlightFence = VK_NULL_HANDLE;
+	std::vector<VkSemaphore> VulkanContext::imageAvailable = {};
+	std::vector<VkSemaphore> VulkanContext::renderFinished = {};
+	std::vector<VkFence> VulkanContext::inFlightFence = {};
 	
 	VkExtent2D VulkanContext::extent = {};
 	std::vector<VkFramebuffer> VulkanContext::framebuffers = {};
+
+	std::vector<MyVertex> VulkanContext::vertices = {};
+	std::vector<uint32_t> VulkanContext::indices = {};
+
+	VkBuffer VulkanContext::vertexBuffer = VK_NULL_HANDLE;
+	VkDeviceMemory VulkanContext::vertexBufferMemory = VK_NULL_HANDLE;
+	
+	VkCommandPool VulkanContext::commandPool = VK_NULL_HANDLE;
+
+	VkBuffer VulkanContext::stagingBuffer = VK_NULL_HANDLE;
+	VkDeviceMemory VulkanContext::stagingBufferMemory = VK_NULL_HANDLE;
+
+	VkBuffer VulkanContext::indexBuffer = VK_NULL_HANDLE;
+	VkDeviceMemory VulkanContext::indexBufferMemory = VK_NULL_HANDLE;
+
+	int VulkanContext::currentFrame = 0;
 
 	static void CheckVkResult(VkResult error)
 	{
@@ -30,7 +65,7 @@ namespace Amethyst
 	}
 
 	VulkanContext::VulkanContext(GLFWwindow* currentWindow) 
-		: window(currentWindow), context(VK_NULL_HANDLE), callbacksAllocator(VK_NULL_HANDLE), physicalDevice(VK_NULL_HANDLE), queueCount(-1)
+		: window(currentWindow), queueCount(-1)
 	{
 		VulkanManager::SetCallbackAllocator(callbacksAllocator);
 	}
@@ -150,11 +185,313 @@ namespace Amethyst
 			CheckVkResult(error);
 		}
 
+		// Setting the command pool
+		{
+			VkCommandPoolCreateInfo commandPoolInfo = {};
+			commandPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+			commandPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+			commandPoolInfo.queueFamilyIndex = queueCount;
+
+			error = vkCreateCommandPool(device, &commandPoolInfo, callbacksAllocator, &commandPool);
+			CheckVkResult(error);
+
+			commandBuffer.resize(maxFramesInFlight);
+
+			// Setting command buffer
+			VkCommandBufferAllocateInfo cmdAllocInfo = {};
+			cmdAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+			cmdAllocInfo.commandPool = commandPool;
+			cmdAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+			cmdAllocInfo.commandBufferCount = commandBuffer.size();
+
+			error = vkAllocateCommandBuffers(device, &cmdAllocInfo, commandBuffer.data());
+			CheckVkResult(error);
+		}
+
+		CreateSwapChain();
+
+		// Setting sync objects
+		{
+			VkSemaphoreCreateInfo semaphoreInfo = {};
+			semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+			VkFenceCreateInfo fenceInfo = {};
+			fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+			fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+			imageAvailable.resize(maxFramesInFlight);
+			renderFinished.resize(maxFramesInFlight);
+			inFlightFence.resize(maxFramesInFlight);
+
+			for (int i = 0; i < maxFramesInFlight; ++i)
+			{
+				vkCreateSemaphore(device, &semaphoreInfo, callbacksAllocator, &imageAvailable[i]);
+				vkCreateSemaphore(device, &semaphoreInfo, callbacksAllocator, &renderFinished[i]);
+				vkCreateFence(device, &fenceInfo, callbacksAllocator, &inFlightFence[i]);
+			}
+		}
+	}
+
+	void VulkanContext::Shutdown()
+	{
+		vkDeviceWaitIdle(device);
+		CleanUpSwapChain();
+
+		vkDestroyBuffer(device, indexBuffer, callbacksAllocator);
+		vkFreeMemory(device, indexBufferMemory, callbacksAllocator);
+
+		vkDestroyBuffer(device, vertexBuffer, callbacksAllocator);
+		vkFreeMemory(device, vertexBufferMemory, callbacksAllocator);
+
+		for (int i = 0; i < maxFramesInFlight; ++i)
+		{
+			vkDestroySemaphore(device, renderFinished[i], callbacksAllocator);
+			vkDestroySemaphore(device, imageAvailable[i], callbacksAllocator);
+			vkDestroyFence(device, inFlightFence[i], callbacksAllocator);
+		}
+
+		vkDestroyCommandPool(device, commandPool, callbacksAllocator);
+		
+		//vkDestroyDescriptorPool(device, descriptorPool, callbacksAllocator);
+		vkDestroyDevice(device, callbacksAllocator);
+		vkDestroySurfaceKHR(context, surface, callbacksAllocator);
+		vkDestroyInstance(context, callbacksAllocator);
+	}
+	
+	void VulkanContext::Draw()
+	{
+		vkWaitForFences(device, 1, &inFlightFence[currentFrame], VK_TRUE, UINT64_MAX);
+
+		vkResetFences(device, 1, &inFlightFence[currentFrame]);
+
+		uint32_t imageIndex;
+		VkResult error = vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailable[currentFrame], VK_NULL_HANDLE, &imageIndex);
+
+		if (error == VK_ERROR_OUT_OF_DATE_KHR)
+		{
+			RecreateSwapChain();
+			return;
+		}
+
+		vkResetCommandBuffer(commandBuffer[currentFrame], 0);
+
+		RecordCommandBuffer(commandBuffer[currentFrame], imageIndex);
+
+		VkPresentInfoKHR presentInfo = {};
+		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+		presentInfo.swapchainCount = 1;
+		presentInfo.pSwapchains = &swapChain;
+		presentInfo.pImageIndices = &imageIndex;
+
+		presentInfo.pResults = nullptr;
+
+		error = vkQueuePresentKHR(queue, &presentInfo);
+
+		if (error == VK_ERROR_OUT_OF_DATE_KHR || error == VK_SUBOPTIMAL_KHR)
+		{
+			RecreateSwapChain();
+		}
+
+		currentFrame = (currentFrame + 1) % maxFramesInFlight;
+	}
+
+	void VulkanContext::SwapBuffers()
+	{
+
+	}
+
+	void VulkanContext::RecreateSwapChain()
+	{
+		vkDeviceWaitIdle(device);
+
+		CleanUpSwapChain();
+
+		CreateSwapChain();
+	}
+	
+	void VulkanContext::CompileShaders(const std::string& vertex, const std::string& fragment)
+	{
+		// Vertex file
+		std::ifstream vertexFile(vertex, std::ios::ate | std::ios::binary);
+
+		size_t fileSize = (size_t)vertexFile.tellg();
+		std::vector<char> vertBuffer(fileSize);
+
+		vertexFile.seekg(0);
+		vertexFile.read(vertBuffer.data(), fileSize);
+
+		vertexFile.close();
+
+		VkShaderModuleCreateInfo vertCreateInfo = {};
+		vertCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+		vertCreateInfo.codeSize = vertBuffer.size();
+		vertCreateInfo.pCode = reinterpret_cast<const uint32_t*>(vertBuffer.data());
+
+		VkResult error = vkCreateShaderModule(VulkanManager::GetDevice(), &vertCreateInfo, VulkanManager::GetCallbackAllocator(), &vertexModule);
+		CheckVkResult(error);
+
+		// Fragment file
+		std::ifstream fragFile(fragment, std::ios::ate | std::ios::binary);
+
+		fileSize = (size_t)fragFile.tellg();
+		std::vector<char> fragBuffer(fileSize);
+
+		fragFile.seekg(0);
+		fragFile.read(fragBuffer.data(), fileSize);
+
+		fragFile.close();
+
+		VkShaderModuleCreateInfo fragCreateInfo = {};
+		fragCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+		fragCreateInfo.codeSize = fragBuffer.size();
+		fragCreateInfo.pCode = reinterpret_cast<const uint32_t*>(fragBuffer.data());
+
+		error = vkCreateShaderModule(VulkanManager::GetDevice(), &fragCreateInfo, VulkanManager::GetCallbackAllocator(), &fragmentModule);
+		CheckVkResult(error);
+	}
+	
+	void VulkanContext::RecordCommandBuffer(VkCommandBuffer cmdBuffer, uint32_t index)
+	{
+		VkCommandBufferBeginInfo cmdBeginInfo = {};
+		cmdBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		cmdBeginInfo.flags = 0;
+		cmdBeginInfo.pInheritanceInfo = nullptr;
+
+		VkResult error = vkBeginCommandBuffer(cmdBuffer, &cmdBeginInfo);
+		CheckVkResult(error);
+
+		VkRenderPassBeginInfo renderPassBeginInfo = {};
+		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		renderPassBeginInfo.renderPass = renderPass;
+		renderPassBeginInfo.framebuffer = framebuffers[index];
+
+		renderPassBeginInfo.renderArea.offset = { 0, 0 };
+		renderPassBeginInfo.renderArea.extent = extent;
+
+		VkClearValue clearColor = { {{0.0f, 0.0f, 0.0f, 1.0f}} };
+		renderPassBeginInfo.clearValueCount = 1;
+		renderPassBeginInfo.pClearValues = &clearColor;
+
+		vkCmdBeginRenderPass(cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+		vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+
+		VkBuffer vertexBuffers[] = { vertexBuffer };
+		VkDeviceSize offsets[] = { 0 };
+		vkCmdBindVertexBuffers(cmdBuffer, 0, 1, vertexBuffers, offsets);
+
+		vkCmdBindIndexBuffer(cmdBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+
+		vkCmdDrawIndexed(cmdBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+
+		vkCmdEndRenderPass(cmdBuffer);
+
+		error = vkEndCommandBuffer(cmdBuffer);
+		CheckVkResult(error);
+
+		VkSubmitInfo submitInfo = {};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+		VkSemaphore waitSemaphores[] = { imageAvailable[currentFrame] };
+		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+		submitInfo.waitSemaphoreCount = 1;
+		submitInfo.pWaitSemaphores = waitSemaphores;
+		submitInfo.pWaitDstStageMask = waitStages;
+
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &cmdBuffer;
+
+		VkSemaphore signalSemaphores[] = { renderFinished[currentFrame] };
+		submitInfo.signalSemaphoreCount = 1;
+		submitInfo.pSignalSemaphores = signalSemaphores;
+
+		vkQueueSubmit(queue, 1, &submitInfo, inFlightFence[currentFrame]);
+	}
+
+	void VulkanContext::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& memory)
+	{
+		// Creating the vertex buffer
+		VkBufferCreateInfo bufferInfo = {};
+		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+		bufferInfo.size = sizeof(vertices[0]) * vertices.size();
+		bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+		VkResult error = vkCreateBuffer(device, &bufferInfo, callbacksAllocator, &buffer);
+		CheckVkResult(error);
+
+		VkMemoryRequirements memRequirements;
+		vkGetBufferMemoryRequirements(device, buffer, &memRequirements);
+
+		VkPhysicalDeviceMemoryProperties memProperties;
+		vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
+
+		int mem = 0;
+		for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
+		{
+			if (memRequirements.memoryTypeBits & (1 << i) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
+			{
+				mem = i;
+				break;
+			}
+		}
+
+		VkMemoryAllocateInfo allocInfo = {};
+		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+		allocInfo.allocationSize = memRequirements.size;
+		allocInfo.memoryTypeIndex = mem;
+
+		error = vkAllocateMemory(device, &allocInfo, callbacksAllocator, &memory);
+		CheckVkResult(error);
+
+		error = vkBindBufferMemory(device, buffer, memory, 0);
+		CheckVkResult(error);
+	}
+
+	void VulkanContext::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
+	{
+		VkCommandBufferAllocateInfo allocIndexInfo = {};
+		allocIndexInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		allocIndexInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		allocIndexInfo.commandPool = commandPool;
+		allocIndexInfo.commandBufferCount = 1;
+
+		VkCommandBuffer commandBuffer;
+		VkResult error = vkAllocateCommandBuffers(device, &allocIndexInfo, &commandBuffer);
+		CheckVkResult(error);
+
+		VkCommandBufferBeginInfo beginIndexInfo = {};
+		beginIndexInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		beginIndexInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+		vkBeginCommandBuffer(commandBuffer, &beginIndexInfo);
+
+		VkBufferCopy copyIndexRegion = {};
+		copyIndexRegion.srcOffset = 0; // Optional
+		copyIndexRegion.dstOffset = 0; // Optional
+		copyIndexRegion.size = size;
+		vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyIndexRegion);
+
+		vkEndCommandBuffer(commandBuffer);
+
+		VkSubmitInfo submitIndexInfo = {};
+		submitIndexInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		submitIndexInfo.commandBufferCount = 1;
+		submitIndexInfo.pCommandBuffers = &commandBuffer;
+
+		vkQueueSubmit(queue, 1, &submitIndexInfo, VK_NULL_HANDLE);
+		vkQueueWaitIdle(queue);
+
+		vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
+	}
+	
+	void VulkanContext::CreateSwapChain()
+	{
 		// ----------------- Creating the swapchain -----------------
 		{
 			// Getting surface capabilities
 			VkSurfaceCapabilitiesKHR capabilities;
-			error = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &capabilities);
+			VkResult error = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &capabilities);
 			CheckVkResult(error);
 
 			extent = capabilities.currentExtent;
@@ -328,12 +665,82 @@ namespace Amethyst
 			// Setting the pipeline
 			{
 				// Setting the vertex input
+				vertices =
+				{
+					{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+					{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+					{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+					{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
+				};
+
+				indices =
+				{
+					0, 1, 2, 2, 3, 0
+				};
+
+				VkVertexInputBindingDescription bindingDescription = {};
+				bindingDescription.binding = 0;
+				bindingDescription.stride = sizeof(MyVertex);
+				bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+				std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions = {};
+
+				attributeDescriptions[0].binding = 0;
+				attributeDescriptions[0].location = 0;
+				attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+				attributeDescriptions[0].offset = offsetof(MyVertex, position);
+
+				attributeDescriptions[1].binding = 0;
+				attributeDescriptions[1].location = 1;
+				attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+				attributeDescriptions[1].offset = offsetof(MyVertex, color);
+
 				VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
 				vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-				vertexInputInfo.vertexBindingDescriptionCount = 0;
-				vertexInputInfo.pVertexBindingDescriptions = nullptr;
-				vertexInputInfo.vertexAttributeDescriptionCount = 0;
-				vertexInputInfo.pVertexAttributeDescriptions = nullptr;
+				vertexInputInfo.vertexBindingDescriptionCount = 1;
+				vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+				vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+				vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
+
+				VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
+				CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+
+				void* data;
+				vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
+				memcpy(data, vertices.data(), (size_t)bufferSize);
+				vkUnmapMemory(device, stagingBufferMemory);
+
+				bufferSize = sizeof(vertices[0]) * vertices.size();
+				CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer, vertexBufferMemory);
+
+				CopyBuffer(stagingBuffer, vertexBuffer, bufferSize);
+
+				vkDestroyBuffer(device, stagingBuffer, callbacksAllocator);
+				vkFreeMemory(device, stagingBufferMemory, callbacksAllocator);
+
+				// ----------------------------- Index Buffer ------------------------------------
+				bufferSize = sizeof(indices[0]) * indices.size();
+
+				VkBuffer stagingIndexBuffer;
+				VkDeviceMemory stagingIndexBufferMemory;
+				CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingIndexBuffer, stagingIndexBufferMemory);
+
+				data = nullptr;
+				vkMapMemory(device, stagingIndexBufferMemory, 0, bufferSize, 0, &data);
+				memcpy(data, indices.data(), (size_t)bufferSize);
+				vkUnmapMemory(device, stagingIndexBufferMemory);
+
+				CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);
+
+				CopyBuffer(stagingIndexBuffer, indexBuffer, bufferSize);
+
+				vkDestroyBuffer(device, stagingIndexBuffer, callbacksAllocator);
+				vkFreeMemory(device, stagingIndexBufferMemory, callbacksAllocator);
+
+				//void* data;
+				//vkMapMemory(device, vertexBufferMemory, 0, bufferSize, 0, &data);
+				//memcpy(data, vertices.data(), (size_t)bufferSize);
+				//vkUnmapMemory(device, vertexBufferMemory);
 
 				// Setting the input assembly
 				VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo = {};
@@ -472,55 +879,14 @@ namespace Amethyst
 				fboCreateInfo.height = extent.height;
 				fboCreateInfo.layers = 1;
 
-				error = vkCreateFramebuffer(device, &fboCreateInfo, callbacksAllocator, &framebuffers[i]);
+				VkResult error = vkCreateFramebuffer(device, &fboCreateInfo, callbacksAllocator, &framebuffers[i]);
 				CheckVkResult(error);
 			}
 		}
-
-		// Setting the command pool
-		{
-			VkCommandPoolCreateInfo commandPoolInfo = {};
-			commandPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-			commandPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-			commandPoolInfo.queueFamilyIndex = queueCount;
-
-			error = vkCreateCommandPool(device, &commandPoolInfo, callbacksAllocator, &commandPool);
-			CheckVkResult(error);
-
-			// Setting command buffer
-			VkCommandBufferAllocateInfo cmdAllocInfo = {};
-			cmdAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-			cmdAllocInfo.commandPool = commandPool;
-			cmdAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-			cmdAllocInfo.commandBufferCount = 1;
-
-			error = vkAllocateCommandBuffers(device, &cmdAllocInfo, &commandBuffer);
-			CheckVkResult(error);
-		}
-
-		// Setting sync objects
-		{
-			VkSemaphoreCreateInfo semaphoreInfo = {};
-			semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
-			VkFenceCreateInfo fenceInfo = {};
-			fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-			fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
-			vkCreateSemaphore(device, &semaphoreInfo, callbacksAllocator, &imageAvailable);
-			vkCreateSemaphore(device, &semaphoreInfo, callbacksAllocator, &renderFinished);
-			vkCreateFence(device, &fenceInfo, callbacksAllocator, &inFlightFence);
-		}
 	}
 
-	void VulkanContext::Shutdown()
+	void VulkanContext::CleanUpSwapChain()
 	{
-		vkDestroySemaphore(device, imageAvailable, callbacksAllocator);
-		vkDestroySemaphore(device, renderFinished, callbacksAllocator);
-		vkDestroyFence(device, inFlightFence, callbacksAllocator);
-
-		vkDestroyCommandPool(device, commandPool, callbacksAllocator);
-
 		for (size_t i = 0; i < framebuffers.size(); ++i)
 		{
 			vkDestroyFramebuffer(device, framebuffers[i], callbacksAllocator);
@@ -529,137 +895,12 @@ namespace Amethyst
 		vkDestroyPipeline(device, graphicsPipeline, callbacksAllocator);
 		vkDestroyPipelineLayout(device, pipelineLayout, callbacksAllocator);
 		vkDestroyRenderPass(device, renderPass, callbacksAllocator);
-		for (uint32_t i = 0; i < imgCount; ++i)
+
+		for (size_t i = 0; i < imageViews.size(); ++i)
 		{
 			vkDestroyImageView(device, imageViews[i], callbacksAllocator);
 		}
 
 		vkDestroySwapchainKHR(device, swapChain, callbacksAllocator);
-		vkDestroyDescriptorPool(device, descriptorPool, callbacksAllocator);
-		vkDestroyDevice(device, callbacksAllocator);
-		vkDestroySurfaceKHR(context, surface, callbacksAllocator);
-		vkDestroyInstance(context, callbacksAllocator);
-	}
-	
-	void VulkanContext::Draw()
-	{
-		vkWaitForFences(device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
-
-		vkResetFences(device, 1, &inFlightFence);
-
-		uint32_t imageIndex;
-		vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailable, VK_NULL_HANDLE, &imageIndex);
-
-		vkResetCommandBuffer(commandBuffer, 0);
-
-		RecordCommandBuffer(commandBuffer, imageIndex);
-
-		VkPresentInfoKHR presentInfo = {};
-		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-		presentInfo.swapchainCount = 1;
-		presentInfo.pSwapchains = &swapChain;
-		presentInfo.pImageIndices = &imageIndex;
-
-		presentInfo.pResults = nullptr;
-
-		vkQueuePresentKHR(queue, &presentInfo);
-	}
-
-	void VulkanContext::SwapBuffers()
-	{
-
-	}
-	
-	void VulkanContext::CompileShaders(const std::string& vertex, const std::string& fragment)
-	{
-		// Vertex file
-		std::ifstream vertexFile(vertex, std::ios::ate | std::ios::binary);
-
-		size_t fileSize = (size_t)vertexFile.tellg();
-		std::vector<char> vertBuffer(fileSize);
-
-		vertexFile.seekg(0);
-		vertexFile.read(vertBuffer.data(), fileSize);
-
-		vertexFile.close();
-
-		VkShaderModuleCreateInfo vertCreateInfo = {};
-		vertCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-		vertCreateInfo.codeSize = vertBuffer.size();
-		vertCreateInfo.pCode = reinterpret_cast<const uint32_t*>(vertBuffer.data());
-
-		VkResult error = vkCreateShaderModule(VulkanManager::GetDevice(), &vertCreateInfo, VulkanManager::GetCallbackAllocator(), &vertexModule);
-		CheckVkResult(error);
-
-		// Fragment file
-		std::ifstream fragFile(fragment, std::ios::ate | std::ios::binary);
-
-		fileSize = (size_t)fragFile.tellg();
-		std::vector<char> fragBuffer(fileSize);
-
-		fragFile.seekg(0);
-		fragFile.read(fragBuffer.data(), fileSize);
-
-		fragFile.close();
-
-		VkShaderModuleCreateInfo fragCreateInfo = {};
-		fragCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-		fragCreateInfo.codeSize = fragBuffer.size();
-		fragCreateInfo.pCode = reinterpret_cast<const uint32_t*>(fragBuffer.data());
-
-		error = vkCreateShaderModule(VulkanManager::GetDevice(), &fragCreateInfo, VulkanManager::GetCallbackAllocator(), &fragmentModule);
-		CheckVkResult(error);
-	}
-	
-	void VulkanContext::RecordCommandBuffer(VkCommandBuffer cmdBuffer, uint32_t index)
-	{
-		VkCommandBufferBeginInfo cmdBeginInfo = {};
-		cmdBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		cmdBeginInfo.flags = 0;
-		cmdBeginInfo.pInheritanceInfo = nullptr;
-
-		VkResult error = vkBeginCommandBuffer(cmdBuffer, &cmdBeginInfo);
-		CheckVkResult(error);
-
-		VkRenderPassBeginInfo renderPassBeginInfo = {};
-		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		renderPassBeginInfo.renderPass = renderPass;
-		renderPassBeginInfo.framebuffer = framebuffers[index];
-
-		renderPassBeginInfo.renderArea.offset = { 0, 0 };
-		renderPassBeginInfo.renderArea.extent = extent;
-
-		VkClearValue clearColor = { {{0.0f, 0.0f, 0.0f, 1.0f}} };
-		renderPassBeginInfo.clearValueCount = 1;
-		renderPassBeginInfo.pClearValues = &clearColor;
-
-		vkCmdBeginRenderPass(cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-		vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
-
-		vkCmdDraw(cmdBuffer, 3, 1, 0, 0);
-
-		vkCmdEndRenderPass(cmdBuffer);
-
-		error = vkEndCommandBuffer(cmdBuffer);
-		CheckVkResult(error);
-
-		VkSubmitInfo submitInfo = {};
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-		VkSemaphore waitSemaphores[] = { imageAvailable };
-		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-		submitInfo.waitSemaphoreCount = 1;
-		submitInfo.pWaitSemaphores = waitSemaphores;
-		submitInfo.pWaitDstStageMask = waitStages;
-
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &commandBuffer;
-
-		VkSemaphore signalSemaphores[] = { renderFinished };
-		submitInfo.signalSemaphoreCount = 1;
-		submitInfo.pSignalSemaphores = signalSemaphores;
-
-		vkQueueSubmit(queue, 1, &submitInfo, inFlightFence);
 	}
 }
