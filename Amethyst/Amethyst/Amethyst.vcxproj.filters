@@ -1494,6 +1494,7 @@
     <ClInclude Include="src\Platform\Vulkan\VulkanShader.h" />
     <ClInclude Include="src\Platform\Vulkan\VulkanManager.h" />
     <ClInclude Include="src\Platform\Vulkan\VulkanRender.h" />
+    <ClInclude Include="src\Platform\Vulkan\VulkanPipeline.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Amethyst\Core\Application.cpp">

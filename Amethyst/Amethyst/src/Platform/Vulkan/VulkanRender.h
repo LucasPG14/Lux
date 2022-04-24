@@ -14,5 +14,8 @@ namespace Amethyst
 		void ChangeState(bool change) const override;
 
 		void Draw(const std::shared_ptr<VertexArray>& vertexArray, uint32_t indexCount = 0) override;
+
+	private:
+
 	};
 }

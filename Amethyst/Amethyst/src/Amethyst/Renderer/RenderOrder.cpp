@@ -6,5 +6,5 @@
 
 namespace Amethyst
 {
-	Render* RenderOrder::render = new OpenGLRender;
+	Render* RenderOrder::render = new VulkanRender;
 }

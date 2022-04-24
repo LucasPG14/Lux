@@ -10,7 +10,7 @@ namespace Amethyst
 	public:
 		AmethystEditor()
 		{
-			PushLayer(new EditorLayer);
+			//PushLayer(new EditorLayer);
 		}
 
 		~AmethystEditor()

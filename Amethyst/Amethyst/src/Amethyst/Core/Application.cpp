@@ -3,6 +3,8 @@
 
 #include "Amethyst/Renderer/Renderer.h"
 
+#include "Platform/Vulkan/VulkanContext.h"
+
 #include "Amethyst/Core/Input.h"
 
 #include <GLFW/glfw3.h>
@@ -26,8 +28,8 @@ namespace Amethyst
 		Renderer::Init();
 
 		// Creating ImGuiLayer
-		imguiLayer = new ImGuiLayer();
-		PushOverlay(imguiLayer);
+		//imguiLayer = new ImGuiLayer();
+		//PushOverlay(imguiLayer);
 	}
 	
 	Application::~Application()
@@ -44,16 +46,18 @@ namespace Amethyst
 			Timer timer = time - lastFrameTime;
 			lastFrameTime = time;
 
-			for (Layer* layer : layerStack)
-				layer->Update(timer);
+			//for (Layer* layer : layerStack)
+			//	layer->Update(timer);
 
 			// This should be on the renderer, on a separate thread
-			imguiLayer->Begin();
+			//imguiLayer->Begin();
 
-			for (Layer* layer : layerStack)
-				layer->RenderImGui();
+			//for (Layer* layer : layerStack)
+			//	layer->RenderImGui();
 
-			imguiLayer->End();
+			//imguiLayer->End();
+
+			VulkanContext::Draw();
 
 			window->Update();
 		}

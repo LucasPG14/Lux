@@ -44,7 +44,7 @@ namespace Amethyst
 		glfwSetErrorCallback(GLFWErrorCallback);
 
 		// Uncomment this to use Vulkan
-		//glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
 		// Creating GLFW window
 		window = glfwCreateWindow((int)data.width, (int)data.height, data.title.c_str(), nullptr, nullptr);

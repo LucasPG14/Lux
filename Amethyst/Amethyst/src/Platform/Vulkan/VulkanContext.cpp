@@ -8,14 +8,29 @@
 
 namespace Amethyst
 {
+	// Temporary
+	VkQueue VulkanContext::queue = VK_NULL_HANDLE;
+	VkDevice VulkanContext::device = VK_NULL_HANDLE;
+	VkCommandBuffer VulkanContext::commandBuffer = VK_NULL_HANDLE;
+	VkRenderPass VulkanContext::renderPass = VK_NULL_HANDLE;
+	VkPipeline VulkanContext::graphicsPipeline = VK_NULL_HANDLE;
+	
+	VkSwapchainKHR VulkanContext::swapChain = VK_NULL_HANDLE;
+	
+	VkSemaphore VulkanContext::imageAvailable = VK_NULL_HANDLE;
+	VkSemaphore VulkanContext::renderFinished = VK_NULL_HANDLE;
+	VkFence VulkanContext::inFlightFence = VK_NULL_HANDLE;
+	
+	VkExtent2D VulkanContext::extent = {};
+	std::vector<VkFramebuffer> VulkanContext::framebuffers = {};
+
 	static void CheckVkResult(VkResult error)
 	{
 		AMT_CORE_ASSERT(!error, "Vulkan error");
 	}
 
 	VulkanContext::VulkanContext(GLFWwindow* currentWindow) 
-		: window(currentWindow), context(VK_NULL_HANDLE), callbacksAllocator(VK_NULL_HANDLE), physicalDevice(VK_NULL_HANDLE), queueCount(-1),
-		queue(VK_NULL_HANDLE)
+		: window(currentWindow), context(VK_NULL_HANDLE), callbacksAllocator(VK_NULL_HANDLE), physicalDevice(VK_NULL_HANDLE), queueCount(-1)
 	{
 		VulkanManager::SetCallbackAllocator(callbacksAllocator);
 	}
@@ -50,8 +65,9 @@ namespace Amethyst
 			AMT_CORE_ASSERT(gpuCount > 0, "Couldn't find a single GPU");
 
 			// Getting the list of all the gpus on the system
-			VkPhysicalDevice* gpus = new VkPhysicalDevice[gpuCount];
-			error = vkEnumeratePhysicalDevices(context, &gpuCount, gpus);
+			std::vector<VkPhysicalDevice> gpus;
+			gpus.resize(gpuCount);
+			error = vkEnumeratePhysicalDevices(context, &gpuCount, gpus.data());
 			CheckVkResult(error);
 
 			// Searching for a dedicated GPU
@@ -69,7 +85,6 @@ namespace Amethyst
 			}
 
 			physicalDevice = gpus[index];
-			delete[] gpus;
 
 			VulkanManager::SetPhysicalDevice(physicalDevice);
 		}
@@ -78,8 +93,9 @@ namespace Amethyst
 		{
 			uint32_t count = 0;
 			vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &count, NULL);
-			VkQueueFamilyProperties* queuesProperties = new VkQueueFamilyProperties[count];
-			vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &count, queuesProperties);
+			std::vector<VkQueueFamilyProperties> queuesProperties;
+			queuesProperties.resize(count);
+			vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &count, queuesProperties.data());
 
 			// Iterating through all the queues
 			for (uint32_t i = 0; i < count; ++i)
@@ -91,7 +107,6 @@ namespace Amethyst
 				}
 			}
 
-			delete[] queuesProperties;
 			AMT_CORE_ASSERT(queueCount != -1, "Queues Family not found");
 		}
 		
@@ -150,8 +165,9 @@ namespace Amethyst
 
 			AMT_CORE_ASSERT(formatCount != 0, "There aren't any surface formats");
 
-			VkSurfaceFormatKHR* surfaceFormats = new VkSurfaceFormatKHR[formatCount];
-			vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, surfaceFormats);
+			std::vector<VkSurfaceFormatKHR> surfaceFormats;
+			surfaceFormats.resize(formatCount);
+			vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, surfaceFormats.data());
 
 			// Getting surface present modes
 			uint32_t presentCount = 0;
@@ -159,8 +175,9 @@ namespace Amethyst
 
 			AMT_CORE_ASSERT(presentCount != 0, "There aren't any surface present modes");
 
-			VkPresentModeKHR* presentModes = new VkPresentModeKHR[presentCount];
-			vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentCount, presentModes);
+			std::vector<VkPresentModeKHR> presentModes;
+			presentModes.resize(presentCount);
+			vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentCount, presentModes.data());
 
 			// Selecting the surface format
 			int formatIndex = 0;
@@ -211,12 +228,12 @@ namespace Amethyst
 
 			// Getting the swapchain images
 			vkGetSwapchainImagesKHR(device, swapChain, &imgCount, NULL);
-			images = new VkImage[imgCount];
-			error = vkGetSwapchainImagesKHR(device, swapChain, &imgCount, images);
+			images.resize(imgCount);
+			error = vkGetSwapchainImagesKHR(device, swapChain, &imgCount, images.data());
 			CheckVkResult(error);
 
 			// Creating the image view for the swapchain
-			imageViews = new VkImageView[imgCount];
+			imageViews.resize(imgCount);
 			for (uint32_t i = 0; i < imgCount; ++i)
 			{
 				VkImageViewCreateInfo imgViewCreateInfo = {};
@@ -229,7 +246,7 @@ namespace Amethyst
 				imgViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
 				imgViewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
 				imgViewCreateInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-				
+
 				imgViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 				imgViewCreateInfo.subresourceRange.baseMipLevel = 0;
 				imgViewCreateInfo.subresourceRange.levelCount = 1;
@@ -239,13 +256,279 @@ namespace Amethyst
 				error = vkCreateImageView(device, &imgViewCreateInfo, callbacksAllocator, &imageViews[i]);
 				CheckVkResult(error);
 			}
+
+			// Creating the shader
+			{
+				CompileShaders("assets/shaders/VulkanVert.spv", "assets/shaders/VulkanFrag.spv");
+
+				VkPipelineShaderStageCreateInfo vertexCreateInfo = {};
+				vertexCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+				vertexCreateInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+				vertexCreateInfo.module = vertexModule;
+				vertexCreateInfo.pName = "main";
+
+				VkPipelineShaderStageCreateInfo fragmentCreateInfo = {};
+				fragmentCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+				fragmentCreateInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+				fragmentCreateInfo.module = fragmentModule;
+				fragmentCreateInfo.pName = "main";
+
+				stages[0] = vertexCreateInfo;
+				stages[1] = fragmentCreateInfo;
+			}
+
+			// Setting render pass
+			{
+				VkAttachmentDescription attachment = {};
+				attachment.format = format;
+				attachment.samples = VK_SAMPLE_COUNT_1_BIT;
+
+				attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+				attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+
+				attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+				attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+				attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+				attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+				VkAttachmentReference colorAttachmentReference = {};
+				colorAttachmentReference.attachment = 0;
+				colorAttachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+				VkSubpassDescription subpassDescription = {};
+				subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+
+				subpassDescription.colorAttachmentCount = 1;
+				subpassDescription.pColorAttachments = &colorAttachmentReference;
+
+				VkRenderPassCreateInfo renderPassInfo = {};
+				renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+				renderPassInfo.attachmentCount = 1;
+				renderPassInfo.pAttachments = &attachment;
+				renderPassInfo.subpassCount = 1;
+				renderPassInfo.pSubpasses = &subpassDescription;
+
+				VkSubpassDependency subPassDependency = {};
+				subPassDependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+				subPassDependency.dstSubpass = 0;
+
+				subPassDependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+				subPassDependency.srcAccessMask = 0;
+
+				subPassDependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+				subPassDependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+				renderPassInfo.dependencyCount = 1;
+				renderPassInfo.pDependencies = &subPassDependency;
+
+				error = vkCreateRenderPass(device, &renderPassInfo, callbacksAllocator, &renderPass);
+				CheckVkResult(error);
+			}
+
+			// Setting the pipeline
+			{
+				// Setting the vertex input
+				VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
+				vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+				vertexInputInfo.vertexBindingDescriptionCount = 0;
+				vertexInputInfo.pVertexBindingDescriptions = nullptr;
+				vertexInputInfo.vertexAttributeDescriptionCount = 0;
+				vertexInputInfo.pVertexAttributeDescriptions = nullptr;
+
+				// Setting the input assembly
+				VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo = {};
+				inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+				inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+				inputAssemblyInfo.primitiveRestartEnable = VK_FALSE;
+
+				// Viewports and scissors
+				VkViewport viewport = {};
+				viewport.x = 0.0f;
+				viewport.y = 0.0f;
+				viewport.width = (float)extent.width;
+				viewport.height = (float)extent.height;
+				viewport.minDepth = 0.0f;
+				viewport.maxDepth = 1.0f;
+
+				VkRect2D scissors = {};
+				scissors.offset = { 0,0 };
+				scissors.extent = extent;
+
+				VkPipelineViewportStateCreateInfo viewportInfo = {};
+				viewportInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+				viewportInfo.viewportCount = 1;
+				viewportInfo.pViewports = &viewport;
+				viewportInfo.scissorCount = 1;
+				viewportInfo.pScissors = &scissors;
+
+				// Setting the rasterizer
+				VkPipelineRasterizationStateCreateInfo rasterizerInfo = {};
+				rasterizerInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+				rasterizerInfo.depthClampEnable = VK_FALSE;
+				rasterizerInfo.rasterizerDiscardEnable = VK_FALSE;
+				rasterizerInfo.polygonMode = VK_POLYGON_MODE_FILL;
+				rasterizerInfo.lineWidth = 1.0f;
+				rasterizerInfo.cullMode = VK_CULL_MODE_BACK_BIT;
+				rasterizerInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
+
+				rasterizerInfo.depthBiasEnable = VK_FALSE;
+				rasterizerInfo.depthBiasConstantFactor = 0.0f;
+				rasterizerInfo.depthBiasClamp = 0.0f;
+				rasterizerInfo.depthBiasSlopeFactor = 0.0f;
+
+				// Setting the multisampling
+				VkPipelineMultisampleStateCreateInfo multisamplingInfo = {};
+				multisamplingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+				multisamplingInfo.sampleShadingEnable = VK_FALSE;
+				multisamplingInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+				multisamplingInfo.minSampleShading = 1.0f;
+				multisamplingInfo.pSampleMask = nullptr;
+				multisamplingInfo.alphaToCoverageEnable = VK_FALSE;
+				multisamplingInfo.alphaToOneEnable = VK_FALSE;
+
+				// Setting the color attachment
+				VkPipelineColorBlendAttachmentState colorBlendAttachment = {};
+				colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+				colorBlendAttachment.blendEnable = VK_FALSE;
+				colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
+				colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
+				colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+				colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+				colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+				colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+
+				VkPipelineColorBlendStateCreateInfo colorBlending = {};
+				colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+				colorBlending.logicOpEnable = VK_FALSE;
+				colorBlending.logicOp = VK_LOGIC_OP_COPY;
+				colorBlending.attachmentCount = 1;
+				colorBlending.pAttachments = &colorBlendAttachment;
+				colorBlending.blendConstants[0] = 0.0f;
+				colorBlending.blendConstants[1] = 0.0f;
+				colorBlending.blendConstants[2] = 0.0f;
+				colorBlending.blendConstants[3] = 0.0f;
+
+				// Setting dynamic state
+				//std::vector<VkDynamicState> dynamicStates = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_LINE_WIDTH };
+
+				//VkPipelineDynamicStateCreateInfo dynamicStateInfo = {};
+				//dynamicStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+				//dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
+				//dynamicStateInfo.pDynamicStates = dynamicStates.data();
+
+				// Setting pipeline layout
+				VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
+				pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+				pipelineLayoutInfo.setLayoutCount = 0;
+				pipelineLayoutInfo.pSetLayouts = nullptr;
+				pipelineLayoutInfo.pushConstantRangeCount = 0;
+				pipelineLayoutInfo.pPushConstantRanges = nullptr;
+
+				error = vkCreatePipelineLayout(device, &pipelineLayoutInfo, callbacksAllocator, &pipelineLayout);
+				CheckVkResult(error);
+
+				// Finally creating the pipeline
+				VkGraphicsPipelineCreateInfo pipelineInfo = {};
+				pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+				pipelineInfo.stageCount = 2;
+				pipelineInfo.pStages = stages;
+				pipelineInfo.pVertexInputState = &vertexInputInfo;
+				pipelineInfo.pInputAssemblyState = &inputAssemblyInfo;
+				pipelineInfo.pViewportState = &viewportInfo;
+				pipelineInfo.pRasterizationState = &rasterizerInfo;
+				pipelineInfo.pMultisampleState = &multisamplingInfo;
+				pipelineInfo.pDepthStencilState = nullptr;
+				pipelineInfo.pColorBlendState = &colorBlending;
+				pipelineInfo.pDynamicState = nullptr;
+
+				pipelineInfo.layout = pipelineLayout;
+				pipelineInfo.renderPass = renderPass;
+				pipelineInfo.subpass = 0;
+
+				pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+				pipelineInfo.basePipelineIndex = -1;
+
+				error = vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline);
+				CheckVkResult(error);
+
+				vkDestroyShaderModule(device, vertexModule, callbacksAllocator);
+				vkDestroyShaderModule(device, fragmentModule, callbacksAllocator);
+			}
 		}
 
+		// Setting the swapchain framebuffers
+		{
+			framebuffers.resize(imageViews.size());
+			for (size_t i = 0; i < imageViews.size(); ++i)
+			{
+				VkImageView attachments[] = { imageViews[i] };
 
+				VkFramebufferCreateInfo fboCreateInfo = {};
+				fboCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+				fboCreateInfo.renderPass = renderPass;
+				fboCreateInfo.attachmentCount = 1;
+				fboCreateInfo.pAttachments = attachments;
+				fboCreateInfo.width = extent.width;
+				fboCreateInfo.height = extent.height;
+				fboCreateInfo.layers = 1;
+
+				error = vkCreateFramebuffer(device, &fboCreateInfo, callbacksAllocator, &framebuffers[i]);
+				CheckVkResult(error);
+			}
+		}
+
+		// Setting the command pool
+		{
+			VkCommandPoolCreateInfo commandPoolInfo = {};
+			commandPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+			commandPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+			commandPoolInfo.queueFamilyIndex = queueCount;
+
+			error = vkCreateCommandPool(device, &commandPoolInfo, callbacksAllocator, &commandPool);
+			CheckVkResult(error);
+
+			// Setting command buffer
+			VkCommandBufferAllocateInfo cmdAllocInfo = {};
+			cmdAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+			cmdAllocInfo.commandPool = commandPool;
+			cmdAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+			cmdAllocInfo.commandBufferCount = 1;
+
+			error = vkAllocateCommandBuffers(device, &cmdAllocInfo, &commandBuffer);
+			CheckVkResult(error);
+		}
+
+		// Setting sync objects
+		{
+			VkSemaphoreCreateInfo semaphoreInfo = {};
+			semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+			VkFenceCreateInfo fenceInfo = {};
+			fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+			fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+			vkCreateSemaphore(device, &semaphoreInfo, callbacksAllocator, &imageAvailable);
+			vkCreateSemaphore(device, &semaphoreInfo, callbacksAllocator, &renderFinished);
+			vkCreateFence(device, &fenceInfo, callbacksAllocator, &inFlightFence);
+		}
 	}
 
 	void VulkanContext::Shutdown()
 	{
+		vkDestroySemaphore(device, imageAvailable, callbacksAllocator);
+		vkDestroySemaphore(device, renderFinished, callbacksAllocator);
+		vkDestroyFence(device, inFlightFence, callbacksAllocator);
+
+		vkDestroyCommandPool(device, commandPool, callbacksAllocator);
+
+		for (size_t i = 0; i < framebuffers.size(); ++i)
+		{
+			vkDestroyFramebuffer(device, framebuffers[i], callbacksAllocator);
+		}
+
+		vkDestroyPipeline(device, graphicsPipeline, callbacksAllocator);
+		vkDestroyPipelineLayout(device, pipelineLayout, callbacksAllocator);
+		vkDestroyRenderPass(device, renderPass, callbacksAllocator);
 		for (uint32_t i = 0; i < imgCount; ++i)
 		{
 			vkDestroyImageView(device, imageViews[i], callbacksAllocator);
@@ -258,8 +541,125 @@ namespace Amethyst
 		vkDestroyInstance(context, callbacksAllocator);
 	}
 	
+	void VulkanContext::Draw()
+	{
+		vkWaitForFences(device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
+
+		vkResetFences(device, 1, &inFlightFence);
+
+		uint32_t imageIndex;
+		vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailable, VK_NULL_HANDLE, &imageIndex);
+
+		vkResetCommandBuffer(commandBuffer, 0);
+
+		RecordCommandBuffer(commandBuffer, imageIndex);
+
+		VkPresentInfoKHR presentInfo = {};
+		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+		presentInfo.swapchainCount = 1;
+		presentInfo.pSwapchains = &swapChain;
+		presentInfo.pImageIndices = &imageIndex;
+
+		presentInfo.pResults = nullptr;
+
+		vkQueuePresentKHR(queue, &presentInfo);
+	}
+
 	void VulkanContext::SwapBuffers()
 	{
 
+	}
+	
+	void VulkanContext::CompileShaders(const std::string& vertex, const std::string& fragment)
+	{
+		// Vertex file
+		std::ifstream vertexFile(vertex, std::ios::ate | std::ios::binary);
+
+		size_t fileSize = (size_t)vertexFile.tellg();
+		std::vector<char> vertBuffer(fileSize);
+
+		vertexFile.seekg(0);
+		vertexFile.read(vertBuffer.data(), fileSize);
+
+		vertexFile.close();
+
+		VkShaderModuleCreateInfo vertCreateInfo = {};
+		vertCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+		vertCreateInfo.codeSize = vertBuffer.size();
+		vertCreateInfo.pCode = reinterpret_cast<const uint32_t*>(vertBuffer.data());
+
+		VkResult error = vkCreateShaderModule(VulkanManager::GetDevice(), &vertCreateInfo, VulkanManager::GetCallbackAllocator(), &vertexModule);
+		CheckVkResult(error);
+
+		// Fragment file
+		std::ifstream fragFile(fragment, std::ios::ate | std::ios::binary);
+
+		fileSize = (size_t)fragFile.tellg();
+		std::vector<char> fragBuffer(fileSize);
+
+		fragFile.seekg(0);
+		fragFile.read(fragBuffer.data(), fileSize);
+
+		fragFile.close();
+
+		VkShaderModuleCreateInfo fragCreateInfo = {};
+		fragCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+		fragCreateInfo.codeSize = fragBuffer.size();
+		fragCreateInfo.pCode = reinterpret_cast<const uint32_t*>(fragBuffer.data());
+
+		error = vkCreateShaderModule(VulkanManager::GetDevice(), &fragCreateInfo, VulkanManager::GetCallbackAllocator(), &fragmentModule);
+		CheckVkResult(error);
+	}
+	
+	void VulkanContext::RecordCommandBuffer(VkCommandBuffer cmdBuffer, uint32_t index)
+	{
+		VkCommandBufferBeginInfo cmdBeginInfo = {};
+		cmdBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		cmdBeginInfo.flags = 0;
+		cmdBeginInfo.pInheritanceInfo = nullptr;
+
+		VkResult error = vkBeginCommandBuffer(cmdBuffer, &cmdBeginInfo);
+		CheckVkResult(error);
+
+		VkRenderPassBeginInfo renderPassBeginInfo = {};
+		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		renderPassBeginInfo.renderPass = renderPass;
+		renderPassBeginInfo.framebuffer = framebuffers[index];
+
+		renderPassBeginInfo.renderArea.offset = { 0, 0 };
+		renderPassBeginInfo.renderArea.extent = extent;
+
+		VkClearValue clearColor = { {{0.0f, 0.0f, 0.0f, 1.0f}} };
+		renderPassBeginInfo.clearValueCount = 1;
+		renderPassBeginInfo.pClearValues = &clearColor;
+
+		vkCmdBeginRenderPass(cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+		vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+
+		vkCmdDraw(cmdBuffer, 3, 1, 0, 0);
+
+		vkCmdEndRenderPass(cmdBuffer);
+
+		error = vkEndCommandBuffer(cmdBuffer);
+		CheckVkResult(error);
+
+		VkSubmitInfo submitInfo = {};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+		VkSemaphore waitSemaphores[] = { imageAvailable };
+		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+		submitInfo.waitSemaphoreCount = 1;
+		submitInfo.pWaitSemaphores = waitSemaphores;
+		submitInfo.pWaitDstStageMask = waitStages;
+
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &commandBuffer;
+
+		VkSemaphore signalSemaphores[] = { renderFinished };
+		submitInfo.signalSemaphoreCount = 1;
+		submitInfo.pSignalSemaphores = signalSemaphores;
+
+		vkQueueSubmit(queue, 1, &submitInfo, inFlightFence);
 	}
 }
