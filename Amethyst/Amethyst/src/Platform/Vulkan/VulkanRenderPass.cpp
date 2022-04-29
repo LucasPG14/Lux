@@ -11,7 +11,7 @@ namespace Amethyst
 	
 	VulkanRenderPass::~VulkanRenderPass()
 	{
-		vkDestroyRenderPass(VulkanContext::GetDevice(), renderPass, VulkanContext::GetCallbackAllocator());
+		vkDestroyRenderPass(VulkanContext::GetVkDevice().GetDevice(), renderPass, VulkanContext::GetCallbackAllocator());
 	}
 	
 	void VulkanRenderPass::Begin()

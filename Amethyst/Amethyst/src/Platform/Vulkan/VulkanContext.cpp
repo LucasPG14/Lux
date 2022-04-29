@@ -9,10 +9,10 @@ namespace Amethyst
 	static const int maxFramesInFlight = 2;
 
 	// Temporary
+	VulkanDevice VulkanContext::device = {};
+
 	VkInstance VulkanContext::context = VK_NULL_HANDLE;
 	VkQueue VulkanContext::queue = VK_NULL_HANDLE;
-	VkDevice VulkanContext::device = VK_NULL_HANDLE;
-	VkPhysicalDevice VulkanContext::physicalDevice = VK_NULL_HANDLE;
 	
 	uint32_t VulkanContext::imgCount = 0;
 	VkAllocationCallbacks* VulkanContext::callbacksAllocator = VK_NULL_HANDLE;
@@ -132,85 +132,10 @@ namespace Amethyst
 			// Creating the context of Vulkan and checking for errors
 		}
 
-		// ---------------- Selecting the GPU ------------------
-		{
-			// Checking the number of GPUs
-			uint32_t gpuCount = 0;
-			error = vkEnumeratePhysicalDevices(context, &gpuCount, NULL);
-			CheckVkResult(error);
+		device.Init();
 
-			AMT_CORE_ASSERT(gpuCount > 0, "Couldn't find a single GPU");
-
-			// Getting the list of all the gpus on the system
-			std::vector<VkPhysicalDevice> gpus;
-			gpus.resize(gpuCount);
-			error = vkEnumeratePhysicalDevices(context, &gpuCount, gpus.data());
-			CheckVkResult(error);
-
-			// Searching for a dedicated GPU
-			// If not, the GPU integrated on the CPU will be selected
-			uint32_t index = 0;
-			for (uint32_t i = 0; i < gpuCount; ++i)
-			{
-				VkPhysicalDeviceProperties properties;
-				vkGetPhysicalDeviceProperties(gpus[i], &properties);
-				if (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
-				{
-					index = i;
-					break;
-				}
-			}
-
-			physicalDevice = gpus[index];
-		}
-
-		// ------------- Selecting the GPU queue ---------------
-		{
-			uint32_t count = 0;
-			vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &count, NULL);
-			std::vector<VkQueueFamilyProperties> queuesProperties;
-			queuesProperties.resize(count);
-			vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &count, queuesProperties.data());
-
-			// Iterating through all the queues
-			for (uint32_t i = 0; i < count; ++i)
-			{
-				if (queuesProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
-				{
-					queueCount = i;
-					break;
-				}
-			}
-
-			AMT_CORE_ASSERT(queueCount != -1, "Queues Family not found");
-		}
-		
-		// ----------- Creating the device with the queue -----------
-		{
-			int devExtensionCount = 1;
-			const char* extensions[] = { "VK_KHR_swapchain" };
-			float queuePriority[] = {1.0f};
-
-			// Setting device queue information
-			VkDeviceQueueCreateInfo queueInfo[1] = {};
-			queueInfo[0].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-			queueInfo[0].queueFamilyIndex = queueCount;
-			queueInfo[0].queueCount = 1;
-			queueInfo[0].pQueuePriorities = queuePriority;
-
-			// Setting device information
-			VkDeviceCreateInfo deviceInfo = {};
-			deviceInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-			deviceInfo.queueCreateInfoCount = sizeof(queueInfo) / sizeof(queueInfo[0]);
-			deviceInfo.pQueueCreateInfos = queueInfo;
-			deviceInfo.enabledExtensionCount = devExtensionCount;
-			deviceInfo.ppEnabledExtensionNames = extensions;
-
-			// Finally creating the device
-			error = vkCreateDevice(physicalDevice, &deviceInfo, callbacksAllocator, &device);
-			CheckVkResult(error);
-			vkGetDeviceQueue(device, queueCount, 0, &queue);
-		}
+		queueCount = device.GetQueueCount();
+		vkGetDeviceQueue(device.GetDevice(), queueCount, 0, &queue);
 
 		// -------------- Setting the descriptor pools --------------
 		{
@@ -230,7 +155,7 @@ namespace Amethyst
 			commandPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 			commandPoolInfo.queueFamilyIndex = queueCount;
 
-			error = vkCreateCommandPool(device, &commandPoolInfo, callbacksAllocator, &commandPool);
+			error = vkCreateCommandPool(device.GetDevice(), &commandPoolInfo, callbacksAllocator, &commandPool);
 			CheckVkResult(error);
 
 			commandBuffer.resize(maxFramesInFlight);
@@ -242,7 +167,7 @@ namespace Amethyst
 			cmdAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 			cmdAllocInfo.commandBufferCount = commandBuffer.size();
 
-			error = vkAllocateCommandBuffers(device, &cmdAllocInfo, commandBuffer.data());
+			error = vkAllocateCommandBuffers(device.GetDevice(), &cmdAllocInfo, commandBuffer.data());
 			CheckVkResult(error);
 		}
 
@@ -263,35 +188,36 @@ namespace Amethyst
 
 			for (int i = 0; i < maxFramesInFlight; ++i)
 			{
-				vkCreateSemaphore(device, &semaphoreInfo, callbacksAllocator, &imageAvailable[i]);
-				vkCreateSemaphore(device, &semaphoreInfo, callbacksAllocator, &renderFinished[i]);
-				vkCreateFence(device, &fenceInfo, callbacksAllocator, &inFlightFence[i]);
+				vkCreateSemaphore(device.GetDevice(), &semaphoreInfo, callbacksAllocator, &imageAvailable[i]);
+				vkCreateSemaphore(device.GetDevice(), &semaphoreInfo, callbacksAllocator, &renderFinished[i]);
+				vkCreateFence(device.GetDevice(), &fenceInfo, callbacksAllocator, &inFlightFence[i]);
 			}
 		}
 	}
 
 	void VulkanContext::Shutdown()
 	{
-		vkDeviceWaitIdle(device);
+		vkDeviceWaitIdle(device.GetDevice());
+		
 		CleanUpSwapChain();
 
-		vkDestroyBuffer(device, indexBuffer, callbacksAllocator);
-		vkFreeMemory(device, indexBufferMemory, callbacksAllocator);
+		vkDestroyBuffer(device.GetDevice(), indexBuffer, callbacksAllocator);
+		vkFreeMemory(device.GetDevice(), indexBufferMemory, callbacksAllocator);
 
-		vkDestroyBuffer(device, vertexBuffer, callbacksAllocator);
-		vkFreeMemory(device, vertexBufferMemory, callbacksAllocator);
+		vkDestroyBuffer(device.GetDevice(), vertexBuffer, callbacksAllocator);
+		vkFreeMemory(device.GetDevice(), vertexBufferMemory, callbacksAllocator);
 
 		for (int i = 0; i < maxFramesInFlight; ++i)
 		{
-			vkDestroySemaphore(device, renderFinished[i], callbacksAllocator);
-			vkDestroySemaphore(device, imageAvailable[i], callbacksAllocator);
-			vkDestroyFence(device, inFlightFence[i], callbacksAllocator);
+			vkDestroySemaphore(device.GetDevice(), renderFinished[i], callbacksAllocator);
+			vkDestroySemaphore(device.GetDevice(), imageAvailable[i], callbacksAllocator);
+			vkDestroyFence(device.GetDevice(), inFlightFence[i], callbacksAllocator);
 		}
 
-		vkDestroyCommandPool(device, commandPool, callbacksAllocator);
+		vkDestroyCommandPool(device.GetDevice(), commandPool, callbacksAllocator);
 		
-		vkDestroyDescriptorPool(device, descriptorPool, callbacksAllocator);
-		vkDestroyDevice(device, callbacksAllocator);
+		vkDestroyDescriptorPool(device.GetDevice(), descriptorPool, callbacksAllocator);
+		device.Shutdown();
 		vkDestroySurfaceKHR(context, surface, callbacksAllocator);
 
 #ifdef _DEBUG
@@ -356,11 +282,11 @@ namespace Amethyst
 
 	void VulkanContext::Begin()
 	{
-		vkWaitForFences(device, 1, &inFlightFence[currentFrame], VK_TRUE, UINT64_MAX);
+		vkWaitForFences(device.GetDevice(), 1, &inFlightFence[currentFrame], VK_TRUE, UINT64_MAX);
 
-		vkResetFences(device, 1, &inFlightFence[currentFrame]);
+		vkResetFences(device.GetDevice(), 1, &inFlightFence[currentFrame]);
 
-		VkResult error = vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailable[currentFrame], VK_NULL_HANDLE, &myIndex);
+		VkResult error = vkAcquireNextImageKHR(device.GetDevice(), swapChain, UINT64_MAX, imageAvailable[currentFrame], VK_NULL_HANDLE, &myIndex);
 
 		if (error == VK_ERROR_OUT_OF_DATE_KHR)
 		{
@@ -410,7 +336,7 @@ namespace Amethyst
 
 	void VulkanContext::RecreateSwapChain()
 	{
-		vkDeviceWaitIdle(device);
+		vkDeviceWaitIdle(device.GetDevice());
 
 		CleanUpSwapChain();
 
@@ -435,7 +361,7 @@ namespace Amethyst
 		vertCreateInfo.codeSize = vertBuffer.size();
 		vertCreateInfo.pCode = reinterpret_cast<const uint32_t*>(vertBuffer.data());
 
-		VkResult error = vkCreateShaderModule(device, &vertCreateInfo, callbacksAllocator, &vertexModule);
+		VkResult error = vkCreateShaderModule(device.GetDevice(), &vertCreateInfo, callbacksAllocator, &vertexModule);
 		CheckVkResult(error);
 
 		// Fragment file
@@ -454,7 +380,7 @@ namespace Amethyst
 		fragCreateInfo.codeSize = fragBuffer.size();
 		fragCreateInfo.pCode = reinterpret_cast<const uint32_t*>(fragBuffer.data());
 
-		error = vkCreateShaderModule(device, &fragCreateInfo, callbacksAllocator, &fragmentModule);
+		error = vkCreateShaderModule(device.GetDevice(), &fragCreateInfo, callbacksAllocator, &fragmentModule);
 		CheckVkResult(error);
 	}
 	
@@ -478,14 +404,14 @@ namespace Amethyst
 		bufferInfo.usage = usage;
 		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-		VkResult error = vkCreateBuffer(device, &bufferInfo, callbacksAllocator, &buffer);
+		VkResult error = vkCreateBuffer(device.GetDevice(), &bufferInfo, callbacksAllocator, &buffer);
 		CheckVkResult(error);
 
 		VkMemoryRequirements memRequirements;
-		vkGetBufferMemoryRequirements(device, buffer, &memRequirements);
+		vkGetBufferMemoryRequirements(device.GetDevice(), buffer, &memRequirements);
 
 		VkPhysicalDeviceMemoryProperties memProperties;
-		vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
+		vkGetPhysicalDeviceMemoryProperties(device.GetPhysicalDevice(), &memProperties);
 
 		int mem = 0;
 		for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
@@ -502,10 +428,10 @@ namespace Amethyst
 		allocInfo.allocationSize = memRequirements.size;
 		allocInfo.memoryTypeIndex = mem;
 
-		error = vkAllocateMemory(device, &allocInfo, callbacksAllocator, &memory);
+		error = vkAllocateMemory(device.GetDevice(), &allocInfo, callbacksAllocator, &memory);
 		CheckVkResult(error);
 
-		error = vkBindBufferMemory(device, buffer, memory, 0);
+		error = vkBindBufferMemory(device.GetDevice(), buffer, memory, 0);
 		CheckVkResult(error);
 	}
 
@@ -518,7 +444,7 @@ namespace Amethyst
 		allocIndexInfo.commandBufferCount = 1;
 
 		VkCommandBuffer commandBuffer;
-		VkResult error = vkAllocateCommandBuffers(device, &allocIndexInfo, &commandBuffer);
+		VkResult error = vkAllocateCommandBuffers(device.GetDevice(), &allocIndexInfo, &commandBuffer);
 		CheckVkResult(error);
 
 		VkCommandBufferBeginInfo beginIndexInfo = {};
@@ -543,7 +469,7 @@ namespace Amethyst
 		vkQueueSubmit(queue, 1, &submitIndexInfo, VK_NULL_HANDLE);
 		vkQueueWaitIdle(queue);
 
-		vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
+		vkFreeCommandBuffers(device.GetDevice(), commandPool, 1, &commandBuffer);
 	}
 	
 	void VulkanContext::CreateSwapChain()
@@ -552,30 +478,30 @@ namespace Amethyst
 		{
 			// Getting surface capabilities
 			VkSurfaceCapabilitiesKHR capabilities;
-			VkResult error = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &capabilities);
+			VkResult error = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device.GetPhysicalDevice(), surface, &capabilities);
 			CheckVkResult(error);
 
 			extent = capabilities.currentExtent;
 
 			// Getting surface formats
 			uint32_t formatCount = 0;
-			vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, NULL);
+			vkGetPhysicalDeviceSurfaceFormatsKHR(device.GetPhysicalDevice(), surface, &formatCount, NULL);
 
 			AMT_CORE_ASSERT(formatCount != 0, "There aren't any surface formats");
 
 			std::vector<VkSurfaceFormatKHR> surfaceFormats;
 			surfaceFormats.resize(formatCount);
-			vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, surfaceFormats.data());
+			vkGetPhysicalDeviceSurfaceFormatsKHR(device.GetPhysicalDevice(), surface, &formatCount, surfaceFormats.data());
 
 			// Getting surface present modes
 			uint32_t presentCount = 0;
-			vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentCount, NULL);
+			vkGetPhysicalDeviceSurfacePresentModesKHR(device.GetPhysicalDevice(), surface, &presentCount, NULL);
 
 			AMT_CORE_ASSERT(presentCount != 0, "There aren't any surface present modes");
 
 			std::vector<VkPresentModeKHR> presentModes;
 			presentModes.resize(presentCount);
-			vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentCount, presentModes.data());
+			vkGetPhysicalDeviceSurfacePresentModesKHR(device.GetPhysicalDevice(), surface, &presentCount, presentModes.data());
 
 			// Selecting the surface format
 			int formatIndex = 0;
@@ -621,13 +547,13 @@ namespace Amethyst
 			swapChainCreateInfo.oldSwapchain = VK_NULL_HANDLE;
 
 			// Finally creating the swapchain
-			error = vkCreateSwapchainKHR(device, &swapChainCreateInfo, callbacksAllocator, &swapChain);
+			error = vkCreateSwapchainKHR(device.GetDevice(), &swapChainCreateInfo, callbacksAllocator, &swapChain);
 			CheckVkResult(error);
 
 			// Getting the swapchain images
-			vkGetSwapchainImagesKHR(device, swapChain, &imgCount, NULL);
+			vkGetSwapchainImagesKHR(device.GetDevice(), swapChain, &imgCount, NULL);
 			images.resize(imgCount);
-			error = vkGetSwapchainImagesKHR(device, swapChain, &imgCount, images.data());
+			error = vkGetSwapchainImagesKHR(device.GetDevice(), swapChain, &imgCount, images.data());
 			CheckVkResult(error);
 
 			// Creating the image view for the swapchain
@@ -651,7 +577,7 @@ namespace Amethyst
 				imgViewCreateInfo.subresourceRange.baseArrayLayer = 0;
 				imgViewCreateInfo.subresourceRange.layerCount = 1;
 
-				error = vkCreateImageView(device, &imgViewCreateInfo, callbacksAllocator, &imageViews[i]);
+				error = vkCreateImageView(device.GetDevice(), &imgViewCreateInfo, callbacksAllocator, &imageViews[i]);
 				CheckVkResult(error);
 			}
 
@@ -720,7 +646,7 @@ namespace Amethyst
 				renderPassInfo.dependencyCount = 1;
 				renderPassInfo.pDependencies = &subPassDependency;
 
-				error = vkCreateRenderPass(device, &renderPassInfo, callbacksAllocator, &renderPass);
+				error = vkCreateRenderPass(device.GetDevice(), &renderPassInfo, callbacksAllocator, &renderPass);
 				CheckVkResult(error);
 			}
 
@@ -768,17 +694,17 @@ namespace Amethyst
 				CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
 				void* data;
-				vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
+				vkMapMemory(device.GetDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
 				memcpy(data, vertices.data(), (size_t)bufferSize);
-				vkUnmapMemory(device, stagingBufferMemory);
+				vkUnmapMemory(device.GetDevice(), stagingBufferMemory);
 
 				bufferSize = sizeof(vertices[0]) * vertices.size();
 				CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer, vertexBufferMemory);
 
 				CopyBuffer(stagingBuffer, vertexBuffer, bufferSize);
 
-				vkDestroyBuffer(device, stagingBuffer, callbacksAllocator);
-				vkFreeMemory(device, stagingBufferMemory, callbacksAllocator);
+				vkDestroyBuffer(device.GetDevice(), stagingBuffer, callbacksAllocator);
+				vkFreeMemory(device.GetDevice(), stagingBufferMemory, callbacksAllocator);
 
 				// ----------------------------- Index Buffer ------------------------------------
 				bufferSize = sizeof(indices[0]) * indices.size();
@@ -788,16 +714,16 @@ namespace Amethyst
 				CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingIndexBuffer, stagingIndexBufferMemory);
 
 				data = nullptr;
-				vkMapMemory(device, stagingIndexBufferMemory, 0, bufferSize, 0, &data);
+				vkMapMemory(device.GetDevice(), stagingIndexBufferMemory, 0, bufferSize, 0, &data);
 				memcpy(data, indices.data(), (size_t)bufferSize);
-				vkUnmapMemory(device, stagingIndexBufferMemory);
+				vkUnmapMemory(device.GetDevice(), stagingIndexBufferMemory);
 
 				CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);
 
 				CopyBuffer(stagingIndexBuffer, indexBuffer, bufferSize);
 
-				vkDestroyBuffer(device, stagingIndexBuffer, callbacksAllocator);
-				vkFreeMemory(device, stagingIndexBufferMemory, callbacksAllocator);
+				vkDestroyBuffer(device.GetDevice(), stagingIndexBuffer, callbacksAllocator);
+				vkFreeMemory(device.GetDevice(), stagingIndexBufferMemory, callbacksAllocator);
 
 				//void* data;
 				//vkMapMemory(device, vertexBufferMemory, 0, bufferSize, 0, &data);
@@ -893,7 +819,7 @@ namespace Amethyst
 				pipelineLayoutInfo.pushConstantRangeCount = 0;
 				pipelineLayoutInfo.pPushConstantRanges = nullptr;
 
-				error = vkCreatePipelineLayout(device, &pipelineLayoutInfo, callbacksAllocator, &pipelineLayout);
+				error = vkCreatePipelineLayout(device.GetDevice(), &pipelineLayoutInfo, callbacksAllocator, &pipelineLayout);
 				CheckVkResult(error);
 
 				// Finally creating the pipeline
@@ -917,11 +843,11 @@ namespace Amethyst
 				pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 				pipelineInfo.basePipelineIndex = -1;
 
-				error = vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline);
+				error = vkCreateGraphicsPipelines(device.GetDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline);
 				CheckVkResult(error);
 
-				vkDestroyShaderModule(device, vertexModule, callbacksAllocator);
-				vkDestroyShaderModule(device, fragmentModule, callbacksAllocator);
+				vkDestroyShaderModule(device.GetDevice(), vertexModule, callbacksAllocator);
+				vkDestroyShaderModule(device.GetDevice(), fragmentModule, callbacksAllocator);
 			}
 		}
 
@@ -941,7 +867,7 @@ namespace Amethyst
 				fboCreateInfo.height = extent.height;
 				fboCreateInfo.layers = 1;
 
-				VkResult error = vkCreateFramebuffer(device, &fboCreateInfo, callbacksAllocator, &framebuffers[i]);
+				VkResult error = vkCreateFramebuffer(device.GetDevice(), &fboCreateInfo, callbacksAllocator, &framebuffers[i]);
 				CheckVkResult(error);
 			}
 		}
@@ -951,18 +877,18 @@ namespace Amethyst
 	{
 		for (size_t i = 0; i < framebuffers.size(); ++i)
 		{
-			vkDestroyFramebuffer(device, framebuffers[i], callbacksAllocator);
+			vkDestroyFramebuffer(device.GetDevice(), framebuffers[i], callbacksAllocator);
 		}
 
-		vkDestroyPipeline(device, graphicsPipeline, callbacksAllocator);
-		vkDestroyPipelineLayout(device, pipelineLayout, callbacksAllocator);
-		vkDestroyRenderPass(device, renderPass, callbacksAllocator);
+		vkDestroyPipeline(device.GetDevice(), graphicsPipeline, callbacksAllocator);
+		vkDestroyPipelineLayout(device.GetDevice(), pipelineLayout, callbacksAllocator);
+		vkDestroyRenderPass(device.GetDevice(), renderPass, callbacksAllocator);
 
 		for (size_t i = 0; i < imageViews.size(); ++i)
 		{
-			vkDestroyImageView(device, imageViews[i], callbacksAllocator);
+			vkDestroyImageView(device.GetDevice(), imageViews[i], callbacksAllocator);
 		}
 
-		vkDestroySwapchainKHR(device, swapChain, callbacksAllocator);
+		vkDestroySwapchainKHR(device.GetDevice(), swapChain, callbacksAllocator);
 	}
 }

@@ -28,6 +28,7 @@ IncludeDir["glm"] = "Amethyst/vendor/glm"
 IncludeDir["ImGuizmo"] = "Amethyst/vendor/ImGuizmo"
 IncludeDir["Optick"] = "Amethyst/vendor/Optick/src"
 IncludeDir["stb_image"] = "Amethyst/vendor/stb_image"
+IncludeDir["VMA"] = "Amethyst/vendor/VMA"
 IncludeDir["yamlcpp"] = "Amethyst/vendor/yaml-cpp/include"
 
 LibraryDir = {}
@@ -67,6 +68,7 @@ project "Amethyst"
 		"%{prj.name}/vendor/ImGuizmo/**.h",
 		"%{prj.name}/vendor/ImGuizmo/**.cpp",
 		"%{prj.name}/vendor/stb_image/**.h",
+		"%{prj.name}/vendor/VMA/include/**.h",
 		"%{prj.name}/vendor/stb_image/**.cpp"
 	}
 
@@ -82,6 +84,7 @@ project "Amethyst"
 		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.Optick}",
 		"%{IncludeDir.stb_image}",
+		"%{IncludeDir.VMA}",
 		"%{IncludeDir.yamlcpp}",
 
 		"%{IncludeDir.VulkanSDK}",

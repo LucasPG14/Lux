@@ -2,8 +2,11 @@
 
 #include "Amethyst/Renderer/GraphicsContext.h"
 
+#include "VulkanDevice.h"
+
 #include <vulkan/vulkan.h>
 #include <glm/glm.hpp>
+
 struct GLFWwindow;
 
 namespace Amethyst
@@ -36,10 +39,10 @@ namespace Amethyst
 		static void RecreateSwapChain();
 
 		static VkInstance GetInstance() { return context; }
-		static VkPhysicalDevice GetPhysicalDevice() { return physicalDevice; }
 		static VkAllocationCallbacks* GetCallbackAllocator() { return callbacksAllocator; }
-		static VkDevice GetDevice() { return device; }
 		static VkSurfaceKHR GetSurface() { return surface; }
+
+		static VulkanDevice& GetVkDevice() { return device; }
 		
 		static VkExtent2D GetExtent() { return extent; }
 		static VkCommandPool GetCommandPool() { return commandPool; }
@@ -48,6 +51,10 @@ namespace Amethyst
 		
 		static VkQueue GetQueue() { return queue; }
 		static VkRenderPass GetRenderPass() { return renderPass; }
+		
+		static std::vector<VkFence> GetFence() { return inFlightFence; }
+		
+		static std::vector<VkImage> GetImages() { return images; }
 		
 		static VkDescriptorPool GetDescriptorPool() { return descriptorPool; }
 
@@ -70,16 +77,16 @@ namespace Amethyst
 	private:
 		GLFWwindow* window;
 
+		static VulkanDevice device;
+
 		static VkInstance context;
 		VkDebugReportCallbackEXT debugReport;
 
 		static VkAllocationCallbacks* callbacksAllocator;
-		static VkPhysicalDevice physicalDevice;
 
 		int32_t queueCount;
 		static VkQueue queue;
 
-		static VkDevice device;
 		static VkDescriptorPool descriptorPool;
 
 		static VkSurfaceKHR surface;

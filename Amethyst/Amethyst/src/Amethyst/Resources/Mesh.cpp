@@ -80,12 +80,12 @@ namespace Amethyst
 
 				vbo->SetLayout(layout);
 			}
+			vao->AddVertexBuffer(vbo);
 
 			std::shared_ptr<IndexBuffer> ebo;
 			ebo = IndexBuffer::Create(indices.data(), indices.size());
 			vao->AddIndexBuffer(ebo);
 
-			vao->AddVertexBuffer(vbo);
 
 			loaded = true;
 		}

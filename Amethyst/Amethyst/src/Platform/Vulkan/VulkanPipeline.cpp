@@ -11,7 +11,7 @@ namespace Amethyst
 
 	VulkanPipeline::~VulkanPipeline()
 	{
-		vkDestroyPipeline(VulkanContext::GetDevice(), pipeline, VulkanContext::GetCallbackAllocator());
+		vkDestroyPipeline(VulkanContext::GetVkDevice().GetDevice(), pipeline, VulkanContext::GetCallbackAllocator());
 	}
 
 	void VulkanPipeline::Bind()

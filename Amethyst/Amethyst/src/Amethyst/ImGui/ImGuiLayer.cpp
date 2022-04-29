@@ -79,12 +79,14 @@ namespace Amethyst
 		poolInfo.poolSizeCount = std::size(poolSizes);
 		poolInfo.pPoolSizes = poolSizes;
 
-		vkCreateDescriptorPool(VulkanContext::GetDevice(), &poolInfo, nullptr, &descPool);
+		VkPhysicalDevice physDevice = VulkanContext::GetVkDevice().GetPhysicalDevice();
+
+		vkCreateDescriptorPool(VulkanContext::GetVkDevice().GetDevice(), &poolInfo, nullptr, &descPool);
 
 		ImGui_ImplVulkan_InitInfo initInfo = {};
 		initInfo.Instance = VulkanContext::GetInstance();
-		initInfo.PhysicalDevice = VulkanContext::GetPhysicalDevice();
-		initInfo.Device = VulkanContext::GetDevice();
+		initInfo.PhysicalDevice = physDevice;
+		initInfo.Device = VulkanContext::GetVkDevice().GetDevice();
 		initInfo.Queue = VulkanContext::GetQueue();
 		initInfo.DescriptorPool = descPool;
 		initInfo.MinImageCount = 3;
@@ -96,67 +98,6 @@ namespace Amethyst
 		ImGui_ImplVulkan_Init(&initInfo, VulkanContext::GetRenderPass());
 		//ImGui_ImplGlfw_InitForOpenGL(window, true);
 		//ImGui_ImplOpenGL3_Init("#version 410");
-		
-		// Begin creating command buffer -----------------------------------
-		
-		//VkCommandBufferAllocateInfo cmdAllocInfo = {};
-		//cmdAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		//cmdAllocInfo.commandPool = VulkanContext::GetCommandPool();
-		//cmdAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		//cmdAllocInfo.commandBufferCount = 1;
-
-		//vkAllocateCommandBuffers(VulkanContext::GetDevice(), &cmdAllocInfo, &cmd);
-		//
-		//// End creating command buffer -------------------------------------
-
-		//// Begin creating render pass --------------------------------------
-		//
-		//VkAttachmentDescription attachment = {};
-		//attachment.format = VulkanContext::GetFormat();
-		//attachment.samples = VK_SAMPLE_COUNT_1_BIT;
-
-		//attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-		//attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-
-		//attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		//attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		//attachment.initialLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		//attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-		//VkAttachmentReference colorAttachmentReference = {};
-		//colorAttachmentReference.attachment = 0;
-		//colorAttachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-		//VkSubpassDescription subpassDescription = {};
-		//subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-
-
-		//subpassDescription.colorAttachmentCount = 1;
-		//subpassDescription.pColorAttachments = &colorAttachmentReference;
-
-		//VkRenderPassCreateInfo renderPassInfo = {};
-		//renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-		//renderPassInfo.attachmentCount = 1;
-		//renderPassInfo.pAttachments = &attachment;
-		//renderPassInfo.subpassCount = 1;
-		//renderPassInfo.pSubpasses = &subpassDescription;
-
-		//VkSubpassDependency subPassDependency = {};
-		//subPassDependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-		//subPassDependency.dstSubpass = 0;
-
-		//subPassDependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		//subPassDependency.srcAccessMask = 0;
-
-		//subPassDependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		//subPassDependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-		//renderPassInfo.dependencyCount = 1;
-		//renderPassInfo.pDependencies = &subPassDependency;
-
-		//vkCreateRenderPass(VulkanContext::GetDevice(), &renderPassInfo, VulkanContext::GetCallbackAllocator(), &renderPass);
-		
-		// End creating render pass ----------------------------------------
 
 		VkCommandBufferBeginInfo cmdBeginInfo = {};
 		cmdBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -173,10 +114,19 @@ namespace Amethyst
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 		submitInfo.pCommandBuffers = &command;
 
-		VkResult error = vkQueueSubmit(VulkanContext::GetQueue(), 1, &submitInfo, {});
+		submitInfo.waitSemaphoreCount = 0;
+		submitInfo.pWaitSemaphores = nullptr;
+		submitInfo.pWaitDstStageMask = nullptr;
+		submitInfo.commandBufferCount = 1;
+		submitInfo.signalSemaphoreCount = 0;
+		submitInfo.pSignalSemaphores = nullptr;
+
+		vkResetFences(VulkanContext::GetVkDevice().GetDevice(), 1, &VulkanContext::GetFence()[0]);
+
+		VkResult error = vkQueueSubmit(VulkanContext::GetQueue(), 1, &submitInfo, VulkanContext::GetFence()[0]);
 		vkQueueWaitIdle(VulkanContext::GetQueue());
 
-		vkResetCommandPool(VulkanContext::GetDevice(), VulkanContext::GetCommandPool(), 0);
+		vkResetCommandPool(VulkanContext::GetVkDevice().GetDevice(), VulkanContext::GetCommandPool(), 0);
 
 		ImGui_ImplVulkan_DestroyFontUploadObjects();
 	}
@@ -188,7 +138,7 @@ namespace Amethyst
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
 
-		vkDestroyDescriptorPool(VulkanContext::GetDevice(), descPool, VulkanContext::GetCallbackAllocator());
+		vkDestroyDescriptorPool(VulkanContext::GetVkDevice().GetDevice(), descPool, VulkanContext::GetCallbackAllocator());
 	}
 	
 	void ImGuiLayer::Update(Timer timer)
@@ -213,12 +163,6 @@ namespace Amethyst
 	void ImGuiLayer::End(uint32_t index)
 	{
 		OPTICK_EVENT("ImGui Layer End");
-
-		ImGui::BeginMainMenuBar();
-		ImGui::EndMainMenuBar();
-		ImGui::ShowDemoWindow();
-
-		//ImGui::DockSpaceOverViewport();
 
 		ImGuiIO& io = ImGui::GetIO();
 		Application& app = Application::Get();

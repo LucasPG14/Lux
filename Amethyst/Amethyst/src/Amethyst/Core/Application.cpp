@@ -51,8 +51,8 @@ namespace Amethyst
 			lastFrameTime = time;
 
 
-			//for (Layer* layer : layerStack)
-			//	layer->Update(timer);
+			for (Layer* layer : layerStack)
+				layer->Update(timer);
 
 			VulkanContext::Begin();
 			VulkanContext::BeginRenderPass();
@@ -60,13 +60,13 @@ namespace Amethyst
 			//// This should be on the renderer, on a separate thread
 			imguiLayer->Begin();
 
-			//for (Layer* layer : layerStack)
-			//	layer->RenderImGui()
+			for (Layer* layer : layerStack)
+				layer->RenderImGui();
 
 			imguiLayer->End(VulkanContext::GetCurrentFrame());
 			//
 
-			VulkanContext::Draw();
+			//VulkanContext::Draw();
 
 			VulkanContext::EndRenderPass();
 			VulkanContext::End();
