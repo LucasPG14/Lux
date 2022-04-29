@@ -234,6 +234,18 @@
     <ClInclude Include="src\Platform\Vulkan\VulkanContext.h">
       <Filter>src\Platform\Vulkan</Filter>
     </ClInclude>
+    <ClInclude Include="src\Platform\Vulkan\VulkanPipeline.h">
+      <Filter>src\Platform\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\Vulkan\VulkanRender.h">
+      <Filter>src\Platform\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\Vulkan\VulkanRenderPass.h">
+      <Filter>src\Platform\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\Vulkan\VulkanShader.h">
+      <Filter>src\Platform\Vulkan</Filter>
+    </ClInclude>
     <ClInclude Include="src\Platform\Windows\WindowsWindow.h">
       <Filter>src\Platform\Windows</Filter>
     </ClInclude>
@@ -1491,10 +1503,6 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="src\Platform\Vulkan\VulkanShader.h" />
-    <ClInclude Include="src\Platform\Vulkan\VulkanManager.h" />
-    <ClInclude Include="src\Platform\Vulkan\VulkanRender.h" />
-    <ClInclude Include="src\Platform\Vulkan\VulkanPipeline.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Amethyst\Core\Application.cpp">
@@ -1608,6 +1616,18 @@
     <ClCompile Include="src\Platform\Vulkan\VulkanContext.cpp">
       <Filter>src\Platform\Vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="src\Platform\Vulkan\VulkanPipeline.cpp">
+      <Filter>src\Platform\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\Vulkan\VulkanRender.cpp">
+      <Filter>src\Platform\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\Vulkan\VulkanRenderPass.cpp">
+      <Filter>src\Platform\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\Vulkan\VulkanShader.cpp">
+      <Filter>src\Platform\Vulkan</Filter>
+    </ClCompile>
     <ClCompile Include="src\Platform\Windows\WindowsInput.cpp">
       <Filter>src\Platform\Windows</Filter>
     </ClCompile>
@@ -1623,8 +1643,5 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
-    <ClCompile Include="src\Platform\Vulkan\VulkanShader.cpp" />
-    <ClCompile Include="src\Platform\Vulkan\VulkanRender.cpp" />
-    <ClCompile Include="src\Platform\Vulkan\VulkanManager.cpp" />
   </ItemGroup>
 </Project>

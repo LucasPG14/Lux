@@ -6,6 +6,8 @@
 #include "Amethyst/Events/KeyEvent.h"
 #include "Amethyst/Events/MouseEvent.h"
 
+#include "backends/imgui_impl_vulkan.h"
+
 namespace Amethyst
 {
 	class AMT_API ImGuiLayer : public Layer
@@ -22,7 +24,14 @@ namespace Amethyst
 		void RenderImGui() override;
 
 		void Begin();
-		void End();
+		void End(uint32_t index);
+
+	private:
+		VkDescriptorPool descPool;
+		VkCommandBuffer cmd;
+
+		VkRenderPass renderPass;
+		VkFramebuffer framebuffer;
 	//	void OnEvent(Event& event) override;
 	//private:
 	//	bool OnMousePressed(MouseButtonPressedEvent& event);

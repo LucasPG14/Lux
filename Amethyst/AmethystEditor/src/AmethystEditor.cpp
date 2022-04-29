@@ -1,7 +1,7 @@
 #include <Amethyst.h>
 #include <Amethyst/Core/EntryPoint.h>
 
-#include "EditorLayer.h"
+//#include "EditorLayer.h"
 
 namespace Amethyst
 {

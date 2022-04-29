@@ -1,6 +1,8 @@
 #include "amtpch.h"
 #include "Application.h"
 
+#include "Amethyst/ImGui/ImGuiLayer.h"
+
 #include "Amethyst/Renderer/Renderer.h"
 
 #include "Platform/Vulkan/VulkanContext.h"
@@ -28,12 +30,14 @@ namespace Amethyst
 		Renderer::Init();
 
 		// Creating ImGuiLayer
-		//imguiLayer = new ImGuiLayer();
-		//PushOverlay(imguiLayer);
+		imguiLayer = new ImGuiLayer();
+		PushOverlay(imguiLayer);
 	}
 	
 	Application::~Application()
 	{
+		for (Layer* layer : layerStack)
+			layer->OnDestroy();
 	}
 	
 	void Application::Run()
@@ -46,18 +50,26 @@ namespace Amethyst
 			Timer timer = time - lastFrameTime;
 			lastFrameTime = time;
 
+
 			//for (Layer* layer : layerStack)
 			//	layer->Update(timer);
 
-			// This should be on the renderer, on a separate thread
-			//imguiLayer->Begin();
+			VulkanContext::Begin();
+			VulkanContext::BeginRenderPass();
+			//
+			//// This should be on the renderer, on a separate thread
+			imguiLayer->Begin();
 
 			//for (Layer* layer : layerStack)
-			//	layer->RenderImGui();
+			//	layer->RenderImGui()
 
-			//imguiLayer->End();
+			imguiLayer->End(VulkanContext::GetCurrentFrame());
+			//
 
 			VulkanContext::Draw();
+
+			VulkanContext::EndRenderPass();
+			VulkanContext::End();
 
 			window->Update();
 		}

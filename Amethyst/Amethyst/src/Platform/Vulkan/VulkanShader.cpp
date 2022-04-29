@@ -1,7 +1,7 @@
 #include "amtpch.h"
 #include "VulkanShader.h"
 
-#include "VulkanManager.h"
+#include "VulkanContext.h"
 
 namespace Amethyst
 {
@@ -19,13 +19,13 @@ namespace Amethyst
 		vertexCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		vertexCreateInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
 		vertexCreateInfo.module = vertexModule;
-		vertexCreateInfo.pName = name.c_str();
+		vertexCreateInfo.pName = "main";
 
 		VkPipelineShaderStageCreateInfo fragmentCreateInfo = {};
-		vertexCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		vertexCreateInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-		vertexCreateInfo.module = fragmentModule;
-		vertexCreateInfo.pName = name.c_str();
+		fragmentCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+		fragmentCreateInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+		fragmentCreateInfo.module = fragmentModule;
+		fragmentCreateInfo.pName = "main";
 
 		stages[0] = vertexCreateInfo;
 		stages[1] = fragmentCreateInfo;
@@ -33,8 +33,8 @@ namespace Amethyst
 
 	VulkanShader::~VulkanShader()
 	{
-		vkDestroyShaderModule(VulkanManager::GetDevice(), fragmentModule, VulkanManager::GetCallbackAllocator());
-		vkDestroyShaderModule(VulkanManager::GetDevice(), vertexModule, VulkanManager::GetCallbackAllocator());
+		vkDestroyShaderModule(VulkanContext::GetDevice(), fragmentModule, VulkanContext::GetCallbackAllocator());
+		vkDestroyShaderModule(VulkanContext::GetDevice(), vertexModule, VulkanContext::GetCallbackAllocator());
 	}
 
 	void VulkanShader::Bind() const
@@ -71,7 +71,7 @@ namespace Amethyst
 		vertCreateInfo.codeSize = vertBuffer.size();
 		vertCreateInfo.pCode = reinterpret_cast<const uint32_t*>(vertBuffer.data());
 
-		VkResult error = vkCreateShaderModule(VulkanManager::GetDevice(), &vertCreateInfo, VulkanManager::GetCallbackAllocator(), &vertexModule);
+		VkResult error = vkCreateShaderModule(VulkanContext::GetDevice(), &vertCreateInfo, VulkanContext::GetCallbackAllocator(), &vertexModule);
 
 		// Fragment file
 		std::ifstream fragFile(vertex, std::ios::ate | std::ios::binary);
@@ -89,6 +89,6 @@ namespace Amethyst
 		fragCreateInfo.codeSize = fragBuffer.size();
 		fragCreateInfo.pCode = reinterpret_cast<const uint32_t*>(fragBuffer.data());
 
-		error = vkCreateShaderModule(VulkanManager::GetDevice(), &fragCreateInfo, VulkanManager::GetCallbackAllocator(), &fragmentModule);
+		error = vkCreateShaderModule(VulkanContext::GetDevice(), &fragCreateInfo, VulkanContext::GetCallbackAllocator(), &fragmentModule);
 	}
 }

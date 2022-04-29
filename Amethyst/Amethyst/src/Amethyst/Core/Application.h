@@ -7,15 +7,12 @@
 #include "Amethyst/Events/Event.h"
 #include "Amethyst/Events/ApplicationEvent.h"
 
-#include "Amethyst/ImGui/ImGuiLayer.h"
-#include "Amethyst/Renderer/Shader.h"
-#include "Amethyst/Renderer/Buffer.h"
-#include "Amethyst/Renderer/VertexArray.h"
-
 #include "Amethyst/Core/Timer.h"
 
 namespace Amethyst
 {
+	class ImGuiLayer;
+
 	class AMT_API Application
 	{
 	public:

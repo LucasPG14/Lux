@@ -27,17 +27,34 @@ namespace Amethyst
 
 		void SwapBuffers() override;
 
+		static void Begin();
+		static void End();
+
+		static void BeginRenderPass();
+		static void EndRenderPass();
+
 		static void RecreateSwapChain();
 
 		static VkInstance GetInstance() { return context; }
 		static VkPhysicalDevice GetPhysicalDevice() { return physicalDevice; }
 		static VkAllocationCallbacks* GetCallbackAllocator() { return callbacksAllocator; }
 		static VkDevice GetDevice() { return device; }
+		static VkSurfaceKHR GetSurface() { return surface; }
+		
+		static VkExtent2D GetExtent() { return extent; }
+		static VkCommandPool GetCommandPool() { return commandPool; }
+
+		static VkFormat GetFormat() { return format; }
 		
 		static VkQueue GetQueue() { return queue; }
 		static VkRenderPass GetRenderPass() { return renderPass; }
 		
+		static VkDescriptorPool GetDescriptorPool() { return descriptorPool; }
+
+		static int GetCurrentFrame() { return currentFrame; }
+		
 		static std::vector<VkCommandBuffer> GetCommandBuffer() { return commandBuffer; }
+		static VkCommandBuffer GetSpecCommandBuffer() { return commandBuffer[currentFrame]; }
 
 		static uint32_t GetImageCount() { return imgCount; }
 	private:
@@ -54,6 +71,8 @@ namespace Amethyst
 		GLFWwindow* window;
 
 		static VkInstance context;
+		VkDebugReportCallbackEXT debugReport;
+
 		static VkAllocationCallbacks* callbacksAllocator;
 		static VkPhysicalDevice physicalDevice;
 
@@ -61,7 +80,7 @@ namespace Amethyst
 		static VkQueue queue;
 
 		static VkDevice device;
-		VkDescriptorPool descriptorPool;
+		static VkDescriptorPool descriptorPool;
 
 		static VkSurfaceKHR surface;
 
@@ -103,5 +122,6 @@ namespace Amethyst
 		static VkDeviceMemory indexBufferMemory;
 
 		static int currentFrame;
+		static uint32_t myIndex;
 	};
 }
