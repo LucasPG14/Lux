@@ -56,17 +56,17 @@ namespace Amethyst
 
 			VulkanContext::Begin();
 			VulkanContext::BeginRenderPass();
-			//
-			//// This should be on the renderer, on a separate thread
+		
+			// This should be on the renderer, on a separate thread
 			imguiLayer->Begin();
 
 			for (Layer* layer : layerStack)
 				layer->RenderImGui();
 
 			imguiLayer->End(VulkanContext::GetCurrentFrame());
-			//
+			
 
-			//VulkanContext::Draw();
+			VulkanContext::Draw();
 
 			VulkanContext::EndRenderPass();
 			VulkanContext::End();

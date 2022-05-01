@@ -200,6 +200,7 @@
     <ClInclude Include="src\Platform\Vulkan\VulkanAllocator.h" />
     <ClInclude Include="src\Platform\Vulkan\VulkanContext.h" />
     <ClInclude Include="src\Platform\Vulkan\VulkanDevice.h" />
+    <ClInclude Include="src\Platform\Vulkan\VulkanIndexBuffer.h" />
     <ClInclude Include="src\Platform\Vulkan\VulkanPipeline.h" />
     <ClInclude Include="src\Platform\Vulkan\VulkanRender.h" />
     <ClInclude Include="src\Platform\Vulkan\VulkanRenderPass.h" />
@@ -664,8 +665,10 @@
     <ClCompile Include="src\Platform\OpenGL\OpenGLTexture.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLVertexArray.cpp" />
     <ClCompile Include="src\Platform\Vulkan\VulkanAllocator.cpp" />
+    <ClCompile Include="src\Platform\Vulkan\VulkanAllocatorBuild.cpp" />
     <ClCompile Include="src\Platform\Vulkan\VulkanContext.cpp" />
     <ClCompile Include="src\Platform\Vulkan\VulkanDevice.cpp" />
+    <ClCompile Include="src\Platform\Vulkan\VulkanIndexBuffer.cpp" />
     <ClCompile Include="src\Platform\Vulkan\VulkanPipeline.cpp" />
     <ClCompile Include="src\Platform\Vulkan\VulkanRender.cpp" />
     <ClCompile Include="src\Platform\Vulkan\VulkanRenderPass.cpp" />

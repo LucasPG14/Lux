@@ -7,12 +7,17 @@ namespace Amethyst
 	class VulkanAllocator
 	{
 	public:
-		VulkanAllocator();
+		VulkanAllocator(const std::string& n);
 
 		~VulkanAllocator();
 
-		void AllocateBuffer(VkBufferCreateInfo bufferInfo, VmaMemoryUsage usage);
+		VmaAllocation AllocateBuffer(VkBufferCreateInfo bufferInfo, VkMemoryPropertyFlagBits usage, VkBuffer& buffer);
+
+		void* MapMemory(VmaAllocation allocation);
+		void UnmapMemory(VmaAllocation allocation);
 	private:
-		VmaAllocator alloc;
+		static VmaAllocator allocator;
+
+		std::string name;
 	};
 }

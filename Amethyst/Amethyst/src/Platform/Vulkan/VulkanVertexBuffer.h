@@ -7,9 +7,11 @@ namespace Amethyst
 	class VulkanVertexBuffer
 	{
 	public:
-		VulkanVertexBuffer();
+		VulkanVertexBuffer(void* data, uint32_t size);
 
 		~VulkanVertexBuffer();
+
+		VkBuffer* GetVertexBuffer() { return &vertexBuffer; }
 
 	private:
 		VkBuffer vertexBuffer;

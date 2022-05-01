@@ -75,7 +75,7 @@ namespace Amethyst
 		VkDescriptorPoolCreateInfo poolInfo = {};
 		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 		poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-		poolInfo.maxSets = 1000 * IM_ARRAYSIZE(poolSizes);;
+		poolInfo.maxSets = 1000 * IM_ARRAYSIZE(poolSizes);
 		poolInfo.poolSizeCount = std::size(poolSizes);
 		poolInfo.pPoolSizes = poolSizes;
 
@@ -168,10 +168,10 @@ namespace Amethyst
 		Application& app = Application::Get();
 		io.DisplaySize = ImVec2((float)app.GetWindow().GetWidth(), (float)app.GetWindow().GetHeight());
 
-		VkRect2D scissors = {};
-		scissors.offset = { 0,0 };
-		scissors.extent = VulkanContext::GetExtent();
-		vkCmdSetScissor(VulkanContext::GetSpecCommandBuffer(), 0, 1, &scissors);
+		//VkRect2D scissors = {};
+		//scissors.offset = { 0,0 };
+		//scissors.extent = VulkanContext::GetExtent();
+		//vkCmdSetScissor(VulkanContext::GetSpecCommandBuffer(), 0, 1, &scissors);
 
 		// Rendering
 		ImGui::Render();

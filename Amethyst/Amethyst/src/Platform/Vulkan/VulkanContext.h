@@ -17,6 +17,9 @@ namespace Amethyst
 		glm::vec3 color;
 	};
 
+	class VulkanVertexBuffer;
+	class VulkanIndexBuffer;
+
 	class VulkanContext : public GraphicsContext
 	{
 	public:
@@ -64,13 +67,14 @@ namespace Amethyst
 		static VkCommandBuffer GetSpecCommandBuffer() { return commandBuffer[currentFrame]; }
 
 		static uint32_t GetImageCount() { return imgCount; }
+
+		static void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& memory);
+		static void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 	private:
 		static void CompileShaders(const std::string& vertex, const std::string& fragment);
 		static void RecordCommandBuffer(VkCommandBuffer cmdBuffer, uint32_t index);
 
-		static void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& memory);
 
-		static void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 
 		static void CreateSwapChain();
 		static void CleanUpSwapChain();
@@ -127,6 +131,9 @@ namespace Amethyst
 		
 		static VkBuffer indexBuffer; 
 		static VkDeviceMemory indexBufferMemory;
+
+		static std::shared_ptr<VulkanVertexBuffer> vbo;
+		static std::shared_ptr<VulkanIndexBuffer> ebo;
 
 		static int currentFrame;
 		static uint32_t myIndex;

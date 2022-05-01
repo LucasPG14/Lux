@@ -237,6 +237,9 @@
     <ClInclude Include="src\Platform\OpenGL\OpenGLVertexArray.h">
       <Filter>src\Platform\OpenGL</Filter>
     </ClInclude>
+    <ClInclude Include="src\Platform\Vulkan\VulkanAllocator.h">
+      <Filter>src\Platform\Vulkan</Filter>
+    </ClInclude>
     <ClInclude Include="src\Platform\Vulkan\VulkanContext.h">
       <Filter>src\Platform\Vulkan</Filter>
     </ClInclude>
@@ -253,6 +256,9 @@
       <Filter>src\Platform\Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\Vulkan\VulkanShader.h">
+      <Filter>src\Platform\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\Vulkan\VulkanVertexBuffer.h">
       <Filter>src\Platform\Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\Windows\WindowsWindow.h">
@@ -1515,8 +1521,7 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="src\Platform\Vulkan\VulkanAllocator.h" />
-    <ClInclude Include="src\Platform\Vulkan\VulkanVertexBuffer.h" />
+    <ClInclude Include="src\Platform\Vulkan\VulkanIndexBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Amethyst\Core\Application.cpp">
@@ -1627,6 +1632,9 @@
     <ClCompile Include="src\Platform\OpenGL\OpenGLVertexArray.cpp">
       <Filter>src\Platform\OpenGL</Filter>
     </ClCompile>
+    <ClCompile Include="src\Platform\Vulkan\VulkanAllocator.cpp">
+      <Filter>src\Platform\Vulkan</Filter>
+    </ClCompile>
     <ClCompile Include="src\Platform\Vulkan\VulkanContext.cpp">
       <Filter>src\Platform\Vulkan</Filter>
     </ClCompile>
@@ -1645,6 +1653,9 @@
     <ClCompile Include="src\Platform\Vulkan\VulkanShader.cpp">
       <Filter>src\Platform\Vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="src\Platform\Vulkan\VulkanVertexBuffer.cpp">
+      <Filter>src\Platform\Vulkan</Filter>
+    </ClCompile>
     <ClCompile Include="src\Platform\Windows\WindowsInput.cpp">
       <Filter>src\Platform\Windows</Filter>
     </ClCompile>
@@ -1660,7 +1671,7 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
-    <ClCompile Include="src\Platform\Vulkan\VulkanAllocator.cpp" />
-    <ClCompile Include="src\Platform\Vulkan\VulkanVertexBuffer.cpp" />
+    <ClCompile Include="src\Platform\Vulkan\VulkanAllocatorBuild.cpp" />
+    <ClCompile Include="src\Platform\Vulkan\VulkanIndexBuffer.cpp" />
   </ItemGroup>
 </Project>

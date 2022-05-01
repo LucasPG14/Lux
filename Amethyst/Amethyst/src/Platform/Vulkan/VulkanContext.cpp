@@ -1,6 +1,9 @@
 #include "amtpch.h"
 #include "VulkanContext.h"
 
+#include "VulkanVertexBuffer.h"
+#include "VulkanIndexBuffer.h"
+
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -56,6 +59,9 @@ namespace Amethyst
 	VkDeviceMemory VulkanContext::indexBufferMemory = VK_NULL_HANDLE;
 
 	VkDescriptorPool VulkanContext::descriptorPool = VK_NULL_HANDLE;
+
+	std::shared_ptr<VulkanVertexBuffer> VulkanContext::vbo = nullptr;
+	std::shared_ptr<VulkanIndexBuffer> VulkanContext::ebo = nullptr;
 
 	int VulkanContext::currentFrame = 0;
 	uint32_t VulkanContext::myIndex = 0;
@@ -231,12 +237,14 @@ namespace Amethyst
 	{
 		vkCmdBindPipeline(commandBuffer[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
 
+		VkBuffer* myVertexBuffer = { vbo->GetVertexBuffer() };
 		VkDeviceSize offsets = 0;
-		vkCmdBindVertexBuffers(commandBuffer[currentFrame], 0, 1, &vertexBuffer, &offsets);
 
-		vkCmdBindIndexBuffer(commandBuffer[currentFrame], indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+		vkCmdBindVertexBuffers(commandBuffer[currentFrame], 0, 1, myVertexBuffer, &offsets);
 
-		vkCmdDrawIndexed(commandBuffer[currentFrame], static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+		vkCmdBindIndexBuffer(commandBuffer[currentFrame], ebo->GetIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
+
+		vkCmdDrawIndexed(commandBuffer[currentFrame], ebo->GetCount(), 1, 0, 0, 0);
 	}
 
 	void VulkanContext::SwapBuffers()
@@ -690,7 +698,9 @@ namespace Amethyst
 				vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
 				vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 
-				VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
+				// TODO: Delete this when having staging buffers in vertex and index buffer classes
+				// Vertex Buffer
+				/*VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
 				CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
 				void* data;
@@ -704,26 +714,30 @@ namespace Amethyst
 				CopyBuffer(stagingBuffer, vertexBuffer, bufferSize);
 
 				vkDestroyBuffer(device.GetDevice(), stagingBuffer, callbacksAllocator);
-				vkFreeMemory(device.GetDevice(), stagingBufferMemory, callbacksAllocator);
+				vkFreeMemory(device.GetDevice(), stagingBufferMemory, callbacksAllocator);*/
+
+				vbo = std::make_shared<VulkanVertexBuffer>(vertices.data(), sizeof(vertices[0]) * vertices.size());
 
 				// ----------------------------- Index Buffer ------------------------------------
-				bufferSize = sizeof(indices[0]) * indices.size();
+				//VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
 
-				VkBuffer stagingIndexBuffer;
-				VkDeviceMemory stagingIndexBufferMemory;
-				CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingIndexBuffer, stagingIndexBufferMemory);
+				//VkBuffer stagingIndexBuffer;
+				//VkDeviceMemory stagingIndexBufferMemory;
+				//CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingIndexBuffer, stagingIndexBufferMemory);
 
-				data = nullptr;
-				vkMapMemory(device.GetDevice(), stagingIndexBufferMemory, 0, bufferSize, 0, &data);
-				memcpy(data, indices.data(), (size_t)bufferSize);
-				vkUnmapMemory(device.GetDevice(), stagingIndexBufferMemory);
+				//void* data = nullptr;
+				//vkMapMemory(device.GetDevice(), stagingIndexBufferMemory, 0, bufferSize, 0, &data);
+				//memcpy(data, indices.data(), (size_t)bufferSize);
+				//vkUnmapMemory(device.GetDevice(), stagingIndexBufferMemory);
 
-				CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);
+				//CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);
 
-				CopyBuffer(stagingIndexBuffer, indexBuffer, bufferSize);
+				//CopyBuffer(stagingIndexBuffer, indexBuffer, bufferSize);
 
-				vkDestroyBuffer(device.GetDevice(), stagingIndexBuffer, callbacksAllocator);
-				vkFreeMemory(device.GetDevice(), stagingIndexBufferMemory, callbacksAllocator);
+				//vkDestroyBuffer(device.GetDevice(), stagingIndexBuffer, callbacksAllocator);
+				//vkFreeMemory(device.GetDevice(), stagingIndexBufferMemory, callbacksAllocator);
+
+				ebo = std::make_shared<VulkanIndexBuffer>(indices.data(), sizeof(indices[0]) * indices.size());
 
 				//void* data;
 				//vkMapMemory(device, vertexBufferMemory, 0, bufferSize, 0, &data);
