@@ -23,10 +23,6 @@ namespace Amethyst
 		AMT_CORE_INFO("OpenGL Version: {0}", glGetString(GL_RENDERER));
 		AMT_CORE_INFO("OpenGL Version: {0}", glGetString(GL_VERSION));
 	}
-
-	void OpenGLContext::Shutdown()
-	{
-	}
 	
 	void OpenGLContext::SwapBuffers()
 	{

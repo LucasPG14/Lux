@@ -168,7 +168,6 @@ namespace Amethyst
 
 	void WindowsWindow::Shutdown()
 	{
-		context->Shutdown();
 		glfwDestroyWindow(window);
 	}
 
