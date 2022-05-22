@@ -5,7 +5,6 @@
 #include "Components/TransformComponent.h"
 #include "Components/MeshComponent.h"
 #include "Components/MaterialComponent.h"
-#include "Components/CameraComponent.h"
 
 #include "Amethyst/Renderer/Renderer.h"
 
