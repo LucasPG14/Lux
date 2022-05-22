@@ -16,30 +16,30 @@ namespace Amethyst
 	
 	ContentBrowserWindow::ContentBrowserWindow() : currentDir(assetsDir)
 	{
-		//folder = Texture2D::Create("editor/textures/folder.png");
-		//tex = Texture2D::Create("assets/textures/bakeHouse.png");
+		folder = Texture2D::Create("editor/textures/folder.png");
+		tex = Texture2D::Create("assets/textures/bakeHouse.png");
 
-		//// Load Resources
-		//std::stack<std::filesystem::path> resources;
-		//resources.push(assetsDir);
+		// Load Resources
+		std::stack<std::filesystem::path> resources;
+		resources.push(assetsDir);
 
-		//std::string extension = ".bsres";
+		std::string extension = ".bsres";
 
-		//while (!resources.empty())
-		//{
-		//	std::filesystem::path path = resources.top();
-		//	resources.pop();
+		while (!resources.empty())
+		{
+			std::filesystem::path path = resources.top();
+			resources.pop();
 
-		//	for (auto& entry : std::filesystem::directory_iterator(path))
-		//	{
-		//		const std::filesystem::path& filePath = entry.path();
-		//		if (entry.is_directory()) resources.push(entry);
-		//		else if (filePath.extension().string() == extension)
-		//		{
-		//			ResourceSystem::ImportResources(filePath);
-		//		}
-		//	}
-		//}
+			for (auto& entry : std::filesystem::directory_iterator(path))
+			{
+				const std::filesystem::path& filePath = entry.path();
+				if (entry.is_directory()) resources.push(entry);
+				else if (filePath.extension().string() == extension)
+				{
+					ResourceSystem::ImportResources(filePath);
+				}
+			}
+		}
 	}
 	
 	void ContentBrowserWindow::Render()
@@ -48,73 +48,73 @@ namespace Amethyst
 		static bool ret = true;
 		ImGui::Begin("Content Browser", &ret, ImGuiWindowFlags_MenuBar);
 
-		//ImGui::BeginMenuBar();
+		ImGui::BeginMenuBar();
 
-		//ImGui::EndMenuBar();
+		ImGui::EndMenuBar();
 
-		//focused = false;
-		//if (ImGui::IsWindowFocused()) focused = true;
+		focused = false;
+		if (ImGui::IsWindowFocused()) focused = true;
 
-		//// Setting the number of columns
-		//float cell = 128;
+		// Setting the number of columns
+		float cell = 128;
 
-		//float width = ImGui::GetContentRegionAvail().x;
-		//int columns = (int)(width / cell);
+		float width = ImGui::GetContentRegionAvail().x;
+		int columns = (int)(width / cell);
 
-		//if (columns < 1)
-		//	columns = 1;
+		if (columns < 1)
+			columns = 1;
 
-		//ImGui::Columns(columns, 0, false);
+		ImGui::Columns(columns, 0, false);
 
-		//int i = 0;
-		//for (const auto& file : std::filesystem::directory_iterator(currentDir))
-		//{
-		//	ImGui::PushID(i++);
-		//	const auto& path = file.path();
-		//	auto relativePath = std::filesystem::relative(file.path(), assetsDir);
-		//	std::string filename = relativePath.filename().string();
+		int i = 0;
+		for (const auto& file : std::filesystem::directory_iterator(currentDir))
+		{
+			ImGui::PushID(i++);
+			const auto& path = file.path();
+			auto relativePath = std::filesystem::relative(file.path(), assetsDir);
+			std::string filename = relativePath.filename().string();
 
-		//	bool fileSelected = false;
-		//	if (path == selected) fileSelected = true;
+			bool fileSelected = false;
+			if (path == selected) fileSelected = true;
 
-		//	if (fileSelected) ImGui::PushStyleColor(ImGuiCol_Button, { 0.992f, 0.894f, 0.764f, 0.4f });
+			if (fileSelected) ImGui::PushStyleColor(ImGuiCol_Button, { 0.992f, 0.894f, 0.764f, 0.4f });
 
-		//	if (file.is_directory()) ImGui::ImageButton((ImTextureID)folder->GetID(), { 100, 100 }, { 0, 1 }, { 1, 0 });
-		//	else ImGui::ImageButton((ImTextureID)tex->GetID(), { 100, 100 }, { 0, 1 }, { 1, 0 });
-		//	
-		//	if (fileSelected) ImGui::PopStyleColor();
+			if (file.is_directory()) ImGui::ImageButton((ImTextureID)folder->GetID(), { 100, 100 }, { 0, 1 }, { 1, 0 });
+			else ImGui::ImageButton((ImTextureID)tex->GetID(), { 100, 100 }, { 0, 1 }, { 1, 0 });
+			
+			if (fileSelected) ImGui::PopStyleColor();
 
-		//	// Drag objects from the Content Browser
-		//	if (ImGui::BeginDragDropSource())
-		//	{
-		//		const wchar_t* filePath = relativePath.c_str();
-		//		ImGui::SetDragDropPayload("CONTENT_BROWSER", filePath, (wcslen(filePath) + 1) * sizeof(const wchar_t), ImGuiCond_Once);
-		//		ImGui::EndDragDropSource();
-		//	}
+			// Drag objects from the Content Browser
+			if (ImGui::BeginDragDropSource())
+			{
+				const wchar_t* filePath = relativePath.c_str();
+				ImGui::SetDragDropPayload("CONTENT_BROWSER", filePath, (wcslen(filePath) + 1) * sizeof(const wchar_t), ImGuiCond_Once);
+				ImGui::EndDragDropSource();
+			}
 
-		//	if (ImGui::IsItemHovered())
-		//	{
-		//		if (ImGui::IsMouseDoubleClicked(0))
-		//		{
-		//			if (file.is_directory()) currentDir /= path.filename();
-		//			//else if (path.extension().string() == ".bsscene") OpenScene(path);
-		//		}
-		//		else if (ImGui::IsMouseClicked(0))
-		//		{
-		//			selected = path;
-		//		}
-		//	}
+			if (ImGui::IsItemHovered())
+			{
+				if (ImGui::IsMouseDoubleClicked(0))
+				{
+					if (file.is_directory()) currentDir /= path.filename();
+					//else if (path.extension().string() == ".bsscene") OpenScene(path);
+				}
+				else if (ImGui::IsMouseClicked(0))
+				{
+					selected = path;
+				}
+			}
 
-		//	ImGui::TextWrapped(filename.c_str());
+			ImGui::TextWrapped(filename.c_str());
 
-		//	ImGui::NextColumn();
-		//	ImGui::PopID();
-		//}
+			ImGui::NextColumn();
+			ImGui::PopID();
+		}
 
-		//if (!ImGui::IsAnyItemHovered() && focused)
-		//{
-		//	if (ImGui::IsMouseClicked(0)) selected = "";
-		//}
+		if (!ImGui::IsAnyItemHovered() && focused)
+		{
+			if (ImGui::IsMouseClicked(0)) selected = "";
+		}
 
 		ImGui::End();
 		// Content Browser end

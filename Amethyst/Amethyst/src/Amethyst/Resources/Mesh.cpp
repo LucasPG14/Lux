@@ -42,9 +42,6 @@ namespace Amethyst
 			file.read((char*)&numVertices, sizeof(int));
 			file.read((char*)&numIndices, sizeof(int));
 
-			//std::vector<Vertex> vertices;
-			//std::vector<uint32_t> indices;
-
 			vertices.resize(numVertices);
 			indices.resize(numIndices);
 

@@ -5,8 +5,6 @@
 
 #include "Amethyst/Renderer/Renderer.h"
 
-#include "Platform/Vulkan/VulkanContext.h"
-
 #include "Amethyst/Core/Input.h"
 
 #include <GLFW/glfw3.h>
@@ -53,9 +51,6 @@ namespace Amethyst
 
 			for (Layer* layer : layerStack)
 				layer->Update(timer);
-
-			VulkanContext::Begin();
-			VulkanContext::BeginRenderPass();
 		
 			// This should be on the renderer, on a separate thread
 			imguiLayer->Begin();
@@ -63,13 +58,7 @@ namespace Amethyst
 			for (Layer* layer : layerStack)
 				layer->RenderImGui();
 
-			imguiLayer->End(VulkanContext::GetCurrentFrame());
-			
-
-			VulkanContext::Draw();
-
-			VulkanContext::EndRenderPass();
-			VulkanContext::End();
+			imguiLayer->End();
 
 			window->Update();
 		}

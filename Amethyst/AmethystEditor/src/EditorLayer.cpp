@@ -35,7 +35,7 @@ namespace Amethyst
 		FramebufferSpecification spec;
 		spec.width = 1280;
 		spec.height = 720;
-		//fbo = Framebuffer::Create(spec);
+		fbo = Framebuffer::Create(spec);
 	}
 
 	void EditorLayer::OnDestroy()
@@ -49,7 +49,7 @@ namespace Amethyst
 
 		camera.Update(timer);
 
-		/*fbo->Bind();
+		fbo->Bind();
 		RenderOrder::ClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 		RenderOrder::Clear();
 
@@ -59,7 +59,7 @@ namespace Amethyst
 
 		Renderer::EndScene();
 
-		fbo->Unbind();*/
+		fbo->Unbind();
 	}
 
 	void EditorLayer::RenderImGui()
@@ -165,30 +165,30 @@ namespace Amethyst
 
 		ImGui::Begin("Viewport", &viewportEnabled, viewportFlags);
 		ImVec2 size = ImGui::GetWindowContentRegionMax();
-		//ImGui::Image((ImTextureID)fbo->GetID(), { viewSize.x, viewSize.y }, { 0, 1 }, { 1, 0 });
-		//if (size.x != viewSize.x || size.y != viewSize.y)
-		//{
-		//	viewSize = { size.x, size.y };
-		//	fbo->Resize(viewSize.x, viewSize.y);
-		//	camera.SetDimensions(viewSize.x, viewSize.y);
-		//}
+		ImGui::Image((ImTextureID)fbo->GetID(), { viewSize.x, viewSize.y }, { 0, 1 }, { 1, 0 });
+		if (size.x != viewSize.x || size.y != viewSize.y)
+		{
+			viewSize = { size.x, size.y };
+			fbo->Resize(viewSize.x, viewSize.y);
+			camera.SetDimensions(viewSize.x, viewSize.y);
+		}
 
-		//// DragAndDrop Target
-		//if (ImGui::BeginDragDropTarget())
-		//{
-		//	if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER"))
-		//	{
-		//		const wchar_t* path = (const wchar_t*)payload->Data;
-		//		std::filesystem::path realPath = std::filesystem::path(assetsDir) / path;
-		//		if (realPath.has_extension())
-		//		{
-		//			if (realPath.extension().string() == ".bsscene") OpenScene(realPath);
-		//			else AddToScene(realPath);
-		//		}
-		//	}
+		// DragAndDrop Target
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER"))
+			{
+				const wchar_t* path = (const wchar_t*)payload->Data;
+				std::filesystem::path realPath = std::filesystem::path(assetsDir) / path;
+				if (realPath.has_extension())
+				{
+					if (realPath.extension().string() == ".bsscene") OpenScene(realPath);
+					else AddToScene(realPath);
+				}
+			}
 
-		//	ImGui::EndDragDropTarget();
-		//}
+			ImGui::EndDragDropTarget();
+		}
 
 		// ImGuizmo Begin
 		if (Entity* entitySelected = hierarchy.GetSelected())
