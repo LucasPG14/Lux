@@ -3,7 +3,7 @@
 
 #include "Amethyst/Resources/ResourceSystem.h"
 
-#include "Amethyst/Utils/Hash.h"
+#include "Hash.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>

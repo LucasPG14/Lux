@@ -6,6 +6,7 @@
 
 #include "Amethyst/Utils/FileDialogs.h"
 #include "Amethyst/Utils/Math.h"
+#include "Amethyst/Utils/Primitives.h"
 
 #include <glm/gtx/intersect.hpp>
 #include <Optick/src/optick.h>
@@ -36,6 +37,8 @@ namespace Amethyst
 		spec.width = 1280;
 		spec.height = 720;
 		fbo = Framebuffer::Create(spec);
+
+		CreateSphere();
 	}
 
 	void EditorLayer::OnDestroy()
@@ -150,6 +153,11 @@ namespace Amethyst
 				if (ImGui::MenuItem("Delete", "Del"))
 				{
 
+				}
+				ImGui::Separator();
+				if (ImGui::MenuItem("Create Sphere", "Ctrl + Y"))
+				{
+					AddToScene(std::filesystem::path("Editor/Meshes/Sphere.bsres"));
 				}
 
 				ImGui::EndMenu();
@@ -435,14 +443,14 @@ namespace Amethyst
 	{
 		sceneState = SceneState::RUNTIME;
 		ImGui::StyleColorsClassic();
-		SaveScene("editor/scenes/ScenePlay.bsscene");
+		SaveScene("Editor/Scenes/ScenePlay.bsscene");
 	}
 	
 	void EditorLayer::StopScene()
 	{
 		sceneState = SceneState::EDITOR;
 		ImGui::StyleColorsDark();
-		OpenScene("editor/scenes/ScenePlay.bsscene");
+		OpenScene("Editor/Scenes/ScenePlay.bsscene");
 		hierarchy.SetSelected(nullptr);
 	}
 }

@@ -188,6 +188,7 @@
     <ClInclude Include="src\Amethyst\Utils\Hash.h" />
     <ClInclude Include="src\Amethyst\Utils\Importer.h" />
     <ClInclude Include="src\Amethyst\Utils\Math.h" />
+    <ClInclude Include="src\Amethyst\Utils\Primitives.h" />
     <ClInclude Include="src\Amethyst\Utils\Vertex.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLBuffer.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLContext.h" />
@@ -646,6 +647,7 @@
     <ClCompile Include="src\Amethyst\Scene\SceneSerializer.cpp" />
     <ClCompile Include="src\Amethyst\Utils\FileDialogs.cpp" />
     <ClCompile Include="src\Amethyst\Utils\Importer.cpp" />
+    <ClCompile Include="src\Amethyst\Utils\Primitives.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLContext.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLFramebuffer.cpp" />

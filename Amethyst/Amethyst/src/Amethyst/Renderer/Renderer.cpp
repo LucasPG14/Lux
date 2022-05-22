@@ -1,6 +1,8 @@
 #include "amtpch.h"
 #include "Renderer.h"
 
+#include "Amethyst/Resources/ResourceSystem.h"
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -13,9 +15,9 @@ namespace Amethyst
 	void Renderer::Init()
 	{
 		RenderOrder::Init();
-		
+
 		// OpenGL
-		std::shared_ptr<Shader> shader = Shader::Create("assets/shaders/Texture.glsl");
+		std::shared_ptr<Shader> shader = Shader::Create("Assets/Shaders/Texture.glsl");
 		shaderLibrary->Add(shader);
 	}
 

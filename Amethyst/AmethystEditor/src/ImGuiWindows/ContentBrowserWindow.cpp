@@ -12,12 +12,12 @@ namespace Amethyst
 {
 	#define BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
 
-	extern const std::filesystem::path assetsDir = "assets/";
+	extern const std::filesystem::path assetsDir = "Assets/";
 	
 	ContentBrowserWindow::ContentBrowserWindow() : currentDir(assetsDir)
 	{
-		folder = Texture2D::Create("editor/textures/folder.png");
-		tex = Texture2D::Create("assets/textures/bakeHouse.png");
+		folder = Texture2D::Create("Editor/Textures/folder.png");
+		tex = Texture2D::Create("Assets/Textures/bakeHouse.png");
 
 		// Load Resources
 		std::stack<std::filesystem::path> resources;
@@ -130,19 +130,19 @@ namespace Amethyst
 	
 	bool ContentBrowserWindow::OnKeyPressed(KeyPressedEvent& e)
 	{
+		if (!focused)
+			return false;
+
 		switch (e.GetKeyCode())
 		{
 		case Keys::DEL:
-			if (focused)
-			{
-				std::ifstream file(selected, std::ios::binary);
+			std::ifstream file(selected, std::ios::binary);
 
-				uint64_t uuid = 0;
-				file.read((char*)&uuid, sizeof(uint64_t));
+			uint64_t uuid = 0;
+			file.read((char*)&uuid, sizeof(uint64_t));
 
-				ResourceSystem::Delete(uuid);
-				std::filesystem::remove_all(selected);
-			}
+			ResourceSystem::Delete(uuid);
+			std::filesystem::remove_all(selected);
 			break;
 		}
 
