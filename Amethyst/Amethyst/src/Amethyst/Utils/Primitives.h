@@ -1,7 +1,9 @@
 #pragma once
 
+#include "Vertex.h"
+
 namespace Amethyst
 {
 	// Sphere
-	void CreateSphere();
+	void CreateSphere(std::vector<Vertex>& vertices, std::vector<uint32_t>& indices);
 }

@@ -16,6 +16,8 @@ namespace Amethyst
 
 		virtual void UploadUniformMat4(const std::string& name, const glm::mat4& matrix) = 0;
 		virtual void UploadUniformInt(const std::string& name, uint32_t value) = 0;
+		virtual void UploadUniformFloat3(const std::string& name, const glm::vec3& value) = 0;
+		virtual void UploadUniformFloat(const std::string& name, float value) = 0;
 		
 		static std::shared_ptr<Shader> Create(const std::string& filePath);
 		static std::shared_ptr<Shader> Create(const std::string& name, const std::string& vertex, const std::string& fragment);

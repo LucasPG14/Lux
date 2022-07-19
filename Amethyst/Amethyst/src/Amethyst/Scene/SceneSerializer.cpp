@@ -5,8 +5,6 @@
 #include "Components/MeshComponent.h"
 #include "Components/MaterialComponent.h"
 
-#include "Amethyst/Resources/ResourceSystem.h"
-
 #include <yaml-cpp/yaml.h>
 
 // YAML functions to deserialize the glm::vec
@@ -93,7 +91,7 @@ namespace Amethyst
 				// Mesh map begin
 				emitter << YAML::BeginMap;
 
-				emitter << YAML::Key << "UUID" << YAML::Value << comp->GetMesh()->GetUUID();
+				
 
 				emitter << YAML::EndMap;
 				// Mesh map end
@@ -105,7 +103,7 @@ namespace Amethyst
 				// Material map begin
 				emitter << YAML::BeginMap;
 
-				emitter << YAML::Key << "UUID" << YAML::Value << comp->GetMaterial()->GetUUID();
+				
 
 				emitter << YAML::EndMap;
 				// Material map end
@@ -154,14 +152,14 @@ namespace Amethyst
 			if (mesh)
 			{
 				uint64_t uuid = mesh["UUID"].as<uint64_t>();
-				MeshComponent& comp = *entity.CreateComponent<MeshComponent>(ResourceSystem::Get<Mesh>(uuid));
+				
 			}
 
 			YAML::Node material = yamlEntity["MaterialComponent"];
 			if (material)
 			{
 				uint64_t uuid = material["UUID"].as<uint64_t>();
-				MaterialComponent& comp = *entity.CreateComponent<MaterialComponent>(ResourceSystem::Get<Material>(uuid));
+				
 			}
 		}
 

@@ -16,12 +16,10 @@
 #include "Amethyst/Scene/Components/TransformComponent.h"
 #include "Amethyst/Scene/Components/MeshComponent.h"
 #include "Amethyst/Scene/Components/MaterialComponent.h"
+#include "Amethyst/Scene/Components/LightComponent.h"
 
 // Timer
 #include "Amethyst/Core/Timer.h"
-
-// For the editor
-#include "Amethyst/Resources/ResourceSystem.h"
 
 // Utils
 #include "Amethyst/Utils/Importer.h"

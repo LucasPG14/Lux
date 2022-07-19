@@ -1,14 +1,17 @@
 #include "amtpch.h"
 
 #include "MaterialComponent.h"
+#include "Amethyst/Utils/Hash.h"
+
+#include <glm/gtc/type_ptr.hpp>
 
 #include <imgui.h>
 
 namespace Amethyst
 {
-	MaterialComponent::MaterialComponent(std::shared_ptr<Material> mat) : material(mat)
+	MaterialComponent::MaterialComponent() 
 	{
-		material->Load();
+		material = std::make_shared<Material>();
 	}
 	
 	MaterialComponent::~MaterialComponent()
@@ -21,9 +24,9 @@ namespace Amethyst
 	
 	void MaterialComponent::DrawInspector()
 	{
-		if (ImGui::CollapsingHeader("Material"))
+		if (ImGui::CollapsingHeader("Material Component"))
 		{
-			
+			ImGui::ColorPicker3("##color", glm::value_ptr(material->GetColor()));
 		}
 	}
 }

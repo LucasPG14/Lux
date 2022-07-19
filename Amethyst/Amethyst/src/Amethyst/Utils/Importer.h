@@ -1,10 +1,11 @@
 #pragma once
 
+#include "Vertex.h"
+
 namespace Amethyst
 {
 	namespace Importer
 	{
-		void Import(const std::filesystem::path& path, const std::filesystem::path& directory);
-		void ImportTexture(const std::filesystem::path& path, const std::filesystem::path& directory);
+		void ImportFBX(std::vector<Vertex>& vertices, std::vector<uint32_t>& indices);
 	}
 }

@@ -22,6 +22,8 @@ namespace Amethyst
 		scene = std::make_shared<Scene>();
 		contentBrowser = ContentBrowserWindow();
 		hierarchy = SceneHierarchyWindow(scene);
+
+		lightningPass = Shader::Create("Assets/Shaders/Quad.glsl");
 	}
 
 	EditorLayer::~EditorLayer()
@@ -32,13 +34,39 @@ namespace Amethyst
 	{
 		OPTICK_EVENT("Editor Layer Create");
 
-		// Creating framebuffer
-		FramebufferSpecification spec;
-		spec.width = 1280;
-		spec.height = 720;
-		fbo = Framebuffer::Create(spec);
+		// Creating scene framebuffer
+		{
+			FramebufferSpecification spec;
+			spec.width = 1280;
+			spec.height = 720;
+			spec.swapChainTarget = true;
 
-		CreateSphere();
+			spec.attachments.attachments =
+			{
+				FramebufferTextureFormat::RGBA16,
+				FramebufferTextureFormat::RGBA16,
+				FramebufferTextureFormat::RGBA8,
+				FramebufferTextureFormat::DEPTH24_STENCIL8
+			};
+
+			sceneFramebuffer = Framebuffer::Create(spec);
+		}
+
+		// Creating viewport framebuffer
+		{
+			FramebufferSpecification spec;
+			spec.width = 1280;
+			spec.height = 720;
+			spec.swapChainTarget = true;
+
+			spec.attachments.attachments =
+			{
+				FramebufferTextureFormat::RGBA8,
+				FramebufferTextureFormat::DEPTH24_STENCIL8
+			};
+
+			viewportFramebuffer = Framebuffer::Create(spec);
+		}
 	}
 
 	void EditorLayer::OnDestroy()
@@ -52,7 +80,7 @@ namespace Amethyst
 
 		camera.Update(timer);
 
-		fbo->Bind();
+		sceneFramebuffer->Bind();
 		RenderOrder::ClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 		RenderOrder::Clear();
 
@@ -62,7 +90,43 @@ namespace Amethyst
 
 		Renderer::EndScene();
 
-		fbo->Unbind();
+		sceneFramebuffer->Unbind();
+
+		viewportFramebuffer->Bind();
+		RenderOrder::ClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
+		RenderOrder::Clear();
+
+		lightningPass->Bind();
+		sceneFramebuffer->BindTextures();
+		lightningPass->UploadUniformInt("positions", 0);
+		lightningPass->UploadUniformInt("normals", 1);
+		lightningPass->UploadUniformInt("albedoSpecular", 2);
+
+		const auto& lights = scene->GetLights();
+
+		for (int i = 0; i < lights.size(); ++i)
+		{
+			LightComponent* light = lights[i].second;
+			switch (light->GetType())
+			{
+			case LightType::DIRECTIONAL:
+				lightningPass->UploadUniformFloat3("dirLight.direction", lights[i].first->GetRotation());
+				lightningPass->UploadUniformFloat3("dirLight.ambient", light->GetColor());
+				lightningPass->UploadUniformFloat3("dirLight.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+				lightningPass->UploadUniformFloat3("dirLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+				break;
+			case LightType::POINT:
+				lightningPass->UploadUniformFloat3("pointLight.position", lights[i].first->GetRotation());
+				lightningPass->UploadUniformFloat3("pointLight.ambient", light->GetColor());
+				lightningPass->UploadUniformFloat3("pointLight.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+				lightningPass->UploadUniformFloat3("pointLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+				break;
+			}
+		}
+		
+		Renderer::DrawQuad();
+
+		viewportFramebuffer->Unbind();
 	}
 
 	void EditorLayer::RenderImGui()
@@ -123,41 +187,20 @@ namespace Amethyst
 				ImGui::EndMenu();
 			}
 
-			if (ImGui::BeginMenu("Edit"))
+			if (ImGui::BeginMenu("Game Object"))
 			{
-				if (ImGui::MenuItem("Undo", "Ctrl + Z"))
+				if (ImGui::MenuItem("Create Directional Light"))
 				{
-
+					Entity& entity = scene->CreateEntity("Light");
+					LightComponent* light = entity.CreateComponent<LightComponent>(LightType::DIRECTIONAL);
+					scene->AddLight(entity.Get<TransformComponent>(), light);
 				}
-				if (ImGui::MenuItem("Redo", "Ctrl + Y"))
-				{
 
-				}
-				ImGui::Separator();
-				if (ImGui::MenuItem("Cut", "Ctrl + X"))
+				if (ImGui::MenuItem("Create Point Light"))
 				{
-
-				}
-				if (ImGui::MenuItem("Copy", "Ctrl + C"))
-				{
-
-				}
-				if (ImGui::MenuItem("Paste", "Ctrl + V"))
-				{
-
-				}
-				if (ImGui::MenuItem("Duplicate", "Ctrl + D"))
-				{
-
-				}
-				if (ImGui::MenuItem("Delete", "Del"))
-				{
-
-				}
-				ImGui::Separator();
-				if (ImGui::MenuItem("Create Sphere", "Ctrl + Y"))
-				{
-					AddToScene(std::filesystem::path("Editor/Meshes/Sphere.bsres"));
+					Entity& entity = scene->CreateEntity("Light");
+					LightComponent* light = entity.CreateComponent<LightComponent>(LightType::POINT);
+					scene->AddLight(entity.Get<TransformComponent>(), light);
 				}
 
 				ImGui::EndMenu();
@@ -173,27 +216,26 @@ namespace Amethyst
 
 		ImGui::Begin("Viewport", &viewportEnabled, viewportFlags);
 		ImVec2 size = ImGui::GetWindowContentRegionMax();
-		ImGui::Image((ImTextureID)fbo->GetID(), { viewSize.x, viewSize.y }, { 0, 1 }, { 1, 0 });
+		ImGui::Image((ImTextureID)viewportFramebuffer->GetID(), { viewSize.x, viewSize.y }, { 0, 1 }, { 1, 0 });
 		if (size.x != viewSize.x || size.y != viewSize.y)
 		{
 			viewSize = { size.x, size.y };
-			fbo->Resize(viewSize.x, viewSize.y);
+			sceneFramebuffer->Resize(viewSize.x, viewSize.y);
 			camera.SetDimensions(viewSize.x, viewSize.y);
 		}
 
 		// DragAndDrop Target
 		if (ImGui::BeginDragDropTarget())
 		{
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER"))
-			{
-				const wchar_t* path = (const wchar_t*)payload->Data;
-				std::filesystem::path realPath = std::filesystem::path(assetsDir) / path;
-				if (realPath.has_extension())
-				{
-					if (realPath.extension().string() == ".bsscene") OpenScene(realPath);
-					else AddToScene(realPath);
-				}
-			}
+			//if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER"))
+			//{
+			//	const wchar_t* path = (const wchar_t*)payload->Data;
+			//	std::filesystem::path realPath = std::filesystem::path(assetsDir) / path;
+			//	if (realPath.has_extension())
+			//	{
+			//		if (realPath.extension().string() == ".bsscene") OpenScene(realPath);
+			//	}
+			//}
 
 			ImGui::EndDragDropTarget();
 		}
@@ -230,41 +272,6 @@ namespace Amethyst
 		{
 			if (Input::IsMouseButtonPressed(Mouse::BUTTON_LEFT))
 			{
-				glm::vec4 viewportBounds = { ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, size.x, size.y };
-				ImVec2 mousePos = ImGui::GetMousePos();
-
-				mousePos.x = 2 * ((mousePos.x - viewportBounds.x) / (viewportBounds.z)) - 1.0f;
-				mousePos.y = -(2 * ((mousePos.y - (viewportBounds.y + 10.0f)) / (viewportBounds.w)) - 1.0f);
-
-				glm::vec3 lineNearVec = glm::normalize(camera.NearPlanePos({ mousePos.x,  mousePos.y }));
-				glm::vec3 lineFarVec = glm::normalize(camera.FarPlanePos({ mousePos.x,  mousePos.y }));
-
-				AMT_TRACE("Mouse Pos X:{0}, Mouse Pos Y:{1}", mousePos.x, mousePos.y);
-				AMT_TRACE("Near Plane:{0}, {1}, {2}", lineNearVec.x, lineNearVec.y, lineNearVec.z);
-				AMT_TRACE("Far Plane:{0}, {1}, {2}", lineFarVec.x, lineFarVec.y, lineFarVec.z);
-
-				std::vector<Entity>& entities = scene->GetWorld();
-
-				for (int i = 0; i < entities.size(); ++i)
-				{
-					MeshComponent* meshComp = entities[i].Get<MeshComponent>();
-					if (!meshComp || !meshComp->GetMesh())
-					{
-						hierarchy.SetSelected(nullptr);
-						continue;
-					}
-
-					AABB aabb = meshComp->GetMesh()->GetAABB();
-					aabb.min = glm::transpose(entities[i].Get<TransformComponent>()->GetTransform()) * glm::vec4(aabb.min, 1.0f);
-					aabb.max = glm::transpose(entities[i].Get<TransformComponent>()->GetTransform()) * glm::vec4(aabb.max, 1.0f);
-					if (!Math::AABBIntersects(aabb, lineNearVec, lineFarVec))
-					{
-						hierarchy.SetSelected(nullptr);
-						continue;
-					}
-
-					hierarchy.SetSelected(&entities[i]);
-				}
 			}
 		}
 
@@ -276,26 +283,6 @@ namespace Amethyst
 
 		hierarchy.Render();
 		contentBrowser.Render();
-
-		// Play/Stop begin
-
-		ImGui::Begin("##PlayStop", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-
-		float buttonSize = ImGui::GetWindowHeight() - 10.0f;
-
-		ImGui::SetCursorPosX((ImGui::GetWindowContentRegionMax().x * 0.5f) - (buttonSize * 2 * 0.5f) - 1.5f);
-		if (ImGui::ColorButton("Play", ImVec4(1.0f, 0.0f, 0.0f, 1.0f), 0, ImVec2(buttonSize, buttonSize)))
-		{
-			PlayScene();
-		}
-		ImGui::SameLine();
-		ImGui::SetCursorPosX((ImGui::GetWindowContentRegionMax().x * 0.5f) - (buttonSize * 2 * 0.5f) + buttonSize + 1.5f);
-		if (ImGui::ColorButton("Stop", ImVec4(0.0f, 0.0f, 1.0f, 1.0f), 0, ImVec2(buttonSize, buttonSize)))
-		{
-			StopScene();
-		}
-
-		ImGui::End();
 
 		ImGui::End();
 	}
@@ -354,43 +341,6 @@ namespace Amethyst
 		}
 
 		return true;
-	}
-	
-	void EditorLayer::AddToScene(std::filesystem::path& path)
-	{
-		std::ifstream file(path, std::ios::binary);
-
-		std::filesystem::path name = path;
-		name.replace_extension("");
-
-		uint64_t uuid;
-		file.read((char*)&uuid, sizeof(uint64_t));
-
-		std::uint32_t type;
-		file.read((char*)&type, sizeof(std::uint32_t));
-		
-		switch (type)
-		{
-		case TypeID<Mesh>::id(): 
-		{
-			Entity& entity = scene->CreateEntity(name.filename().string());
-			entity.CreateComponent<MeshComponent>(ResourceSystem::Get<Mesh>(uuid));
-
-			// Reading the material path
-			uint64_t matUUID = 0;
-			file.read((char*)&matUUID, sizeof(uint64_t));
-
-			entity.CreateComponent<MaterialComponent>(ResourceSystem::Get<Material>(matUUID));
-			hierarchy.SetSelected(nullptr);
-			break;
-		}
-		case TypeID<Material>::id():
-		{
-			break;
-		}
-		}
-
-		file.close();
 	}
 	
 	void EditorLayer::NewScene()

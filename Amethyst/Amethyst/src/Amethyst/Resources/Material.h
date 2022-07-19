@@ -1,31 +1,28 @@
 #pragma once
 
-#include "Resource.h"
-
-#include "Amethyst/Resources/Texture.h"
+#include "Texture.h"
+#include "glm/glm.hpp"
 
 namespace Amethyst
 {
-	class Material : public Resource
+	class Material
 	{
 	public:
-		Material(const void* data, int width, int height);
-		Material(UUID id, const std::filesystem::path& filePath);
-
+		Material();
 		~Material();
-
-		void Load() override;
-
-		void UnLoad() override;
 
 		void Bind();
 
-		void Unbind();
-
-		const std::shared_ptr<Texture2D>& GetDiffuse() { return diffuse; }
+		glm::vec3& GetColor() { return albedoColor; }
 
 	private:
-		std::shared_ptr<Texture2D> diffuse;
-		//Texture2D* normal;
+		std::shared_ptr<Texture2D> albedo;
+		glm::vec3 albedoColor;
+
+		std::shared_ptr<Texture2D> normal;
+		std::shared_ptr<Texture2D> metallic;
+
+
+		friend class MaterialComponent;
 	};
 }

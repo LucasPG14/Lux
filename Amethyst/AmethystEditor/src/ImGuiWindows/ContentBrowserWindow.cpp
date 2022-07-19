@@ -1,7 +1,6 @@
 #include "amtpch.h"
 #include "ContentBrowserWindow.h"
 
-#include "Amethyst/Resources/ResourceSystem.h"
 #include "Amethyst/Core/KeyCodes.h"
 
 #include "Amethyst/Utils/Importer.h"
@@ -19,27 +18,27 @@ namespace Amethyst
 		folder = Texture2D::Create("Editor/Textures/folder.png");
 		tex = Texture2D::Create("Assets/Textures/bakeHouse.png");
 
-		// Load Resources
-		std::stack<std::filesystem::path> resources;
-		resources.push(assetsDir);
+		//// Load Resources
+		//std::stack<std::filesystem::path> resources;
+		//resources.push(assetsDir);
 
-		std::string extension = ".bsres";
+		//std::string extension = ".bsres";
 
-		while (!resources.empty())
-		{
-			std::filesystem::path path = resources.top();
-			resources.pop();
+		//while (!resources.empty())
+		//{
+		//	std::filesystem::path path = resources.top();
+		//	resources.pop();
 
-			for (auto& entry : std::filesystem::directory_iterator(path))
-			{
-				const std::filesystem::path& filePath = entry.path();
-				if (entry.is_directory()) resources.push(entry);
-				else if (filePath.extension().string() == extension)
-				{
-					ResourceSystem::ImportResources(filePath);
-				}
-			}
-		}
+		//	for (auto& entry : std::filesystem::directory_iterator(path))
+		//	{
+		//		const std::filesystem::path& filePath = entry.path();
+		//		if (entry.is_directory()) resources.push(entry);
+		//		else if (filePath.extension().string() == extension)
+		//		{
+		//		
+		//		}
+		//	}
+		//}
 	}
 	
 	void ContentBrowserWindow::Render()
@@ -133,25 +132,12 @@ namespace Amethyst
 		if (!focused)
 			return false;
 
-		switch (e.GetKeyCode())
-		{
-		case Keys::DEL:
-			std::ifstream file(selected, std::ios::binary);
-
-			uint64_t uuid = 0;
-			file.read((char*)&uuid, sizeof(uint64_t));
-
-			ResourceSystem::Delete(uuid);
-			std::filesystem::remove_all(selected);
-			break;
-		}
-
 		return true;
 	}
 	
 	bool ContentBrowserWindow::FileDropped(WindowDropEvent& e)
 	{
-		std::vector<std::string>& paths = e.GetPaths();
+		/*std::vector<std::string>& paths = e.GetPaths();
 		std::string extension = ".png";
 		for (int i = 0; i < paths.size(); ++i)
 		{
@@ -162,7 +148,7 @@ namespace Amethyst
 				continue;
 			}
 			Importer::Import(path, currentDir);
-		}
+		}*/
 
 		return true;
 	}

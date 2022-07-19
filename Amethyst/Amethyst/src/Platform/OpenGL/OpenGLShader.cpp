@@ -61,6 +61,18 @@ namespace Amethyst
 		GLint location = glGetUniformLocation(shaderID, name.c_str());
 		glUniform1i(location, value);
 	}
+
+	void OpenGLShader::UploadUniformFloat3(const std::string& name, const glm::vec3& value)
+	{
+		GLint location = glGetUniformLocation(shaderID, name.c_str());
+		glUniform3fv(location, 1, glm::value_ptr(value));
+	}
+
+	void OpenGLShader::UploadUniformFloat(const std::string& name, float value)
+	{
+		GLint location = glGetUniformLocation(shaderID, name.c_str());
+		glUniform1f(location, value);
+	}
 	
 	void OpenGLShader::CompileShader(const std::unordered_map<GLenum, std::string>& map)
 	{

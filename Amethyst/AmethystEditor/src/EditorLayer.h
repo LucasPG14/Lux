@@ -31,8 +31,6 @@ namespace Amethyst
 	private:
 		bool ShortCuts(KeyPressedEvent& e);
 
-		void AddToScene(std::filesystem::path& path);
-
 		void NewScene();
 
 		void OpenScene();
@@ -53,7 +51,13 @@ namespace Amethyst
 		
 		std::shared_ptr<Scene> scene;
 
-		std::shared_ptr<Framebuffer> fbo;
+		std::shared_ptr<Framebuffer> sceneFramebuffer;
+		std::shared_ptr<Framebuffer> viewportFramebuffer;
+		std::shared_ptr<Shader> lightningPass;
+
+		std::shared_ptr<VertexArray> vao;
+		std::shared_ptr<VertexBuffer> vbo;
+		std::shared_ptr<IndexBuffer> ebo;
 
 		PerspectiveCamera camera;
 

@@ -27,7 +27,7 @@
 #else
 	#define HZ_ASSERT(x, ...)
 	#define HZ_CORE_ASSERT(x, ...)
-#endif // AMT_ENAMBLE_ASSERTS
+#endif // AMT_ENABLE_ASSERTS
 
 #define BIT(x) (1 << x)
 

@@ -2,12 +2,44 @@
 
 namespace Amethyst
 {
+	enum class FramebufferTextureFormat
+	{
+		NONE = 0,
+
+		// Color
+		RGBA8 = 1,
+		RGBA16 = 2,
+
+		// Depth / Stencil
+		DEPTH24_STENCIL8 = 3
+	};
+
+	struct FramebufferTextureSpecification
+	{
+		FramebufferTextureSpecification() = default;
+		FramebufferTextureSpecification(FramebufferTextureFormat format)
+			: textureFormat(format) {}
+
+		FramebufferTextureFormat textureFormat = FramebufferTextureFormat::NONE;
+	};
+
+	struct FramebufferAttachmentSpecification
+	{
+		FramebufferAttachmentSpecification() = default;
+		FramebufferAttachmentSpecification(std::initializer_list<FramebufferTextureSpecification> attach)
+			: attachments(attach) {}
+
+		std::vector<FramebufferTextureSpecification> attachments;
+	};
+
 	struct FramebufferSpecification
 	{
 		uint32_t width = 1280;
 		uint32_t height = 720;
-		//FramebufferFormat
+
 		uint32_t samples = 1;
+
+		FramebufferAttachmentSpecification attachments;
 
 		bool swapChainTarget = false;
 	};
@@ -19,6 +51,8 @@ namespace Amethyst
 
 		virtual void Bind() = 0;
 		virtual void Unbind() = 0;
+
+		virtual void BindTextures() = 0;
 
 		virtual void Resize(uint32_t width, uint32_t height) = 0;
 

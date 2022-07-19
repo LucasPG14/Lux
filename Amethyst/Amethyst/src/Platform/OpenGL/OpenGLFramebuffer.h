@@ -17,13 +17,24 @@ namespace Amethyst
 		void Bind() override;
 		void Unbind() override;
 
+		void BindTextures() override;
+
 		inline uint32_t GetID() const { return framebufferID; }
 
 		inline const FramebufferSpecification& GetSpec() const override { return spec; }
 	private:
 		uint32_t framebufferID;
-		uint32_t color;
-		uint32_t depth;
 		FramebufferSpecification spec;
+
+		std::vector<FramebufferTextureSpecification> colorSpecifications;
+		FramebufferTextureSpecification depthSpecification;
+
+		std::vector<uint32_t> colorAttachments;
+		uint32_t depth;
+
+
+		uint32_t positions;
+		uint32_t normals;
+		uint32_t colorSpecular;
 	};
 }

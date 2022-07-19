@@ -12,8 +12,7 @@ namespace Amethyst
 		enum class API
 		{
 			NONE = 0,
-			OPENGL = 1,
-			VULKAN = 2
+			OPENGL = 1
 		};
 	public:
 		virtual void Init() const = 0;

@@ -9,12 +9,7 @@ namespace Amethyst
 	public:
 		OpenGLTexture2D(const void* data, int width, int height);
 		OpenGLTexture2D(const std::string& path);
-		OpenGLTexture2D(UUID id, const std::filesystem::path& path);
 		~OpenGLTexture2D();
-
-		void Load() override;
-
-		void UnLoad() override;
 
 		inline uint32_t GetWidth() const override { return width; }
 		inline uint32_t GetHeight() const override { return height; }

@@ -20,6 +20,8 @@ namespace Amethyst
 
 		void SetDimensions(float width, float height);
 
+		inline const glm::vec3& GetPosition() const { return position; }
+
 		glm::vec3 NearPlanePos(glm::vec2 pos);
 		glm::vec3 FarPlanePos(glm::vec2 pos);
 	

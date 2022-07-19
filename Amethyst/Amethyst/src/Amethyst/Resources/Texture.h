@@ -1,10 +1,8 @@
 #pragma once
 
-#include "Resource.h"
-
 namespace Amethyst
 {
-	class Texture2D : public Resource
+	class Texture2D
 	{
 	public:
 		virtual ~Texture2D() {}
