@@ -1,0 +1,33 @@
+#pragma once
+
+#include "Component.h"
+#include "Lux/Utils/Vertex.h"
+
+#include "Lux/Renderer/VertexArray.h"
+#include "Lux/Renderer/Buffer.h"
+
+#include <glm/glm.hpp>
+
+namespace Lux
+{
+	class MeshComponent : public Component
+	{
+	public:
+		MeshComponent();
+
+		~MeshComponent();
+
+		void Update() override;
+
+		void DrawInspector() override;
+
+		const std::shared_ptr<VertexArray>& GetVertexArray() { return vao; }
+	private:
+		std::vector<Vertex> vertices;
+		std::vector<uint32_t> indices;
+
+		std::shared_ptr<VertexArray> vao;
+		std::shared_ptr<VertexBuffer> vbo;
+		std::shared_ptr<IndexBuffer> ebo;
+	};
+}
