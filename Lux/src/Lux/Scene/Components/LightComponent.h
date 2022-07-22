@@ -24,11 +24,15 @@ namespace Lux
 
 		inline const glm::vec3& GetColor() const { return color; }
 
-		inline const LightType& GetType() const { return type; }
+		inline const LightType& GetType() const { return lightType; }
+
+		COMPONENT_TYPE(LIGHT)
 
 	private:
+		ComponentType type;
+
 		glm::vec3 color;
 
-		LightType type;
+		LightType lightType;
 	};
 }

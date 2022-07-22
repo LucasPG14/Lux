@@ -10,7 +10,7 @@ namespace Lux
 		OpenGLFramebuffer(const FramebufferSpecification& specification);
 		virtual ~OpenGLFramebuffer();
 
-		void CreateFramebuffer();
+		void Invalidate();
 
 		void Resize(uint32_t width, uint32_t height);
 
@@ -31,10 +31,5 @@ namespace Lux
 
 		std::vector<uint32_t> colorAttachments;
 		uint32_t depth;
-
-
-		uint32_t positions;
-		uint32_t normals;
-		uint32_t colorSpecular;
 	};
 }

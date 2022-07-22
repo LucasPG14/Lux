@@ -5,6 +5,12 @@
 
 namespace Lux
 {
+	static bool IsInsideWindow(ImVec2 size, ImVec2 windowPos, ImVec2 mousePos)
+	{
+		return mousePos.x > windowPos.x && mousePos.x < windowPos.x + size.x &&
+			mousePos.y > windowPos.y && mousePos.y < windowPos.y + size.y;
+	}
+
 	SceneHierarchyWindow::SceneHierarchyWindow(const std::shared_ptr<Scene>& currScene) : scene(currScene), selected(nullptr)
 	{
 
@@ -36,7 +42,7 @@ namespace Lux
 			ImGui::PopID();
 		}
 
-		if (focused && !ImGui::IsAnyItemHovered() && ImGui::IsMouseClicked(0))
+		if (focused && !ImGui::IsAnyItemHovered() && ImGui::IsMouseClicked(0) && IsInsideWindow(ImGui::GetWindowSize(), ImGui::GetWindowPos(), ImGui::GetIO().MousePos))
 			selected = nullptr;
 
 		ImGui::End();

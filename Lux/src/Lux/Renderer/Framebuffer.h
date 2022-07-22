@@ -10,8 +10,11 @@ namespace Lux
 		RGBA8 = 1,
 		RGBA16 = 2,
 
+		// Red channel
+		RED_INTEGER = 3,
+
 		// Depth / Stencil
-		DEPTH24_STENCIL8 = 3
+		DEPTH24_STENCIL8 = 4
 	};
 
 	struct FramebufferTextureSpecification

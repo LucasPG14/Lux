@@ -6,7 +6,7 @@
 
 namespace Lux
 {
-	LightComponent::LightComponent(LightType t) : color(1.0f, 1.0f, 1.0f), type(t)
+	LightComponent::LightComponent(LightType t) : color(1.0f, 1.0f, 1.0f), lightType(t)
 	{
 	}
 	

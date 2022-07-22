@@ -23,6 +23,8 @@ namespace Lux
 
 		static void DrawQuad();
 
+		static void DrawSkybox(const std::shared_ptr<VertexArray>& vao, const std::shared_ptr<TextureCube>& cubemap, const std::shared_ptr<Shader>& shader, const glm::mat4& viewMatrix, const glm::mat4& projMatrix);
+
 		static void ChangeState(bool change);
 
 		inline static Render::API GetRenderer() { return Render::GetAPI(); }

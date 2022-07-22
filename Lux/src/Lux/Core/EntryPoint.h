@@ -8,8 +8,8 @@ int main(int argc, char** argv)
 {
 	Lux::Log::Init();
 	LUX_CORE_WARN("Initialized Log!");
-	LUX_INFO("Hello!");
 
+	LUX_INFO("Initializing Lux Engine");
 	auto app = Lux::CreateApp();
 	app->Run();
 	delete app;

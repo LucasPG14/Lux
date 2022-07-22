@@ -9,8 +9,6 @@
 
 namespace Lux
 {
-	#define BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
-
 	extern const std::filesystem::path assetsDir = "Assets/";
 	
 	ContentBrowserWindow::ContentBrowserWindow() : currentDir(assetsDir)
@@ -123,8 +121,8 @@ namespace Lux
 	{
 		EventDispatcher dispatcher(e);
 
-		dispatcher.Dispatch<KeyPressedEvent>(BIND_EVENT_FN(ContentBrowserWindow::OnKeyPressed));
-		dispatcher.Dispatch<WindowDropEvent>(BIND_EVENT_FN(ContentBrowserWindow::FileDropped));
+		dispatcher.Dispatch<KeyPressedEvent>(LUX_BIND_EVENT_FN(ContentBrowserWindow::OnKeyPressed));
+		dispatcher.Dispatch<WindowDropEvent>(LUX_BIND_EVENT_FN(ContentBrowserWindow::FileDropped));
 	}
 	
 	bool ContentBrowserWindow::OnKeyPressed(KeyPressedEvent& e)

@@ -13,17 +13,61 @@
 
 namespace Lux
 {
-	#define BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
-
 	extern const std::filesystem::path assetsDir;
 
-	EditorLayer::EditorLayer() : guizmoState(ImGuizmo::TRANSLATE), sceneState(SceneState::EDITOR)
+	EditorLayer::EditorLayer() : guizmoState(ImGuizmo::TRANSLATE)
 	{
 		scene = std::make_shared<Scene>();
 		contentBrowser = ContentBrowserWindow();
 		hierarchy = SceneHierarchyWindow(scene);
 
-		lightningPass = Shader::Create("Assets/Shaders/Quad.glsl");
+		lightingPass = Shader::Create("Assets/Shaders/Quad.glsl");
+		skyboxShader = Shader::Create("Assets/Shaders/Skybox.glsl");
+
+		float vertices[] =
+		{
+			0.5f, 0.5f, 0.5f,
+			-0.5f, 0.5f, 0.5f,
+			-0.5f, 0.5f, -0.5f,
+			0.5f, 0.5f, -0.5f,
+			0.5f, -0.5f, 0.5f,
+			-0.5f, -0.5f, 0.5f,
+			-0.5f, -0.5f, -0.5f,
+			0.5f, -0.5f, -0.5f,
+		};
+
+		vao = VertexArray::Create();
+
+		vbo = VertexBuffer::Create(vertices, 24 * sizeof(float));
+		{
+			BufferLayout layout =
+			{
+				{ShaderDataType::FLOAT3, "position"}
+			};
+
+			vbo->SetLayout(layout);
+		}
+
+		vao->AddVertexBuffer(vbo);
+
+		std::vector<uint32_t> indices =
+		{
+			0, 1, 3, 
+			3, 1, 2, 
+			2, 6, 7, 
+			7, 3, 2, 
+			7, 6, 5, 
+			5, 4, 7, 
+			5, 1, 4, 
+			4, 1, 0, 
+			4, 3, 7, 
+			3, 4, 0, 
+			5, 6, 2, 
+			5, 1, 2
+		};
+		ebo = IndexBuffer::Create(indices.data(), indices.size());
+
+		vao->AddIndexBuffer(ebo);
 	}
 
 	EditorLayer::~EditorLayer()
@@ -67,6 +111,18 @@ namespace Lux
 
 			viewportFramebuffer = Framebuffer::Create(spec);
 		}
+
+		std::vector<std::string> faces = 
+		{
+				"Assets/Textures/right.jpg",
+				"Assets/Textures/left.jpg",
+				"Assets/Textures/top.jpg",
+				"Assets/Textures/bottom.jpg",
+				"Assets/Textures/front.jpg",
+				"Assets/Textures/back.jpg"
+		};
+
+		skybox = TextureCube::Create(faces);
 	}
 
 	void EditorLayer::OnDestroy()
@@ -81,45 +137,57 @@ namespace Lux
 		camera.Update(timer);
 
 		sceneFramebuffer->Bind();
-		RenderOrder::ClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
+		RenderOrder::ClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
 		RenderOrder::Clear();
 
 		Renderer::BeginScene(camera);
 
 		scene->Update();
 
+		//Renderer::DrawSkybox(vao, skybox, skyboxShader, camera.GetViewMatrix(), camera.GetProjectionMatrix());
+
 		Renderer::EndScene();
 
 		sceneFramebuffer->Unbind();
 
 		viewportFramebuffer->Bind();
-		RenderOrder::ClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
+		RenderOrder::ClearColor({ 1.0f, 0.0f, 0.0f, 1.0f });
 		RenderOrder::Clear();
 
-		lightningPass->Bind();
+		lightingPass->Bind();
 		sceneFramebuffer->BindTextures();
-		lightningPass->UploadUniformInt("positions", 0);
-		lightningPass->UploadUniformInt("normals", 1);
-		lightningPass->UploadUniformInt("albedoSpecular", 2);
+		lightingPass->UploadUniformInt("positions", 0);
+		lightingPass->UploadUniformInt("normals", 1);
+		lightingPass->UploadUniformInt("albedoSpecular", 2);
 
 		const auto& lights = scene->GetLights();
 
+		int pointLights = 0;
 		for (int i = 0; i < lights.size(); ++i)
 		{
 			LightComponent* light = lights[i].second;
 			switch (light->GetType())
 			{
 			case LightType::DIRECTIONAL:
-				lightningPass->UploadUniformFloat3("dirLight.direction", lights[i].first->GetRotation());
-				lightningPass->UploadUniformFloat3("dirLight.ambient", light->GetColor());
-				lightningPass->UploadUniformFloat3("dirLight.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
-				lightningPass->UploadUniformFloat3("dirLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+				lightingPass->UploadUniformFloat3("dirLight.direction", lights[i].first->GetRotation());
+				lightingPass->UploadUniformFloat3("dirLight.ambient", light->GetColor());
+				lightingPass->UploadUniformFloat3("dirLight.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+				lightingPass->UploadUniformFloat3("dirLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 				break;
 			case LightType::POINT:
-				lightningPass->UploadUniformFloat3("pointLight.position", lights[i].first->GetRotation());
-				lightningPass->UploadUniformFloat3("pointLight.ambient", light->GetColor());
-				lightningPass->UploadUniformFloat3("pointLight.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
-				lightningPass->UploadUniformFloat3("pointLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+				std::string number = std::to_string(pointLights);
+				lightingPass->UploadUniformFloat3("pointLights[" + number + "].position", lights[i].first->GetPosition());
+				lightingPass->UploadUniformFloat3("pointLights[" + number + "].ambient", light->GetColor());
+				lightingPass->UploadUniformFloat3("pointLights[" + number + "].diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+				lightingPass->UploadUniformFloat3("pointLights[" + number + "].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+				
+				float lightMax = std::fmaxf(std::fmaxf(light->GetColor().r, light->GetColor().g), light->GetColor().b);
+				float radius = (-0.7f + std::sqrtf(0.7f * 0.7f - 4 * 1.8f * (1.0f - (256.0f / 5.0f) * lightMax))) / (2 * 1.8f);
+				lightingPass->UploadUniformFloat("pointLights[" + number + "].radius", radius);
+
+				float length = glm::length(lights[i].first->GetPosition() - glm::vec3(0.0f, 0.0f, 0.0f));
+
+				pointLights++;
 				break;
 			}
 		}
@@ -167,10 +235,14 @@ namespace Lux
 			if (ImGui::BeginMenu("File"))
 			{
 				if (ImGui::MenuItem("New scene", "Ctrl + N"))
-					NewScene();
+				{
+
+				}
 
 				if (ImGui::MenuItem("Open scene", "Ctrl + O"))
-					OpenScene();
+				{
+
+				}
 
 				ImGui::Separator();
 				if (ImGui::MenuItem("Save scene", "Ctrl + S"))
@@ -178,7 +250,9 @@ namespace Lux
 					// Still not implemented
 				}
 				if (ImGui::MenuItem("Save scene as...", "Ctrl + Shift + S"))
-					SaveScene();
+				{
+
+				}
 
 				ImGui::Separator();
 				if (ImGui::MenuItem("Exit", "Alt + F4")) 
@@ -191,14 +265,14 @@ namespace Lux
 			{
 				if (ImGui::MenuItem("Create Directional Light"))
 				{
-					Entity& entity = scene->CreateEntity("Light");
+					Entity& entity = scene->CreateEntity("Directional Light");
 					LightComponent* light = entity.CreateComponent<LightComponent>(LightType::DIRECTIONAL);
 					scene->AddLight(entity.Get<TransformComponent>(), light);
 				}
 
 				if (ImGui::MenuItem("Create Point Light"))
 				{
-					Entity& entity = scene->CreateEntity("Light");
+					Entity& entity = scene->CreateEntity("Point Light");
 					LightComponent* light = entity.CreateComponent<LightComponent>(LightType::POINT);
 					scene->AddLight(entity.Get<TransformComponent>(), light);
 				}
@@ -293,7 +367,7 @@ namespace Lux
 
 		contentBrowser.OnEvent(e);
 
-		dispatcher.Dispatch<KeyPressedEvent>(BIND_EVENT_FN(EditorLayer::ShortCuts));
+		dispatcher.Dispatch<KeyPressedEvent>(LUX_BIND_EVENT_FN(EditorLayer::ShortCuts));
 	}
 
 	bool EditorLayer::ShortCuts(KeyPressedEvent& e)
@@ -307,14 +381,14 @@ namespace Lux
 			if (ctrl)
 			{
 				// New Scene
-				NewScene();
+				
 			}
 			break;
 		case Keys::O:
 			if (ctrl)
 			{
 				// Open Scene
-				OpenScene();
+				
 			}
 			break;
 		case Keys::S:
@@ -323,7 +397,7 @@ namespace Lux
 				if (shift)
 				{
 					// Save Scene As
-					SaveScene();
+					
 					return true;
 				}
 				// Save Current Scene
@@ -341,66 +415,5 @@ namespace Lux
 		}
 
 		return true;
-	}
-	
-	void EditorLayer::NewScene()
-	{
-		scene = std::make_shared<Scene>();
-	}
-	
-	void EditorLayer::OpenScene()
-	{
-		std::string path = OpenFile("Black Sapphire Scene (*.bsscene)\0*.bsscene\0");
-
-		if (!path.empty())
-			OpenScene(path);
-	}
-	
-	void EditorLayer::OpenScene(const std::filesystem::path& path)
-	{
-		if (path.extension().string() != ".bsscene")
-		{
-			LUX_WARN("This isn't a Black Sapphire Scene");
-			return;
-		}
-
-		std::shared_ptr<Scene> newScene = std::make_shared<Scene>();
-		SceneSerializer serializer(newScene);
-
-		// If the scene is well deserialized, then copy into the active scene
-		if (serializer.Deserialize(path))
-		{
-			scene = newScene;
-			hierarchy.SetScene(scene);
-		}
-	}
-	
-	void EditorLayer::SaveScene()
-	{
-		std::string path = SaveFile("Black Sapphire Scene (*.bsscene)\0*.bsscene\0");
-
-		if (!path.empty())
-			SaveScene(path);
-	}
-	
-	void EditorLayer::SaveScene(const std::filesystem::path& path)
-	{
-		SceneSerializer serializer(scene);
-		serializer.Serialize(path);
-	}
-	
-	void EditorLayer::PlayScene()
-	{
-		sceneState = SceneState::RUNTIME;
-		ImGui::StyleColorsClassic();
-		SaveScene("Editor/Scenes/ScenePlay.bsscene");
-	}
-	
-	void EditorLayer::StopScene()
-	{
-		sceneState = SceneState::EDITOR;
-		ImGui::StyleColorsDark();
-		OpenScene("Editor/Scenes/ScenePlay.bsscene");
-		hierarchy.SetSelected(nullptr);
 	}
 }

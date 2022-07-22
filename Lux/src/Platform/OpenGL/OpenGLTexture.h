@@ -24,4 +24,18 @@ namespace Lux
 		uint32_t height;
 		uint32_t textureID;
 	};
+
+
+	class OpenGLTextureCube : public TextureCube
+	{
+	public:
+		OpenGLTextureCube(const std::vector<std::string>& paths);
+		~OpenGLTextureCube();
+
+		void Bind(uint32_t slot = 0) const override;
+		void Unbind(uint32_t slot = 0) const override;
+
+	private:
+		uint32_t textureID;
+	};
 }

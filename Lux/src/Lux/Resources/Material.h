@@ -21,6 +21,7 @@ namespace Lux
 
 		std::shared_ptr<Texture2D> normal;
 		std::shared_ptr<Texture2D> metallic;
+		std::shared_ptr<Texture2D> roughness;
 
 
 		friend class MaterialComponent;

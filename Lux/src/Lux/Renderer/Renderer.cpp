@@ -69,7 +69,7 @@ namespace Lux
 		// Material info
 		material->Bind();
 		
-		shader->UploadUniformInt("material.albedoMap", 0);
+		shader->UploadUniformInt("material.diffuseMap", 0);
 		shader->UploadUniformInt("material.normalMap", 1);
 
 		shader->UploadUniformFloat3("material.albedoColor", material->GetColor());
@@ -114,6 +114,22 @@ namespace Lux
 		vao->AddIndexBuffer(ebo);
 
 		RenderOrder::Draw(vao);
+	}
+
+	void Renderer::DrawSkybox(const std::shared_ptr<VertexArray>& vao, const std::shared_ptr<TextureCube>& cubemap, const std::shared_ptr<Shader>& shader, const glm::mat4& viewMatrix, const glm::mat4& projMatrix)
+	{
+		shader->Bind();
+
+		glm::mat4 view = glm::mat4(glm::mat3(viewMatrix));
+		shader->UploadUniformMat4("projection", projMatrix);
+		shader->UploadUniformMat4("view", view);
+
+		shader->UploadUniformInt("cubemap", 0);
+
+		cubemap->Bind();
+		vao->Bind();
+		RenderOrder::Draw(vao);
+		cubemap->Unbind();
 	}
 
 	void Renderer::ChangeState(bool change)

@@ -22,7 +22,12 @@ namespace Lux
 		void DrawInspector() override;
 
 		const std::shared_ptr<VertexArray>& GetVertexArray() { return vao; }
+
+		ComponentType GetType() { return type; }
+		COMPONENT_TYPE(MESH)
 	private:
+		ComponentType type;
+
 		std::vector<Vertex> vertices;
 		std::vector<uint32_t> indices;
 

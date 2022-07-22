@@ -29,20 +29,23 @@ void main()
     t = normalize(t - dot(t, n) * n);
     vec3 b = cross(n, t);
 
-    tbn = transpose(mat3(t, b, n));
+    tbn = mat3(t, b, n);
 }
 
 
 #type fragment
 #version 450 core
 
-layout(location = 0) out vec3 position;
-layout(location = 1) out vec3 normals;
+layout(location = 0) out vec4 position;
+layout(location = 1) out vec4 normals;
 layout(location = 2) out vec4 albedoSpecular;
 
 struct Material
 {
+    sampler2D diffuseMap;
     vec3 albedoColor;
+
+    sampler2D normalMap;
 }; 
 uniform Material material;
 
@@ -51,15 +54,13 @@ in vec3 fragPos;
 in vec3 normal;
 in mat3 tbn;
 
-layout(location = 0) uniform sampler2D diffuseMap;
-layout(location = 1) uniform sampler2D normalMap;
-
 void main()
 {
-    position = tbn * fragPos;
-    normals = texture(normalMap, texCoord).rgb;
-    normals = normals * 2.0 - 1.0;
-    normals = normalize(tbn * normals);
+    position.rgb = fragPos;
 
-    albedoSpecular = vec4(texture(diffuseMap, texCoord).rgb * material.albedoColor, 1.0);
+    normals.rgb = texture(material.normalMap, texCoord).rgb;
+    normals.rgb = normals.rgb * 2.0 - 1.0;
+    normals.rgb = normalize(normals.rgb);
+
+    albedoSpecular = vec4(texture(material.diffuseMap, texCoord).rgb * material.albedoColor, 1.0);
 }

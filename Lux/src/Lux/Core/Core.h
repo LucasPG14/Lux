@@ -1,9 +1,9 @@
 #pragma once
 
-#if _WIN32
-	#if _WIN64
-	#define LUX_PLATFORM_WINDOWS
-#endif // Windows
+//#if _WIN32
+//	#if _WIN64
+//	#define LUX_PLATFORM_WINDOWS
+//#endif // Windows
 
 #if LUX_DYNAMIC_LINK
 	#ifdef LUX_BUILD_DLL
@@ -15,7 +15,7 @@
 	#define LUX_API
 
 #endif
-#endif
+//#endif
 
 #ifdef LUX_DEBUG
 	#define LUX_ENABLE_ASSERTS

@@ -7,6 +7,31 @@
 
 namespace Lux
 {
+	namespace Utilities
+	{
+		static void GetGLFormat(int channels, GLenum& internalFormat, GLenum& dataFormat)
+		{
+			switch (channels)
+			{
+			case 4:
+			{
+				internalFormat = GL_RGBA8;
+				dataFormat = GL_RGBA;
+				break;
+			}
+			case 3:
+			{
+				internalFormat = GL_RGB8;
+				dataFormat = GL_RGB;
+				break;
+			}
+			}
+
+			LUX_CORE_ASSERT(internalFormat && dataFormat, "Texture format not supported!");
+		}
+	}
+
+	// Texture 2D
 	OpenGLTexture2D::OpenGLTexture2D(const void* data, int w, int h) : width(w), height(h)
 	{
 		glCreateTextures(GL_TEXTURE_2D, 1, &textureID);
@@ -24,11 +49,12 @@ namespace Lux
 	{
 		int w, h, channels;
 		stbi_set_flip_vertically_on_load(1);
-		if (stbi_is_hdr(path.c_str()))
-		{
-			bool ret = true;
-			ret = false;
-		}
+		// TODO: Check this for HDR images
+		//if (stbi_is_hdr(path.c_str()))
+		//{
+		//	bool ret = true;
+		//	ret = false;
+		//}
 		stbi_uc* data = stbi_load(path.c_str(), &w, &h, &channels, 0);
 		LUX_CORE_ASSERT(data, "Couldn't load the image!");
 		width = w;
@@ -37,18 +63,7 @@ namespace Lux
 		GLenum internalFormat = 0;
 		GLenum dataFormat = 0;
 
-		if (channels == 4)
-		{
-			internalFormat = GL_RGBA8;
-			dataFormat = GL_RGBA;
-		}
-		else if (channels == 3)
-		{
-			internalFormat = GL_RGB8;
-			dataFormat = GL_RGB;
-		}
-
-		LUX_CORE_ASSERT(internalFormat && dataFormat, "Texture format not supported!");
+		Utilities::GetGLFormat(channels, internalFormat, dataFormat);
 
 		glCreateTextures(GL_TEXTURE_2D, 1, &textureID);
 		glBindTexture(GL_TEXTURE_2D, textureID);
@@ -78,4 +93,46 @@ namespace Lux
 	{
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
+
+	// Texture Cube
+
+	OpenGLTextureCube::OpenGLTextureCube(const std::vector<std::string>& paths)
+	{
+		glGenTextures(1, &textureID);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
+		int width, height, channels;
+		for (int i = 0; i < paths.size(); ++i)
+		{
+			stbi_set_flip_vertically_on_load(1);
+			unsigned char* data = stbi_load(paths[i].c_str(), &width, &height, &channels, 0);
+			if (data)
+			{
+				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+			}
+			stbi_image_free(data);
+		}
+
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	}
+
+	OpenGLTextureCube::~OpenGLTextureCube()
+	{
+	}
+
+	void OpenGLTextureCube::Bind(uint32_t slot) const
+	{
+		glActiveTexture(GL_TEXTURE_CUBE_MAP);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+	}
+
+	void OpenGLTextureCube::Unbind(uint32_t slot) const
+	{
+		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+	}
+
 }

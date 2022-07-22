@@ -18,7 +18,12 @@ namespace Lux
 
 		const std::shared_ptr<Material>& GetMaterial() { return material; }
 
+		ComponentType GetType() { return type; }
+		COMPONENT_TYPE(MATERIAL)
+
 	private:
+		ComponentType type;
+
 		std::shared_ptr<Material> material;
 	};
 }

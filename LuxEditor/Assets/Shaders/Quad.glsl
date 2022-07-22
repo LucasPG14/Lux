@@ -40,8 +40,10 @@ struct PointLight
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
+
+    float radius;
 };
-uniform PointLight pointLight; 
+uniform PointLight pointLights[32]; 
 
 layout(location = 0) uniform sampler2D positions;
 layout(location = 1) uniform sampler2D normals;
@@ -76,17 +78,22 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir, v
     float spec = pow(max(dot(viewDir, halfwayDir), 0.0), 32.0);
 
     float distance = length(light.position - fragPos);
-    float attenuation = 1.0 / (distance * distance);
+    if(distance < light.radius)
+    {
+        float attenuation = 1.0 / (distance * distance);
 
-    vec3 ambient = light.ambient * albedo;
-    vec3 diffuse = light.diffuse * diff * albedo;
-    vec3 specular = light.specular * spec * materialSpecular;
+        vec3 ambient = light.ambient * albedo;
+        vec3 diffuse = light.diffuse * diff * albedo;
+        vec3 specular = light.specular * spec * materialSpecular;
 
-    ambient *= attenuation;
-    diffuse *= attenuation;
-    specular *= attenuation;
+        ambient *= attenuation;
+        diffuse *= attenuation;
+        specular *= attenuation;
 
-    return (ambient + diffuse + specular);
+        return (ambient + diffuse + specular);
+    }
+
+    return vec3(0.0, 0.0, 0.0);
 }
 
 
@@ -97,12 +104,14 @@ void main()
 	vec3 albedo = texture(albedoSpecular, texCoord).rgb;
 	float specular = texture(albedoSpecular, texCoord).a;
 
-	vec3 light = albedo;
 	vec3 viewDir = normalize(viewPos - fragPos);
 
-	light += CalcDirLight(dirLight, normal, viewDir, albedo, specular);
+	vec3 light = CalcDirLight(dirLight, normal, viewDir, albedo, specular);
 
-	light += CalcPointLight(pointLight, normal, fragPos, viewDir, albedo, specular);
+    for (int i = 0; i < 32; ++i)
+    {
+	    light += CalcPointLight(pointLights[i], normal, fragPos, viewDir, albedo, specular);
+    }
 
     fragColor = vec4(light, 1.0);
 }

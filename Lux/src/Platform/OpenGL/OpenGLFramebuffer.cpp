@@ -7,6 +7,16 @@ namespace Lux
 {
 	namespace Utilities
 	{
+		static bool IsDepthFormat(FramebufferTextureFormat texFormat)
+		{
+			switch (texFormat)
+			{
+			case FramebufferTextureFormat::DEPTH24_STENCIL8: return true;
+			}
+
+			return false;
+		}
+
 		static void CreateTextures(uint32_t count, uint32_t* data)
 		{
 			glCreateTextures(GL_TEXTURE_2D, count, data);
@@ -25,13 +35,13 @@ namespace Lux
 	{
 		for (FramebufferTextureSpecification texSpec : spec.attachments.attachments)
 		{
-			if (texSpec.textureFormat == FramebufferTextureFormat::RGBA16 || texSpec.textureFormat == FramebufferTextureFormat::RGBA8)
+			if (!Utilities::IsDepthFormat(texSpec.textureFormat))
 				colorSpecifications.emplace_back(texSpec);
 			else
 				depthSpecification = texSpec;
 		}
 
-		CreateFramebuffer();
+		Invalidate();
 	}
 	
 	OpenGLFramebuffer::~OpenGLFramebuffer()
@@ -41,7 +51,7 @@ namespace Lux
 		glDeleteTextures(1, &depth);
 	}
 	
-	void OpenGLFramebuffer::CreateFramebuffer()
+	void OpenGLFramebuffer::Invalidate()
 	{
 		if (framebufferID)
 		{
@@ -49,10 +59,6 @@ namespace Lux
 
 			glDeleteTextures(colorAttachments.size(), colorAttachments.data());
 			glDeleteTextures(1, &depth);
-
-			glDeleteTextures(1, &positions);
-			glDeleteTextures(1, &normals);
-			glDeleteTextures(1, &colorSpecular);
 		}
 
 		glCreateFramebuffers(1, &framebufferID);
@@ -110,9 +116,10 @@ namespace Lux
 
 	void OpenGLFramebuffer::Resize(uint32_t width, uint32_t height)
 	{
+		LUX_CORE_TRACE("New framebuffer size: {0}, {1}", width, height);
 		spec.width = width;
 		spec.height = height;
-		CreateFramebuffer();
+		Invalidate();
 	}
 	
 	void OpenGLFramebuffer::Bind()

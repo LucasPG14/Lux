@@ -25,7 +25,8 @@ namespace Lux
 		{
 			const glm::mat4& rotationMat = glm::toMat4(glm::quat(glm::radians(rotation)));
 			
-			return glm::translate(glm::mat4(1.0f), position) * rotationMat * glm::scale(glm::mat4(1.0f), scale);
+			glm::mat4 mat = glm::translate(glm::mat4(1.0f), position) * rotationMat * glm::scale(glm::mat4(1.0f), scale);
+			return mat;
 		}
 
 		// Setters
@@ -38,7 +39,11 @@ namespace Lux
 		inline const glm::vec3& GetRotation() { return rotation; }
 		inline const glm::vec3& GetScale() { return scale; }
 
+		COMPONENT_TYPE(TRANSFORM)
+
 	private:
+		ComponentType type;
+
 		glm::vec3 position;
 		glm::vec3 rotation;
 		glm::vec3 scale;
