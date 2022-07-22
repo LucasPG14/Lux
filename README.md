@@ -1,12 +1,14 @@
 # Lux
 
-Lux is a final degree project at the UPC, corresponding to the Video Game Design and Development degree.
+Lux is a rendering engine created from scratch using OpenGL and C++ for my final degree project at the UPC-CITM. In this engine, we find implementations of different Global Illumination techniques.
 
-The basis of the project was made following this [YouTube series]() by [TheCherno]().
+The basis of this project was made following [TheCherno's](https://www.youtube.com/c/TheChernoProject) [Game Engine Series](https://www.youtube.com/playlist?list=PLlrATfBNZ98dC-V-N3m0Go4deliWHPFwT) playlist.
 
 ## Goal
 
 The aim of this project is to implement some of the different Global Illumination software techniques that currently exist and to carry out a study between them, analysing performance and memory consumption.
+
+Another goal of this project is to improve my knowledge of graphics programming, creating an optimal and efficient rendering engine.
 
 ## How to use Lux
 
