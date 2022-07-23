@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Texture.h"
+#include "Texture2D.h"
 #include "glm/glm.hpp"
 
 namespace Lux

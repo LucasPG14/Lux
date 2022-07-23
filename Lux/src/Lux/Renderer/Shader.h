@@ -2,25 +2,35 @@
 
 #include <glm/glm.hpp>
 
+typedef unsigned int GLenum;
+
 namespace Lux
 {
 	class Shader
 	{
 	public:
-		virtual ~Shader() {}
+		Shader(const std::string& filePath);
+		Shader(const std::string& name, const std::string& vertex, const std::string& fragment);
+		virtual ~Shader();
 
-		virtual void Bind() const = 0;
-		virtual void Unbind() const = 0;
+		void Bind() const;
+		void Unbind() const;
 
-		virtual const std::string& GetName() const = 0;
+		const std::string& GetName() const { return name; }
 
-		virtual void SetUniformMat4(const std::string& name, const glm::mat4& matrix) = 0;
-		virtual void SetUniformInt(const std::string& name, uint32_t value) = 0;
-		virtual void SetUniformFloat3(const std::string& name, const glm::vec3& value) = 0;
-		virtual void SetUniformFloat(const std::string& name, float value) = 0;
-		
-		static std::shared_ptr<Shader> Create(const std::string& filePath);
-		static std::shared_ptr<Shader> Create(const std::string& name, const std::string& vertex, const std::string& fragment);
+		void SetUniformMat4(const std::string& name, const glm::mat4& matrix);
+		void SetUniformInt(const std::string& name, uint32_t value);
+		void SetUniformFloat3(const std::string& name, const glm::vec3& value);
+		void SetUniformFloat(const std::string& name, float value);
+
+	private:
+		void CompileShader(const std::unordered_map<GLenum, std::string>& map);
+		std::unordered_map<GLenum, std::string> PreProcessShader(const std::string& src);
+		std::string ReadFile(const std::string& path);
+
+	private:
+		uint32_t shaderID;
+		std::string name;
 	};
 
 	class ShaderLibrary

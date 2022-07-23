@@ -21,8 +21,8 @@ namespace Lux
 		contentBrowser = ContentBrowserWindow();
 		hierarchy = SceneHierarchyWindow(scene);
 
-		lightingPass = Shader::Create("Assets/Shaders/Quad.glsl");
-		skyboxShader = Shader::Create("Assets/Shaders/Skybox.glsl");
+		lightingPass = CreateSharedPtr<Shader>("Assets/Shaders/Quad.glsl");
+		skyboxShader = CreateSharedPtr<Shader>("Assets/Shaders/Skybox.glsl");
 
 		std::vector<float> vertices =
 		{
@@ -57,9 +57,9 @@ namespace Lux
 			6, 2, 1
 		};
 		//Importer::ImportFBX(vertices, indices, "Assets/Models/Cube.fbx");
-		vao = VertexArray::Create();
+		vao = CreateSharedPtr<VertexArray>();
 
-		vbo = VertexBuffer::Create(vertices.data(), vertices.size() * sizeof(float));
+		vbo = CreateSharedPtr<VertexBuffer>(vertices.data(), vertices.size() * sizeof(float));
 		{
 			BufferLayout layout =
 			{
@@ -71,7 +71,7 @@ namespace Lux
 
 		vao->AddVertexBuffer(vbo);
 		
-		ebo = IndexBuffer::Create(indices.data(), indices.size());
+		ebo = CreateSharedPtr<IndexBuffer>(indices.data(), indices.size());
 
 		vao->AddIndexBuffer(ebo);
 	}
@@ -99,7 +99,7 @@ namespace Lux
 				FramebufferTextureFormat::DEPTH24_STENCIL8
 			};
 
-			sceneFramebuffer = Framebuffer::Create(spec);
+			sceneFramebuffer = CreateSharedPtr<Framebuffer>(spec);
 		}
 
 		// Creating viewport framebuffer
@@ -115,7 +115,7 @@ namespace Lux
 				FramebufferTextureFormat::DEPTH24_STENCIL8
 			};
 
-			viewportFramebuffer = Framebuffer::Create(spec);
+			viewportFramebuffer = CreateSharedPtr<Framebuffer>(spec);
 		}
 
 		std::vector<std::string> faces = 
@@ -128,7 +128,7 @@ namespace Lux
 				"Assets/Textures/back.jpg"
 		};
 
-		skybox = TextureCube::Create(faces);
+		skybox = CreateSharedPtr<TextureCube>(faces);
 	}
 
 	void EditorLayer::OnDestroy()
@@ -143,8 +143,9 @@ namespace Lux
 		camera.Update(timer);
 
 		sceneFramebuffer->Bind();
-		RenderOrder::ClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
-		RenderOrder::Clear();
+
+		Renderer::ClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
+		Renderer::Clear();
 
 		Renderer::BeginScene(camera);
 
@@ -156,8 +157,9 @@ namespace Lux
 		sceneFramebuffer->Unbind();
 
 		viewportFramebuffer->Bind();
-		RenderOrder::ClearColor({ 1.0f, 0.0f, 0.0f, 1.0f });
-		RenderOrder::Clear();
+
+		Renderer::ClearColor({ 1.0f, 0.0f, 0.0f, 1.0f });
+		Renderer::Clear();
 
 		lightingPass->Bind();
 		sceneFramebuffer->BindTextures();

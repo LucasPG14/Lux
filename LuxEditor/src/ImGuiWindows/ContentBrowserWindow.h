@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Lux/Resources/Texture.h"
+#include "Lux/Resources/Texture2D.h"
 
 #include "Lux/Events/Event.h"
 #include "Lux/Events/ApplicationEvent.h"

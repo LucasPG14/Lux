@@ -26,7 +26,7 @@ namespace Lux
 		MaterialComponent* material = new MaterialComponent();
 		ent.AddComponent(material);
 		//CreateEntity("Light");
-		shader = Shader::Create("Assets/Shaders/Deferred.glsl");
+		shader = CreateSharedPtr<Shader>("Assets/Shaders/Deferred.glsl");
 
 		Entity& light = CreateEntity("Directional Light");
 		AddLight(light.Get<TransformComponent>(), light.CreateComponent<LightComponent>(LightType::DIRECTIONAL));

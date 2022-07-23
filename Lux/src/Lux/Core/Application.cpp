@@ -19,7 +19,7 @@ namespace Lux
 		LUX_CORE_ASSERT(!app, "Application already created!");
 		app = this;
 		// Creating Window
-		window = std::unique_ptr<Window>(Window::Create());
+		window = CreateUniquePtr<Window>();
 		window->SetEventCallback(LUX_BIND_EVENT_FN(Application::OnEvent));
 
 		// Initializing renderer

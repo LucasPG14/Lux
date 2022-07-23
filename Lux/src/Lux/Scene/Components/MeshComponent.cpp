@@ -12,9 +12,9 @@ namespace Lux
 	{
 		//CreateSphere(vertices, indices);
 		Importer::ImportFBX(vertices, indices, "Assets/Models/model.fbx");
-		vao = VertexArray::Create();
+		vao = CreateSharedPtr<VertexArray>();
 
-		vbo = VertexBuffer::Create(vertices.data(), vertices.size() * sizeof(Vertex));
+		vbo = CreateSharedPtr<VertexBuffer>(vertices.data(), vertices.size() * sizeof(Vertex));
 		{
 			BufferLayout layout =
 			{
@@ -30,7 +30,7 @@ namespace Lux
 
 		vao->AddVertexBuffer(vbo);
 
-		ebo = IndexBuffer::Create(indices.data(), indices.size());
+		ebo = CreateSharedPtr<IndexBuffer>(indices.data(), indices.size());
 		vao->AddIndexBuffer(ebo);
 	}
 	

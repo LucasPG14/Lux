@@ -1,9 +1,8 @@
 #include "luxpch.h"
-#include "OpenGLTexture.h"
+#include "Texture2D.h"
 
-#include "stb_image.h"
-
-#include "glad/glad.h"
+#include <stb_image.h>
+#include <glad/glad.h>
 
 namespace Lux
 {
@@ -38,7 +37,7 @@ namespace Lux
 	}
 
 	// Texture 2D
-	OpenGLTexture2D::OpenGLTexture2D(const void* data, int w, int h) : width(w), height(h)
+	Texture2D::Texture2D(const void* data, int w, int h) : width(w), height(h)
 	{
 		glCreateTextures(GL_TEXTURE_2D, 1, &textureID);
 		glBindTexture(GL_TEXTURE_2D, textureID);
@@ -51,7 +50,7 @@ namespace Lux
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-	OpenGLTexture2D::OpenGLTexture2D(const std::string& path)
+	Texture2D::Texture2D(const std::string& path)
 	{
 		int w, h, channels;
 		stbi_set_flip_vertically_on_load(1);
@@ -79,64 +78,19 @@ namespace Lux
 		stbi_image_free(data);
 	}
 
-	OpenGLTexture2D::~OpenGLTexture2D()
+	Texture2D::~Texture2D()
 	{
 		glDeleteTextures(1, &textureID);
 	}
-	
-	void OpenGLTexture2D::Bind(uint32_t slot) const
+
+	void Texture2D::Bind(uint32_t slot) const
 	{
 		glActiveTexture(GL_TEXTURE0 + slot);
 		glBindTexture(GL_TEXTURE_2D, textureID);
 	}
-	
-	void OpenGLTexture2D::Unbind(uint32_t slot) const
+
+	void Texture2D::Unbind(uint32_t slot) const
 	{
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
-
-	// Texture Cube
-
-	OpenGLTextureCube::OpenGLTextureCube(const std::vector<std::string>& paths)
-	{
-		glGenTextures(1, &textureID);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
-
-		int width, height, channels;
-		for (int i = 0; i < paths.size(); ++i)
-		{
-			stbi_set_flip_vertically_on_load(false);
-			unsigned char* data = stbi_load(paths[i].c_str(), &width, &height, &channels, 0);
-			if (data)
-			{
-				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-			}
-			stbi_image_free(data);
-		}
-		stbi_set_flip_vertically_on_load(true);
-
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-	}
-
-	OpenGLTextureCube::~OpenGLTextureCube()
-	{
-	}
-
-	void OpenGLTextureCube::Bind(uint32_t slot) const
-	{
-		glDepthFunc(GL_LEQUAL);
-		glActiveTexture(GL_TEXTURE_CUBE_MAP);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
-	}
-
-	void OpenGLTextureCube::Unbind(uint32_t slot) const
-	{
-		glDepthFunc(GL_LESS);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-	}
-
 }

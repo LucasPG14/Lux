@@ -18,6 +18,7 @@
 #include <bitset>
 
 #include "Lux/Core/Log.h"
+#include "Lux/Utils/Tools.h"
 
 #ifdef LUX_PLATFORM_WINDOWS
 	#include <Windows.h>

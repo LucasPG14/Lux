@@ -5,6 +5,8 @@
 #include "Core.h"
 #include "Lux/Events/Event.h"
 
+struct GLFWwindow;
+
 namespace Lux
 {
 	class LUX_API Window
@@ -12,20 +14,37 @@ namespace Lux
 	public:
 		using EventCallbackFn = std::function<void(Event&)>;
 
-		virtual ~Window() {}
+		Window();
+		virtual ~Window();
 
-		virtual void Update() = 0;
+		void Update();
 
-		virtual unsigned int GetWidth() const = 0;
-		virtual unsigned int GetHeight() const = 0;
+		unsigned int GetWidth() const { return data.width; }
+		unsigned int GetHeight() const { return data.height; }
 
 		// Window attributes
-		virtual void SetEventCallback(const EventCallbackFn& callback) = 0;
-		virtual void SetVSync(bool enabled) = 0;
-		virtual bool IsVSync() const = 0;
+		void SetEventCallback(const EventCallbackFn& callback) { data.eventCallback = callback; }
+		void SetVSync(bool enabled);
+		bool IsVSync() const;
 
-		virtual void* GetWindow() const = 0;
+		GLFWwindow* GetWindow() const { return window; }
 
-		static Window* Create();
+	private:
+		void Init();
+		void Shutdown();
+
+	private:
+		GLFWwindow* window;
+
+		struct WindowData
+		{
+			std::string title;
+			unsigned int width, height;
+			bool vSync;
+
+			EventCallbackFn eventCallback;
+		};
+
+		WindowData data;
 	};
 }

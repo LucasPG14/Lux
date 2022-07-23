@@ -50,18 +50,31 @@ namespace Lux
 	class Framebuffer
 	{
 	public:
-		virtual ~Framebuffer() {}
+		Framebuffer(const FramebufferSpecification& specification);
+		virtual ~Framebuffer();
 
-		virtual void Bind() = 0;
-		virtual void Unbind() = 0;
+		void Invalidate();
 
-		virtual void BindTextures() = 0;
+		void Bind();
+		void Unbind();
 
-		virtual void Resize(uint32_t width, uint32_t height) = 0;
+		void BindTextures();
 
-		virtual uint32_t GetID() const = 0;
+		void Resize(uint32_t width, uint32_t height);
 
-		virtual const FramebufferSpecification& GetSpec() const = 0;
-		static std::shared_ptr<Framebuffer> Create(const FramebufferSpecification& specification);
+		uint32_t GetID() const { return framebufferID; }
+
+		const FramebufferSpecification& GetSpec() const { return spec; }
+
+	private:
+
+		uint32_t framebufferID;
+		FramebufferSpecification spec;
+
+		std::vector<FramebufferTextureSpecification> colorSpecifications;
+		FramebufferTextureSpecification depthSpecification;
+
+		std::vector<uint32_t> colorAttachments;
+		uint32_t depth;
 	};
 }

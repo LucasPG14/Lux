@@ -1,12 +1,18 @@
 #include "luxpch.h"
 #include "Renderer.h"
 
+#include "VertexArray.h"
+
 #include "Lux/Scene/Components/TransformComponent.h"
 #include "Lux/Scene/Components/LightComponent.h"
+
+#include "Lux/Utils/Tools.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+#include <glad/glad.h>
 
 namespace Lux
 {
@@ -15,9 +21,13 @@ namespace Lux
 
 	void Renderer::Init()
 	{
-		RenderOrder::Init();
+		// Setting rendering specification
+		glEnable(GL_TEXTURE_2D);
+		/*glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);*/
+		glEnable(GL_DEPTH_TEST);
 
-		std::shared_ptr<Shader> shader = Shader::Create("Assets/Shaders/Texture.glsl");
+		std::shared_ptr<Shader> shader = CreateSharedPtr<Shader>("Assets/Shaders/Texture.glsl");
 		shaderLibrary->Add(shader);
 	}
 
@@ -48,7 +58,7 @@ namespace Lux
 		shader->SetUniformFloat3("material.albedoColor", material->GetColor());
 
 		vertexArray->Bind();
-		RenderOrder::Draw(vertexArray);
+		Draw(vertexArray);
 	}
 
 	void Renderer::DrawQuad()
@@ -61,10 +71,10 @@ namespace Lux
 			-1.0f,  1.0f, 0.0f, 0.0f, 1.0f
 		};
 		
-		std::shared_ptr<VertexArray> vao = VertexArray::Create();
+		std::shared_ptr<VertexArray> vao = CreateSharedPtr<VertexArray>();
 		vao->Bind();
 
-		std::shared_ptr<VertexBuffer> vbo = VertexBuffer::Create(quad, 20 * sizeof(float));
+		std::shared_ptr<VertexBuffer> vbo = CreateSharedPtr<VertexBuffer>(quad, 20 * sizeof(float));
 		{
 			BufferLayout layout =
 			{
@@ -82,11 +92,11 @@ namespace Lux
 			2, 3, 0
 		};
 
-		std::shared_ptr<IndexBuffer> ebo = IndexBuffer::Create(indices, 6);
+		std::shared_ptr<IndexBuffer> ebo = CreateSharedPtr<IndexBuffer>(indices, 6);
 
 		vao->AddIndexBuffer(ebo);
 
-		RenderOrder::Draw(vao);
+		Draw(vao);
 	}
 
 	void Renderer::DrawSkybox(const std::shared_ptr<VertexArray>& vao, const std::shared_ptr<TextureCube>& cubemap, const std::shared_ptr<Shader>& shader, const glm::mat4& viewMatrix, const glm::mat4& projMatrix)
@@ -100,12 +110,29 @@ namespace Lux
 		shader->SetUniformInt("skybox", 0);
 
 		vao->Bind();
-		RenderOrder::Draw(vao);
+		Draw(vao);
 		cubemap->Unbind();
 	}
 
 	void Renderer::ChangeState(bool change)
 	{
-		RenderOrder::ChangeState(change);
+		if (change) glDisable(GL_CULL_FACE);
+		else glEnable(GL_CULL_FACE);
+	}
+
+	void Renderer::ClearColor(const glm::vec4& color)
+	{
+		glClearColor(color.r, color.g, color.b, color.a);
+	}
+
+	void Renderer::Clear()
+	{
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+	
+	void Renderer::Draw(const std::shared_ptr<VertexArray>& vertexArray, uint32_t indexCount)
+	{
+		uint32_t count = indexCount ? indexCount : vertexArray->GetIndexBuffer()->GetCount();
+		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
 	}
 }

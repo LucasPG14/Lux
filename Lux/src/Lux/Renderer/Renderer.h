@@ -1,13 +1,16 @@
 #pragma once
 
-#include "RenderOrder.h"
 #include "Shader.h"
 #include "Lux/Resources/Material.h"
+
+#include "Lux/Resources/TextureCube.h"
 
 #include "Lux/PerspectiveCamera.h"
 
 namespace Lux
 {
+	class VertexArray;
+	
 	class TransformComponent;
 	class LightComponent;
 
@@ -27,8 +30,13 @@ namespace Lux
 
 		static void ChangeState(bool change);
 
-		inline static Render::API GetRenderer() { return Render::GetAPI(); }
+		static void ClearColor(const glm::vec4& color);
+		static void Clear();
+
 		inline static const std::unique_ptr<ShaderLibrary>& GetShaderLibrary() { return shaderLibrary; }
+
+	private:
+		static void Draw(const std::shared_ptr<VertexArray>& vertexArray, uint32_t indexCount = 0);
 
 	private:
 		struct SceneInfo

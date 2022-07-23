@@ -1,23 +1,28 @@
 #pragma once
 
-#include "Buffer.h"
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
 
 namespace Lux
 {
 	class VertexArray
 	{
 	public:
-		virtual ~VertexArray() {}
+		VertexArray();
+		virtual ~VertexArray();
 
-		virtual void Bind() const = 0;
-		virtual void Unbind() const = 0;
+		void Bind() const;
+		void Unbind() const;
 
-		virtual void AddVertexBuffer(const std::shared_ptr<VertexBuffer>& vertex) = 0;
-		virtual void AddIndexBuffer(const std::shared_ptr<IndexBuffer>& index) = 0;
+		void AddVertexBuffer(const std::shared_ptr<VertexBuffer>& vertex);
+		void AddIndexBuffer(const std::shared_ptr<IndexBuffer>& index);
 
-		virtual const std::vector<std::shared_ptr<VertexBuffer>>& GetVertexBuffers() const = 0;
-		virtual const std::shared_ptr<IndexBuffer>& GetIndexBuffer() const = 0;
+		const std::vector<std::shared_ptr<VertexBuffer>>& GetVertexBuffers() const { return vertexBuffers; }
+		const std::shared_ptr<IndexBuffer>& GetIndexBuffer() const { return indexBuffer; }
 
-		static std::shared_ptr<VertexArray> Create();
+	private:
+		uint32_t vertexArrayID;
+		std::vector<std::shared_ptr<VertexBuffer>> vertexBuffers;
+		std::shared_ptr<IndexBuffer> indexBuffer;
 	};
 }

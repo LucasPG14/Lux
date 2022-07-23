@@ -13,8 +13,8 @@ namespace Lux
 	
 	ContentBrowserWindow::ContentBrowserWindow() : currentDir(assetsDir)
 	{
-		folder = Texture2D::Create("Editor/Textures/folder.png");
-		tex = Texture2D::Create("Assets/Textures/bakeHouse.png");
+		folder = CreateSharedPtr<Texture2D>("Editor/Textures/folder.png");
+		tex = CreateSharedPtr<Texture2D>("Assets/Textures/bakeHouse.png");
 
 		//// Load Resources
 		//std::stack<std::filesystem::path> resources;

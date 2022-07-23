@@ -27,7 +27,6 @@
 
 // Renderer
 #include "Lux/Renderer/Renderer.h"
-#include "Lux/Renderer/RenderOrder.h"
 #include "Lux/Renderer/Buffer.h"
 #include "Lux/Renderer/Shader.h"
 #include "Lux/Renderer/Framebuffer.h"

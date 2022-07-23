@@ -1,25 +1,77 @@
 #include "luxpch.h"
 #include "VertexArray.h"
 
-#include "Renderer.h"
-
-#include "Platform/OpenGL/OpenGLVertexArray.h"
+#include <glad/glad.h>
 
 namespace Lux
 {
-	std::shared_ptr<VertexArray> VertexArray::Create()
+	namespace Utilities
 	{
-		switch (Renderer::GetRenderer())
+		static GLenum ShaderTypeToOpenGL(ShaderDataType type)
 		{
-		case Render::API::NONE:
-		{
-			LUX_CORE_ASSERT(false, "There's no RendererAPI");
-			return nullptr;
+			switch (type)
+			{
+			case ShaderDataType::FLOAT:		return GL_FLOAT;
+			case ShaderDataType::FLOAT2:	return GL_FLOAT;
+			case ShaderDataType::FLOAT3:	return GL_FLOAT;
+			case ShaderDataType::FLOAT4:	return GL_FLOAT;
+			case ShaderDataType::INT:	 	return GL_INT;
+			case ShaderDataType::INT2: 		return GL_INT;
+			case ShaderDataType::INT3:	 	return GL_INT;
+			case ShaderDataType::INT4: 		return GL_INT;
+			case ShaderDataType::MAT3: 		return GL_FLOAT;
+			case ShaderDataType::MAT4:		return GL_FLOAT;
+			}
+
+			LUX_CORE_ASSERT(false, "ShaderDataType doesn't exist!");
+			return 0;
 		}
-		case Render::API::OPENGL: return std::make_shared<OpenGLVertexArray>();
+	}
+
+	VertexArray::VertexArray()
+	{
+		glCreateVertexArrays(1, &vertexArrayID);
+	}
+
+	VertexArray::~VertexArray()
+	{
+		glDeleteVertexArrays(1, &vertexArrayID);
+	}
+
+	void VertexArray::Bind() const
+	{
+		glBindVertexArray(vertexArrayID);
+	}
+
+	void VertexArray::Unbind() const
+	{
+		glBindVertexArray(0);
+	}
+
+	void VertexArray::AddVertexBuffer(const std::shared_ptr<VertexBuffer>& vertex)
+	{
+		LUX_CORE_ASSERT(vertex->GetLayout().GetElements().size(), "Vertex Buffer hasn't layout!");
+		glBindVertexArray(vertexArrayID);
+		vertex->Bind();
+
+		uint32_t i = 0;
+		for (const auto& lay : vertex->GetLayout())
+		{
+			glEnableVertexAttribArray(i);
+			glVertexAttribPointer(i, lay.GetCount(), Utilities::ShaderTypeToOpenGL(lay.type),
+				lay.normalize ? GL_TRUE : GL_FALSE, vertex->GetLayout().GetStride(), (const void*)lay.offset);
+
+			i++;
 		}
 
-		LUX_CORE_ASSERT(false, "RendererAPI not defined!");
-		return nullptr;
+		vertexBuffers.push_back(vertex);
+	}
+
+	void VertexArray::AddIndexBuffer(const std::shared_ptr<IndexBuffer>& index)
+	{
+		glBindVertexArray(vertexArrayID);
+		index->Bind();
+
+		indexBuffer = index;
 	}
 }
