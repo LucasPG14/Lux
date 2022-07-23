@@ -13,11 +13,11 @@ namespace Lux
 {
 	namespace Importer
 	{
-		void ImportFBX(std::vector<Vertex>& vertices, std::vector<uint32_t>& indices)
+		void ImportFBX(std::vector<Vertex>& vertices, std::vector<uint32_t>& indices, const std::string& path)
 		{
 			Assimp::Importer importer;
 
-			const aiScene* scene = importer.ReadFile("Assets/Models/model.fbx", aiProcessPreset_TargetRealtime_MaxQuality);
+			const aiScene* scene = importer.ReadFile(path.c_str(), aiProcessPreset_TargetRealtime_MaxQuality);
 
 			if (scene == nullptr)
 			{

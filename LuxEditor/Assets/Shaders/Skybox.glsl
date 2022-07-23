@@ -18,8 +18,8 @@ void main()
 #type fragment
 #version 450 core
 
-layout(location = 0) out vec3 position;
-layout(location = 1) out vec3 normals;
+layout(location = 0) out vec4 positions;
+layout(location = 1) out vec4 normals;
 layout(location = 2) out vec4 albedoSpecular;
 
 in vec3 texCoords;
@@ -28,6 +28,6 @@ uniform samplerCube skybox;
 
 void main()
 {    
-    position = texCoords;
+    positions.rgb = texCoords.rgb;
     albedoSpecular = texture(skybox, texCoords);
 }

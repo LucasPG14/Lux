@@ -80,7 +80,7 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir, v
     float distance = length(light.position - fragPos);
     if(distance < light.radius)
     {
-        float attenuation = 1.0 / (distance * distance);
+        float attenuation = 1.0 / distance;
 
         vec3 ambient = light.ambient * albedo;
         vec3 diffuse = light.diffuse * diff * albedo;
@@ -112,6 +112,7 @@ void main()
     {
 	    light += CalcPointLight(pointLights[i], normal, fragPos, viewDir, albedo, specular);
     }
+
 
     fragColor = vec4(light, 1.0);
 }

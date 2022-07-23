@@ -11,7 +11,7 @@ namespace Lux
 	MeshComponent::MeshComponent()
 	{
 		//CreateSphere(vertices, indices);
-		Importer::ImportFBX(vertices, indices);
+		Importer::ImportFBX(vertices, indices, "Assets/Models/model.fbx");
 		vao = VertexArray::Create();
 
 		vbo = VertexBuffer::Create(vertices.data(), vertices.size() * sizeof(Vertex));

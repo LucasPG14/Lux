@@ -13,16 +13,22 @@ namespace Lux
 		{
 			switch (channels)
 			{
-			case 4:
+			case 1:
 			{
-				internalFormat = GL_RGBA8;
-				dataFormat = GL_RGBA;
+				internalFormat = GL_R8;
+				dataFormat = GL_RED;
 				break;
 			}
 			case 3:
 			{
 				internalFormat = GL_RGB8;
 				dataFormat = GL_RGB;
+				break;
+			}
+			case 4:
+			{
+				internalFormat = GL_RGBA8;
+				dataFormat = GL_RGBA;
 				break;
 			}
 			}
@@ -49,13 +55,8 @@ namespace Lux
 	{
 		int w, h, channels;
 		stbi_set_flip_vertically_on_load(1);
-		// TODO: Check this for HDR images
-		//if (stbi_is_hdr(path.c_str()))
-		//{
-		//	bool ret = true;
-		//	ret = false;
-		//}
-		stbi_uc* data = stbi_load(path.c_str(), &w, &h, &channels, 0);
+
+		uint8_t* data = stbi_load(path.c_str(), &w, &h, &channels, 0);
 		LUX_CORE_ASSERT(data, "Couldn't load the image!");
 		width = w;
 		height = h;
@@ -104,7 +105,7 @@ namespace Lux
 		int width, height, channels;
 		for (int i = 0; i < paths.size(); ++i)
 		{
-			stbi_set_flip_vertically_on_load(1);
+			stbi_set_flip_vertically_on_load(false);
 			unsigned char* data = stbi_load(paths[i].c_str(), &width, &height, &channels, 0);
 			if (data)
 			{
@@ -112,6 +113,7 @@ namespace Lux
 			}
 			stbi_image_free(data);
 		}
+		stbi_set_flip_vertically_on_load(true);
 
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -126,12 +128,14 @@ namespace Lux
 
 	void OpenGLTextureCube::Bind(uint32_t slot) const
 	{
+		glDepthFunc(GL_LEQUAL);
 		glActiveTexture(GL_TEXTURE_CUBE_MAP);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
 	}
 
 	void OpenGLTextureCube::Unbind(uint32_t slot) const
 	{
+		glDepthFunc(GL_LESS);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	}
 

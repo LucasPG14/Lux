@@ -24,47 +24,53 @@ namespace Lux
 		lightingPass = Shader::Create("Assets/Shaders/Quad.glsl");
 		skyboxShader = Shader::Create("Assets/Shaders/Skybox.glsl");
 
-		float vertices[] =
+		std::vector<float> vertices =
 		{
-			0.5f, 0.5f, 0.5f,
-			-0.5f, 0.5f, 0.5f,
-			-0.5f, 0.5f, -0.5f,
-			0.5f, 0.5f, -0.5f,
-			0.5f, -0.5f, 0.5f,
-			-0.5f, -0.5f, 0.5f,
-			-0.5f, -0.5f, -0.5f,
-			0.5f, -0.5f, -0.5f,
+			0.5f, 0.5f, -0.5f, // 0
+			0.5f, -0.5f, -0.5f, // 1
+			-0.5f, -0.5f, -0.5f, // 2
+			-0.5f, 0.5f, -0.5f, // 3
+			0.5f, 0.5f, 0.5f, // 4
+			0.5f, -0.5f, 0.5f, // 5
+			-0.5f, -0.5f, 0.5f, // 6
+			-0.5f, 0.5f, 0.5f, // 7
 		};
 
+		std::vector<uint32_t> indices =
+		{
+			0, 1, 2,
+			2, 3, 0,
+
+			0, 1, 5,
+			5, 4, 0,
+
+			7, 6, 5,
+			5, 4, 7,
+
+			3, 2, 6,
+			6, 7, 3,
+
+			4, 0, 3,
+			3, 7, 4,
+
+			1, 5, 6,
+			6, 2, 1
+		};
+		//Importer::ImportFBX(vertices, indices, "Assets/Models/Cube.fbx");
 		vao = VertexArray::Create();
 
-		vbo = VertexBuffer::Create(vertices, 24 * sizeof(float));
+		vbo = VertexBuffer::Create(vertices.data(), vertices.size() * sizeof(float));
 		{
 			BufferLayout layout =
 			{
-				{ShaderDataType::FLOAT3, "position"}
+				{ShaderDataType::FLOAT3, "position"},
 			};
 
 			vbo->SetLayout(layout);
 		}
 
 		vao->AddVertexBuffer(vbo);
-
-		std::vector<uint32_t> indices =
-		{
-			0, 1, 3, 
-			3, 1, 2, 
-			2, 6, 7, 
-			7, 3, 2, 
-			7, 6, 5, 
-			5, 4, 7, 
-			5, 1, 4, 
-			4, 1, 0, 
-			4, 3, 7, 
-			3, 4, 0, 
-			5, 6, 2, 
-			5, 1, 2
-		};
+		
 		ebo = IndexBuffer::Create(indices.data(), indices.size());
 
 		vao->AddIndexBuffer(ebo);
@@ -89,7 +95,7 @@ namespace Lux
 			{
 				FramebufferTextureFormat::RGBA16,
 				FramebufferTextureFormat::RGBA16,
-				FramebufferTextureFormat::RGBA8,
+				FramebufferTextureFormat::RGBA16,
 				FramebufferTextureFormat::DEPTH24_STENCIL8
 			};
 
@@ -143,8 +149,7 @@ namespace Lux
 		Renderer::BeginScene(camera);
 
 		scene->Update();
-
-		//Renderer::DrawSkybox(vao, skybox, skyboxShader, camera.GetViewMatrix(), camera.GetProjectionMatrix());
+		Renderer::DrawSkybox(vao, skybox, skyboxShader, camera.GetViewMatrix(), camera.GetProjectionMatrix());
 
 		Renderer::EndScene();
 
@@ -156,9 +161,9 @@ namespace Lux
 
 		lightingPass->Bind();
 		sceneFramebuffer->BindTextures();
-		lightingPass->UploadUniformInt("positions", 0);
-		lightingPass->UploadUniformInt("normals", 1);
-		lightingPass->UploadUniformInt("albedoSpecular", 2);
+		lightingPass->SetUniformInt("positions", 0);
+		lightingPass->SetUniformInt("normals", 1);
+		lightingPass->SetUniformInt("albedoSpecular", 2);
 
 		const auto& lights = scene->GetLights();
 
@@ -169,21 +174,21 @@ namespace Lux
 			switch (light->GetType())
 			{
 			case LightType::DIRECTIONAL:
-				lightingPass->UploadUniformFloat3("dirLight.direction", lights[i].first->GetRotation());
-				lightingPass->UploadUniformFloat3("dirLight.ambient", light->GetColor());
-				lightingPass->UploadUniformFloat3("dirLight.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
-				lightingPass->UploadUniformFloat3("dirLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+				lightingPass->SetUniformFloat3("dirLight.direction", lights[i].first->GetRotation());
+				lightingPass->SetUniformFloat3("dirLight.ambient", light->GetColor());
+				lightingPass->SetUniformFloat3("dirLight.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+				lightingPass->SetUniformFloat3("dirLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 				break;
 			case LightType::POINT:
 				std::string number = std::to_string(pointLights);
-				lightingPass->UploadUniformFloat3("pointLights[" + number + "].position", lights[i].first->GetPosition());
-				lightingPass->UploadUniformFloat3("pointLights[" + number + "].ambient", light->GetColor());
-				lightingPass->UploadUniformFloat3("pointLights[" + number + "].diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
-				lightingPass->UploadUniformFloat3("pointLights[" + number + "].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+				lightingPass->SetUniformFloat3("pointLights[" + number + "].position", lights[i].first->GetPosition());
+				lightingPass->SetUniformFloat3("pointLights[" + number + "].ambient", light->GetColor());
+				lightingPass->SetUniformFloat3("pointLights[" + number + "].diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+				lightingPass->SetUniformFloat3("pointLights[" + number + "].specular", glm::vec3(1.0f, 1.0f, 1.0f));
 				
 				float lightMax = std::fmaxf(std::fmaxf(light->GetColor().r, light->GetColor().g), light->GetColor().b);
 				float radius = (-0.7f + std::sqrtf(0.7f * 0.7f - 4 * 1.8f * (1.0f - (256.0f / 5.0f) * lightMax))) / (2 * 1.8f);
-				lightingPass->UploadUniformFloat("pointLights[" + number + "].radius", radius);
+				lightingPass->SetUniformFloat("pointLights[" + number + "].radius", radius);
 
 				float length = glm::length(lights[i].first->GetPosition() - glm::vec3(0.0f, 0.0f, 0.0f));
 
@@ -191,7 +196,7 @@ namespace Lux
 				break;
 			}
 		}
-		
+
 		Renderer::DrawQuad();
 
 		viewportFramebuffer->Unbind();

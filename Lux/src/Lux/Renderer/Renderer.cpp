@@ -17,7 +17,6 @@ namespace Lux
 	{
 		RenderOrder::Init();
 
-		// OpenGL
 		std::shared_ptr<Shader> shader = Shader::Create("Assets/Shaders/Texture.glsl");
 		shaderLibrary->Add(shader);
 	}
@@ -35,44 +34,18 @@ namespace Lux
 	void Renderer::Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<Material>& material, const std::shared_ptr<VertexArray>& vertexArray, const glm::mat4& model)
 	{
 		shader->Bind();
-		shader->UploadUniformMat4("viewProjection", glm::transpose(sceneInfo->viewProjection));
-		shader->UploadUniformFloat3("viewPos", sceneInfo->viewPos);
-		shader->UploadUniformMat4("model", model);
 
-		//// Light Info
-		//for (int i = 0; i < lights.size(); ++i)
-		//{
-		//	const LightComponent* light = lights[i].second;
-		//	switch (light->GetType())
-		//	{
-		//	case LightType::DIRECTIONAL:
-		//		shader->UploadUniformFloat3("dirLight.direction", lights[i].first->GetRotation());
-		//		shader->UploadUniformFloat3("dirLight.ambient", light->GetColor());
-		//		shader->UploadUniformFloat3("dirLight.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
-		//		shader->UploadUniformFloat3("dirLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-		//		break;
-		//	case LightType::POINT:
-		//		shader->UploadUniformFloat3("pointLight.position", lights[i].first->GetPosition());
+		// Setting view and projection matrix from the camera and the model matrix of the object
+		shader->SetUniformMat4("viewProjection", glm::transpose(sceneInfo->viewProjection));
+		shader->SetUniformFloat3("viewPos", sceneInfo->viewPos);
+		shader->SetUniformMat4("model", model);
 
-		//		shader->UploadUniformFloat("pointLight.constant", 1.0f);
-		//		shader->UploadUniformFloat("pointLight.quadratic", 1.0f);
-		//		shader->UploadUniformFloat("pointLight.linear", 1.0f);
-
-
-		//		shader->UploadUniformFloat3("pointLight.ambient", light->GetColor());
-		//		shader->UploadUniformFloat3("pointLight.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
-		//		shader->UploadUniformFloat3("pointLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-		//		break;
-		//	}
-		//}
-
-		// Material info
+		// Material bindings and uniforms
 		material->Bind();
-		
-		shader->UploadUniformInt("material.diffuseMap", 0);
-		shader->UploadUniformInt("material.normalMap", 1);
-
-		shader->UploadUniformFloat3("material.albedoColor", material->GetColor());
+		shader->SetUniformInt("material.diffuseMap", 0);
+		shader->SetUniformInt("material.normalMap", 1);
+		shader->SetUniformInt("material.metallicMap", 2);
+		shader->SetUniformFloat3("material.albedoColor", material->GetColor());
 
 		vertexArray->Bind();
 		RenderOrder::Draw(vertexArray);
@@ -120,13 +93,12 @@ namespace Lux
 	{
 		shader->Bind();
 
-		glm::mat4 view = glm::mat4(glm::mat3(viewMatrix));
-		shader->UploadUniformMat4("projection", projMatrix);
-		shader->UploadUniformMat4("view", view);
-
-		shader->UploadUniformInt("cubemap", 0);
+		shader->SetUniformMat4("projection", projMatrix);
+		shader->SetUniformMat4("view", glm::mat3(viewMatrix));
 
 		cubemap->Bind();
+		shader->SetUniformInt("skybox", 0);
+
 		vao->Bind();
 		RenderOrder::Draw(vao);
 		cubemap->Unbind();

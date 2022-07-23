@@ -7,7 +7,7 @@ namespace Lux
 	{
 		albedo = Texture2D::Create("Assets/Textures/BricksDiffuse.png");
 		normal = Texture2D::Create("Assets/Textures/BricksNormal.png");
-		//metallic = Texture2D::Create("Assets/Textures/rustediron2_metallic.png");
+		metallic = Texture2D::Create("Assets/Textures/rustediron2_metallic.png");
 		//roughness = Texture2D::Create("Assets/Textures/rustediron2_roughness.png");
 	}
 
@@ -20,7 +20,7 @@ namespace Lux
 	{
 		albedo->Bind(0);
 		normal->Bind(1);
-		//metallic->Bind(2);
+		metallic->Bind(2);
 		//roughness->Bind(3);
 	}
 }

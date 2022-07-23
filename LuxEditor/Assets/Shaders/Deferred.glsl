@@ -61,6 +61,6 @@ void main()
     normals.rgb = texture(material.normalMap, texCoord).rgb;
     normals.rgb = normals.rgb * 2.0 - 1.0;
     normals.rgb = normalize(normals.rgb);
-
+    
     albedoSpecular = vec4(texture(material.diffuseMap, texCoord).rgb * material.albedoColor, 1.0);
 }
