@@ -1,7 +1,9 @@
 #include "luxpch.h"
 #include "SceneHierarchyWindow.h"
 
+#include <Lux.h>
 #include <ImGui/imgui.h>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace Lux
 {
@@ -51,12 +53,89 @@ namespace Lux
 		// Inspector begin
 		ImGui::Begin("Inspector");
 
-		if (selected)
-		{
-			selected->DrawInspector();
-		}
+		if (selected) DrawEntityComponents(*selected);
 
 		ImGui::End();
 		// Inspector end
+	}
+
+	// TODO: Try to change the way components are stored to avoid using the "GetModified" function
+	void SceneHierarchyWindow::DrawEntityComponents(Entity& entity)
+	{
+		ImGui::InputText("##name", entity.GetModifiedName().data(), 128);
+
+		// Transform
+		if (TransformComponent* component = entity.Get<TransformComponent>())
+		{
+			if (ImGui::CollapsingHeader("Transform Component"))
+			{
+				ImGui::Text("Position");
+				ImGui::SameLine();
+				ImGui::DragFloat3("##Position", glm::value_ptr(component->GetModifiedPosition()));
+
+				ImGui::Text("Rotation");
+				ImGui::SameLine();
+				ImGui::DragFloat3("##Rotation", glm::value_ptr(component->GetModifiedRotation()));
+
+				ImGui::Text("Scale");
+				ImGui::SameLine();
+				ImGui::DragFloat3("##Scale", glm::value_ptr(component->GetModifiedScale()));
+			}
+		}
+		
+		// Mesh
+		if (MeshComponent* component = entity.Get<MeshComponent>())
+		{
+			if (ImGui::CollapsingHeader("Mesh Component"))
+			{
+
+			}
+		}
+
+		// Material
+		if (MaterialComponent* component = entity.Get<MaterialComponent>())
+		{
+			if (ImGui::CollapsingHeader("Material Component"))
+			{
+				Material& material = *component->GetMaterial();
+				if (ImGui::Button("##Diffuse Map", { 40.0f, 40.0f }))
+				{
+
+				}
+				ImGui::SameLine();
+				ImGui::Text("Diffuse Map");
+
+				if (ImGui::Button("##Normal Map", { 40.0f, 40.0f }))
+				{
+
+				}
+				ImGui::SameLine();
+				ImGui::Text("Normal Map");
+
+				if (ImGui::Button("##Metallic Map", { 40.0f, 40.0f }))
+				{
+
+				}
+				ImGui::SameLine();
+				ImGui::Text("Metallic Map");
+
+				if (ImGui::Button("##Roughness Map", { 40.0f, 40.0f }))
+				{
+
+				}
+				ImGui::SameLine();
+				ImGui::Text("Roughness Map");
+
+				ImGui::ColorPicker3("##color", glm::value_ptr(material.GetColor()));
+			}
+		}
+
+		if (LightComponent* component = entity.Get<LightComponent>())
+		{
+			if (ImGui::CollapsingHeader("Light Component"))
+			{
+				ImGui::ColorPicker3("Light Color", glm::value_ptr(component->GetModifiedColor()));
+			}
+		}
 	}
 }

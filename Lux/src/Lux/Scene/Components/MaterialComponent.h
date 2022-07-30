@@ -14,8 +14,6 @@ namespace Lux
 
 		void Update() override;
 
-		void DrawInspector() override;
-
 		const std::shared_ptr<Material>& GetMaterial() { return material; }
 
 		ComponentType GetType() { return type; }

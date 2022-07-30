@@ -9,9 +9,6 @@
 
 #include "Lux/Renderer/Renderer.h"
 
-// TODO: Remove this
-#include <glm/gtc/type_ptr.hpp>
-
 namespace Lux
 {
 	Scene::Scene()
@@ -25,7 +22,7 @@ namespace Lux
 
 		MaterialComponent* material = new MaterialComponent();
 		ent.AddComponent(material);
-		//CreateEntity("Light");
+
 		shader = CreateSharedPtr<Shader>("Assets/Shaders/Deferred.glsl");
 
 		Entity& light = CreateEntity("Directional Light");

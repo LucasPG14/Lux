@@ -17,12 +17,4 @@ namespace Lux
 	void LightComponent::Update()
 	{
 	}
-	
-	void LightComponent::DrawInspector()
-	{
-		if (ImGui::CollapsingHeader("Light Component"))
-		{
-			ImGui::ColorPicker3("Light Color", glm::value_ptr(color));
-		}
-	}
 }

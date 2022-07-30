@@ -9,7 +9,8 @@ namespace Lux
 	enum class LightType
 	{
 		DIRECTIONAL = 0,
-		POINT = 1
+		POINT = 1,
+		SPOT
 	};
 
 	class LightComponent : public Component
@@ -20,9 +21,9 @@ namespace Lux
 
 		void Update() override;
 
-		void DrawInspector() override;
-
 		inline const glm::vec3& GetColor() const { return color; }
+
+		inline glm::vec3& GetModifiedColor() { return color; }
 
 		inline const LightType& GetType() const { return lightType; }
 
@@ -30,7 +31,6 @@ namespace Lux
 
 	private:
 		ComponentType type;
-
 		glm::vec3 color;
 
 		LightType lightType;

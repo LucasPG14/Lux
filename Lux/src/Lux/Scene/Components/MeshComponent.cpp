@@ -41,11 +41,4 @@ namespace Lux
 	void MeshComponent::Update()
 	{
 	}
-	
-	void MeshComponent::DrawInspector()
-	{
-		if (ImGui::CollapsingHeader("Mesh"))
-		{
-		}
-	}
 }

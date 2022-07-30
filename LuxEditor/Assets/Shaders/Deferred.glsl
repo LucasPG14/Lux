@@ -18,18 +18,13 @@ out mat4 vModel;
 			
 void main()
 {
+    vec4 worldPos = model * vec4(aPosition, 1.0);
 	texCoord = aTexCoord;
+    fragPos = worldPos.xyz;
+
     normal = aNormals;
-	gl_Position = viewProjection * model * vec4(aPosition, 1.0);
-	fragPos = aPosition;
-
-    vec3 t = normalize(aTangents);
-    vec3 n = normalize(aNormals);
-
-    t = normalize(t - dot(t, n) * n);
-    vec3 b = cross(n, t);
-
-    tbn = mat3(t, b, n);
+	
+    gl_Position = viewProjection * worldPos;
 }
 
 
@@ -46,6 +41,8 @@ struct Material
     vec3 albedoColor;
 
     sampler2D normalMap;
+    sampler2D metallicMap;
+    sampler2D roughnessMap;
 }; 
 uniform Material material;
 
@@ -57,10 +54,12 @@ in mat3 tbn;
 void main()
 {
     position.rgb = fragPos;
+    position.a = texture(material.metallicMap, texCoord).r;
 
     normals.rgb = texture(material.normalMap, texCoord).rgb;
-    normals.rgb = normals.rgb * 2.0 - 1.0;
-    normals.rgb = normalize(normals.rgb);
+    normals.rgb = normalize(normals.rgb * 2.0 - 1.0);
+    normals.rgb = normals.rgb;
     
-    albedoSpecular = vec4(texture(material.diffuseMap, texCoord).rgb * material.albedoColor, 1.0);
+    albedoSpecular.rgb = texture(material.diffuseMap, texCoord).rgb * material.albedoColor;
+    albedoSpecular.a = texture(material.roughnessMap, texCoord).r;
 }

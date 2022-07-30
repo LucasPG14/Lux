@@ -18,22 +18,4 @@ namespace Lux
 	void TransformComponent::Update()
 	{
 	}
-	
-	void TransformComponent::DrawInspector()
-	{
-		if (ImGui::CollapsingHeader("Transform"))
-		{
-			ImGui::Text("Position");
-			ImGui::SameLine();
-			ImGui::DragFloat3("##Position", glm::value_ptr(position));
-
-			ImGui::Text("Rotation");
-			ImGui::SameLine();
-			ImGui::DragFloat3("##Rotation", glm::value_ptr(rotation));
-
-			ImGui::Text("Scale");
-			ImGui::SameLine();
-			ImGui::DragFloat3("##Scale", glm::value_ptr(scale));
-		}
-	}
 }

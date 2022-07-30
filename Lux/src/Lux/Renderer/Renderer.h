@@ -10,6 +10,8 @@
 namespace Lux
 {
 	class VertexArray;
+	class VertexBuffer;
+	class IndexBuffer;
 	
 	class TransformComponent;
 	class LightComponent;
@@ -24,7 +26,7 @@ namespace Lux
 
 		static void Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<Material>& material, const std::shared_ptr<VertexArray>& vertexArray, const glm::mat4& model = glm::mat4(1.0f));
 
-		static void DrawQuad();
+		static void DrawFullscreenQuad();
 
 		static void DrawSkybox(const std::shared_ptr<VertexArray>& vao, const std::shared_ptr<TextureCube>& cubemap, const std::shared_ptr<Shader>& shader, const glm::mat4& viewMatrix, const glm::mat4& projMatrix);
 
@@ -47,5 +49,9 @@ namespace Lux
 
 		static std::unique_ptr<SceneInfo> sceneInfo;
 		static std::unique_ptr<ShaderLibrary> shaderLibrary;
+
+		static std::shared_ptr<VertexArray> quadVao;
+		static std::shared_ptr<VertexBuffer> quadVbo;
+		static std::shared_ptr<IndexBuffer> quadEbo;
 	};
 }

@@ -18,8 +18,6 @@ namespace Lux
 
 		void Update() override;
 
-		void DrawInspector() override;
-
 		// TODO: Review this, maybe there's another better option
 		const glm::mat4 GetTransform()
 		{
@@ -38,6 +36,11 @@ namespace Lux
 		inline const glm::vec3& GetPosition() { return position; }
 		inline const glm::vec3& GetRotation() { return rotation; }
 		inline const glm::vec3& GetScale() { return scale; }
+
+		// Getters
+		inline glm::vec3& GetModifiedPosition() { return position; }
+		inline glm::vec3& GetModifiedRotation() { return rotation; }
+		inline glm::vec3& GetModifiedScale() { return scale; }
 
 		COMPONENT_TYPE(TRANSFORM)
 

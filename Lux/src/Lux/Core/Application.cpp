@@ -46,11 +46,9 @@ namespace Lux
 			Timer timer = time - lastFrameTime;
 			lastFrameTime = time;
 
-
 			for (Layer* layer : layerStack)
 				layer->Update(timer);
 		
-			// This should be on the renderer, on a separate thread
 			imguiLayer->Begin();
 
 			for (Layer* layer : layerStack)

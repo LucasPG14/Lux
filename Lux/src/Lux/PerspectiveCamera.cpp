@@ -69,8 +69,6 @@ namespace Lux
 			position = newPos;
 			up = newUp;
 			front = newFront;
-
-			LUX_CORE_INFO("X: {0} Y: {1}, Z: {2}", position.x, position.y, position.z);
 		}
 
 		viewMatrix = ComputeViewMatrix();
@@ -119,7 +117,7 @@ namespace Lux
 			v1.x * v2.y - v1.y * v2.x);
 	}
 	
-	glm::mat3x4 PerspectiveCamera::ComputeViewMatrix()
+	const glm::mat3x4 PerspectiveCamera::ComputeViewMatrix()
 	{
 		glm::vec3 worldRight = glm::normalize(glm::cross(front, up));
 

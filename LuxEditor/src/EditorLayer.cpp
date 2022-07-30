@@ -1,14 +1,15 @@
 #include "EditorLayer.h"
 
-#include "glm/gtc/type_ptr.hpp"
-#include <ImGui/imgui.h>
-#include "ImGuizmo/ImGuizmo.h"
-
 #include "Lux/Utils/FileDialogs.h"
 #include "Lux/Utils/Math.h"
 #include "Lux/Utils/Primitives.h"
 
+#include <ImGui/imgui.h>
+#include <ImGuizmo/ImGuizmo.h>
+
 #include <glm/gtx/intersect.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include <Optick/src/optick.h>
 
 namespace Lux
@@ -158,7 +159,7 @@ namespace Lux
 
 		viewportFramebuffer->Bind();
 
-		Renderer::ClearColor({ 1.0f, 0.0f, 0.0f, 1.0f });
+		Renderer::ClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
 		Renderer::Clear();
 
 		lightingPass->Bind();
@@ -166,6 +167,8 @@ namespace Lux
 		lightingPass->SetUniformInt("positions", 0);
 		lightingPass->SetUniformInt("normals", 1);
 		lightingPass->SetUniformInt("albedoSpecular", 2);
+
+		lightingPass->SetUniformFloat3("viewPos", camera.GetPosition());
 
 		const auto& lights = scene->GetLights();
 
@@ -177,19 +180,23 @@ namespace Lux
 			{
 			case LightType::DIRECTIONAL:
 				lightingPass->SetUniformFloat3("dirLight.direction", lights[i].first->GetRotation());
-				lightingPass->SetUniformFloat3("dirLight.ambient", light->GetColor());
-				lightingPass->SetUniformFloat3("dirLight.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+				lightingPass->SetUniformFloat3("dirLight.ambient", glm::vec3(0.5f, 0.5f, 0.5f));
+				lightingPass->SetUniformFloat3("dirLight.diffuse", light->GetColor());
 				lightingPass->SetUniformFloat3("dirLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 				break;
 			case LightType::POINT:
 				std::string number = std::to_string(pointLights);
 				lightingPass->SetUniformFloat3("pointLights[" + number + "].position", lights[i].first->GetPosition());
-				lightingPass->SetUniformFloat3("pointLights[" + number + "].ambient", light->GetColor());
-				lightingPass->SetUniformFloat3("pointLights[" + number + "].diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+				lightingPass->SetUniformFloat3("pointLights[" + number + "].ambient", glm::vec3(0.5f, 0.5f, 0.5f));
+				lightingPass->SetUniformFloat3("pointLights[" + number + "].diffuse", light->GetColor());
 				lightingPass->SetUniformFloat3("pointLights[" + number + "].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+
+				lightingPass->SetUniformFloat("pointLights[" + number + "].constant", 1.0f);
+				lightingPass->SetUniformFloat("pointLights[" + number + "].linear", 0.7f);
+				lightingPass->SetUniformFloat("pointLights[" + number + "].quadratic", 1.8f);
 				
 				float lightMax = std::fmaxf(std::fmaxf(light->GetColor().r, light->GetColor().g), light->GetColor().b);
-				float radius = (-0.7f + std::sqrtf(0.7f * 0.7f - 4 * 1.8f * (1.0f - (256.0f / 5.0f) * lightMax))) / (2 * 1.8f);
+				float radius = (-0.09f + std::sqrtf(0.7f * 0.7f - 4 * 1.8f * (1.0f - (256.0f / 5.0f) * lightMax))) / (2 * 1.8f);
 				lightingPass->SetUniformFloat("pointLights[" + number + "].radius", radius);
 
 				float length = glm::length(lights[i].first->GetPosition() - glm::vec3(0.0f, 0.0f, 0.0f));
@@ -199,7 +206,7 @@ namespace Lux
 			}
 		}
 
-		Renderer::DrawQuad();
+		Renderer::DrawFullscreenQuad();
 
 		viewportFramebuffer->Unbind();
 	}
@@ -282,6 +289,11 @@ namespace Lux
 					Entity& entity = scene->CreateEntity("Point Light");
 					LightComponent* light = entity.CreateComponent<LightComponent>(LightType::POINT);
 					scene->AddLight(entity.Get<TransformComponent>(), light);
+				}
+
+				if (ImGui::MenuItem("Create Sphere"))
+				{
+					// TODO: 
 				}
 
 				ImGui::EndMenu();

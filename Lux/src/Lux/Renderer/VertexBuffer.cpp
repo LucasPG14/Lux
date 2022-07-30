@@ -28,17 +28,16 @@ namespace Lux
 
 	VertexBuffer::~VertexBuffer()
 	{
+		glDeleteBuffers(1, &vertexID);
 	}
 
 	void VertexBuffer::Bind() const
 	{
+		glBindBuffer(GL_ARRAY_BUFFER, vertexID);
 	}
 
 	void VertexBuffer::Unbind() const
 	{
-	}
-
-	void VertexBuffer::SetData(const void* data, uint32_t size)
-	{
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 }

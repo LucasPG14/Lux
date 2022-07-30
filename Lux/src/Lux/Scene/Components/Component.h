@@ -20,8 +20,6 @@ namespace Lux
 
 		virtual void Update() = 0;
 
-		virtual void DrawInspector() = 0;
-
 		virtual ComponentType GetComponentType() const = 0;
 	};
 }

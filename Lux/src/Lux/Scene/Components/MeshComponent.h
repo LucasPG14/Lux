@@ -19,8 +19,6 @@ namespace Lux
 
 		void Update() override;
 
-		void DrawInspector() override;
-
 		const std::shared_ptr<VertexArray>& GetVertexArray() { return vao; }
 
 		ComponentType GetType() { return type; }

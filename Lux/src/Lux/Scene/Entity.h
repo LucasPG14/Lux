@@ -14,10 +14,9 @@ namespace Lux
 
 		void Update();
 
-		void DrawInspector();
-
 		// Getters
 		inline const std::string& GetName() const { return name; }
+		inline std::string& GetModifiedName() { return name; }
 		inline const UUID& GetUUID() const { return uuid; }
 
 		template<typename T, typename... Args>
@@ -45,14 +44,10 @@ namespace Lux
 
 		void AddComponent(Component* component) { components.push_back(component); }
 
-		bool GetAABBDebug() { return aabbDebug; }
-
 		operator bool() const { return name != ""; }
 	private:
 		UUID uuid;
 		std::string name;
-
-		bool aabbDebug;
 
 		std::vector<Entity> childrens;
 		std::vector<Component*> components;

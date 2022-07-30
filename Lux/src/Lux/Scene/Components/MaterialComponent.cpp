@@ -21,12 +21,4 @@ namespace Lux
 	void MaterialComponent::Update()
 	{
 	}
-	
-	void MaterialComponent::DrawInspector()
-	{
-		if (ImGui::CollapsingHeader("Material Component"))
-		{
-			ImGui::ColorPicker3("##color", glm::value_ptr(material->GetColor()));
-		}
-	}
 }

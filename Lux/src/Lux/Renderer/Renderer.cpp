@@ -2,6 +2,7 @@
 #include "Renderer.h"
 
 #include "VertexArray.h"
+#include "VertexBuffer.h"
 
 #include "Lux/Scene/Components/TransformComponent.h"
 #include "Lux/Scene/Components/LightComponent.h"
@@ -19,12 +20,17 @@ namespace Lux
 	std::unique_ptr<Renderer::SceneInfo> Renderer::sceneInfo = std::make_unique<SceneInfo>();
 	std::unique_ptr<ShaderLibrary> Renderer::shaderLibrary = std::make_unique<ShaderLibrary>();
 
+	std::shared_ptr<VertexArray> Renderer::quadVao = nullptr;
+	std::shared_ptr<VertexBuffer> Renderer::quadVbo = nullptr;
+	std::shared_ptr<IndexBuffer> Renderer::quadEbo = nullptr;
+	
+	
 	void Renderer::Init()
 	{
 		// Setting rendering specification
 		glEnable(GL_TEXTURE_2D);
-		/*glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);*/
+		//glEnable(GL_BLEND);
+		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_DEPTH_TEST);
 
 		std::shared_ptr<Shader> shader = CreateSharedPtr<Shader>("Assets/Shaders/Texture.glsl");
@@ -55,26 +61,27 @@ namespace Lux
 		shader->SetUniformInt("material.diffuseMap", 0);
 		shader->SetUniformInt("material.normalMap", 1);
 		shader->SetUniformInt("material.metallicMap", 2);
+		shader->SetUniformInt("material.roughnessMap", 3);
 		shader->SetUniformFloat3("material.albedoColor", material->GetColor());
 
 		vertexArray->Bind();
 		Draw(vertexArray);
 	}
 
-	void Renderer::DrawQuad()
+	void Renderer::DrawFullscreenQuad()
 	{
-		float quad[] = 
-		{ 
+		float quad[] =
+		{
 			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
 			1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
 			1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
 			-1.0f,  1.0f, 0.0f, 0.0f, 1.0f
 		};
-		
-		std::shared_ptr<VertexArray> vao = CreateSharedPtr<VertexArray>();
-		vao->Bind();
 
-		std::shared_ptr<VertexBuffer> vbo = CreateSharedPtr<VertexBuffer>(quad, 20 * sizeof(float));
+		quadVao = CreateSharedPtr<VertexArray>();
+		quadVao->Bind();
+
+		quadVbo = CreateSharedPtr<VertexBuffer>(quad, 20 * sizeof(float));
 		{
 			BufferLayout layout =
 			{
@@ -82,9 +89,9 @@ namespace Lux
 				{ShaderDataType::FLOAT2, "texCoords"},
 			};
 
-			vbo->SetLayout(layout);
+			quadVbo->SetLayout(layout);
 		}
-		vao->AddVertexBuffer(vbo);
+		quadVao->AddVertexBuffer(quadVbo);
 
 		uint32_t indices[] =
 		{
@@ -92,11 +99,11 @@ namespace Lux
 			2, 3, 0
 		};
 
-		std::shared_ptr<IndexBuffer> ebo = CreateSharedPtr<IndexBuffer>(indices, 6);
+		quadEbo = CreateSharedPtr<IndexBuffer>(indices, 6);
 
-		vao->AddIndexBuffer(ebo);
+		quadVao->AddIndexBuffer(quadEbo);
 
-		Draw(vao);
+		Draw(quadVao);
 	}
 
 	void Renderer::DrawSkybox(const std::shared_ptr<VertexArray>& vao, const std::shared_ptr<TextureCube>& cubemap, const std::shared_ptr<Shader>& shader, const glm::mat4& viewMatrix, const glm::mat4& projMatrix)

@@ -18,6 +18,9 @@ namespace Lux
 		inline Entity* GetSelected() { return selected; }
 
 	private:
+		void DrawEntityComponents(Entity& entity);
+
+	private:
 		bool focused;
 
 		std::shared_ptr<Scene> scene;

@@ -15,8 +15,6 @@ namespace Lux
 		void Bind() const;
 		void Unbind() const;
 
-		void SetData(const void* data, uint32_t size);
-
 		const BufferLayout& GetLayout() { return layout; }
 		void SetLayout(const BufferLayout& lay) { layout = lay; }
 
