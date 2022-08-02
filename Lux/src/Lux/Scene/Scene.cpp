@@ -17,16 +17,16 @@ namespace Lux
 		//entity.CreateComponent<CameraComponent>();
 
 		Entity& ent = CreateEntity("Sphere");
-		MeshComponent* mesh = new MeshComponent();
-		ent.AddComponent(mesh);
-
-		MaterialComponent* material = new MaterialComponent();
-		ent.AddComponent(material);
+		ent.CreateComponent<MeshComponent>();
+		ent.CreateComponent<MaterialComponent>();
 
 		shader = CreateSharedPtr<Shader>("Assets/Shaders/Deferred.glsl");
 
-		Entity& light = CreateEntity("Directional Light");
-		AddLight(light.Get<TransformComponent>(), light.CreateComponent<LightComponent>(LightType::DIRECTIONAL));
+		Entity& dirLight = CreateEntity("Directional Light");
+		AddLight(dirLight.Get<TransformComponent>(), dirLight.CreateComponent<LightComponent>(LightType::DIRECTIONAL));
+
+		Entity& pointLight = CreateEntity("Point Light");
+		AddLight(pointLight.Get<TransformComponent>(), pointLight.CreateComponent<LightComponent>(LightType::POINT));
 	}
 	
 	Scene::~Scene()

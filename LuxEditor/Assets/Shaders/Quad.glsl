@@ -125,7 +125,7 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir, v
     vec3 H = normalize(viewDir + L);
 
     float distance = length(light.position - fragPos);
-    float attenuation = 1.0 / (distance * distance);
+    float attenuation = pow(clamp(1.0 - pow(distance / light.radius, 4.0), 0.0, 1.0), 2.0) / ((distance * distance) + 1);
     vec3 radiance = light.diffuse * attenuation;
 
     float NDF = DistributionGGX(normal, H, roughness);        
@@ -161,13 +161,15 @@ void main()
 
     vec3 Lo = vec3(0.0);
     Lo += CalcDirLight(dirLight, normal, viewDir, albedo, metallic, roughness, F0);
-    for (int i = 0; i < 1; ++i)
+    for (int i = 0; i < 32; ++i)
     {
         Lo += CalcPointLight(pointLights[i], normal, fragPos, viewDir, albedo, metallic, roughness, F0);
     }
 
     vec3 ambient = vec3(0.03) * albedo * 1.0f;
     vec3 color = ambient + Lo;
+
+    //color = color / (color + vec3(1.0));
 
     fragColor = vec4(color, 1.0);
 }

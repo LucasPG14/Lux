@@ -112,7 +112,7 @@ namespace Lux
 
 			spec.attachments.attachments =
 			{
-				FramebufferTextureFormat::RGBA8,
+				FramebufferTextureFormat::RGBA16,
 				FramebufferTextureFormat::DEPTH24_STENCIL8
 			};
 
@@ -151,7 +151,7 @@ namespace Lux
 		Renderer::BeginScene(camera);
 
 		scene->Update();
-		Renderer::DrawSkybox(vao, skybox, skyboxShader, camera.GetViewMatrix(), camera.GetProjectionMatrix());
+		//Renderer::DrawSkybox(vao, skybox, skyboxShader, camera.GetViewMatrix(), camera.GetProjectionMatrix());
 
 		Renderer::EndScene();
 
@@ -293,7 +293,10 @@ namespace Lux
 
 				if (ImGui::MenuItem("Create Sphere"))
 				{
-					// TODO: 
+					// TODO:
+					Entity& entity = scene->CreateEntity("Sphere");
+					entity.CreateComponent<MeshComponent>();
+					entity.CreateComponent<MaterialComponent>();
 				}
 
 				ImGui::EndMenu();
@@ -375,7 +378,7 @@ namespace Lux
 		// Viewport End
 
 		hierarchy.Render();
-		contentBrowser.Render();
+		//contentBrowser.Render();
 
 		ImGui::End();
 	}

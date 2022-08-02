@@ -35,6 +35,39 @@ namespace Lux
 
 		std::shared_ptr<Shader> shader = CreateSharedPtr<Shader>("Assets/Shaders/Texture.glsl");
 		shaderLibrary->Add(shader);
+
+		float quad[] =
+		{
+			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+			1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+			1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+			-1.0f,  1.0f, 0.0f, 0.0f, 1.0f
+		};
+
+		quadVao = CreateSharedPtr<VertexArray>();
+		quadVao->Bind();
+
+		quadVbo = CreateSharedPtr<VertexBuffer>(quad, 20 * sizeof(float));
+		{
+			BufferLayout layout =
+			{
+				{ShaderDataType::FLOAT3, "position"},
+				{ShaderDataType::FLOAT2, "texCoords"},
+			};
+
+			quadVbo->SetLayout(layout);
+		}
+		quadVao->AddVertexBuffer(quadVbo);
+
+		uint32_t indices[] =
+		{
+			0, 1, 2,
+			2, 3, 0
+		};
+
+		quadEbo = CreateSharedPtr<IndexBuffer>(indices, 6);
+
+		quadVao->AddIndexBuffer(quadEbo);
 	}
 
 	void Renderer::BeginScene(const PerspectiveCamera& camera)
@@ -70,39 +103,7 @@ namespace Lux
 
 	void Renderer::DrawFullscreenQuad()
 	{
-		float quad[] =
-		{
-			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-			1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-			1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
-			-1.0f,  1.0f, 0.0f, 0.0f, 1.0f
-		};
-
-		quadVao = CreateSharedPtr<VertexArray>();
 		quadVao->Bind();
-
-		quadVbo = CreateSharedPtr<VertexBuffer>(quad, 20 * sizeof(float));
-		{
-			BufferLayout layout =
-			{
-				{ShaderDataType::FLOAT3, "position"},
-				{ShaderDataType::FLOAT2, "texCoords"},
-			};
-
-			quadVbo->SetLayout(layout);
-		}
-		quadVao->AddVertexBuffer(quadVbo);
-
-		uint32_t indices[] =
-		{
-			0, 1, 2,
-			2, 3, 0
-		};
-
-		quadEbo = CreateSharedPtr<IndexBuffer>(indices, 6);
-
-		quadVao->AddIndexBuffer(quadEbo);
-
 		Draw(quadVao);
 	}
 

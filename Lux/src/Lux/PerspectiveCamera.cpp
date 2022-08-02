@@ -35,34 +35,37 @@ namespace Lux
 		const glm::vec2& mouse = { Input::GetMouseX(), Input::GetMouseY() };
 		glm::vec2 delta = (mouse - mouseInitialPos) * 0.0001f;
 		mouseInitialPos = mouse;
+
+		delta.x = -delta.x;
+		delta.y = -delta.y;
 		
 		if (Input::IsMouseButtonPressed(Mouse::BUTTON_RIGHT))
 		{
 			if (Input::IsKeyPressed(Keys::W)) newPos += front * 0.025f;
 			if (Input::IsKeyPressed(Keys::S)) newPos -= front * 0.025f;
 
-			if (Input::IsKeyPressed(Keys::A)) newPos -= glm::cross(front, up) * 0.025f;
-			if (Input::IsKeyPressed(Keys::D)) newPos += glm::cross(front, up) * 0.025f;
+			if (Input::IsKeyPressed(Keys::A)) newPos -= glm::normalize(glm::cross(front, up)) * 0.025f;
+			if (Input::IsKeyPressed(Keys::D)) newPos += glm::normalize(glm::cross(front, up)) * 0.025f;
 
 			if (Input::IsKeyPressed(Keys::Q)) newPos += up * 0.025f;
 			if (Input::IsKeyPressed(Keys::E)) newPos -= up * 0.025f;
 
 			if (delta.y != 0)
 			{
-				glm::quat quaternion = glm::quat(delta.y * timer.GetMilliSeconds(), glm::normalize(glm::cross(front, up)));
-				newFront = quaternion * newFront * glm::conjugate(quaternion);
-				newUp = quaternion * newUp * glm::conjugate(quaternion);
-				glm::normalize(newFront);
-				glm::normalize(newUp);
-				glm::orthonormalize(newFront, newUp);
+				const glm::quat& quaternion = glm::quat(delta.y * timer.GetMilliSeconds(), glm::normalize(glm::cross(front, up)));
+				const glm::quat& conjQuat = glm::conjugate(quaternion);
+
+				newFront = glm::normalize(quaternion * newFront * conjQuat);
+				newUp = glm::normalize(quaternion * newUp * conjQuat);
+				newFront = glm::orthonormalize(newFront, newUp);
 			}
 			if (delta.x != 0)
 			{
-				glm::quat quaternion = glm::quat(delta.x * timer.GetMilliSeconds(), glm::vec3(0.0f, 1.0f, 0.0f));
-				newFront = quaternion * newFront * glm::conjugate(quaternion);
-				newUp = quaternion * newUp * glm::conjugate(quaternion);
-				glm::normalize(newFront);
-				glm::normalize(newUp);
+				const glm::quat& quaternion = glm::quat(delta.x * timer.GetMilliSeconds(), glm::vec3(0.0f, 1.0f, 0.0f));
+				const glm::quat& conjQuat = glm::conjugate(quaternion);
+
+				newFront = glm::normalize(quaternion * newFront * conjQuat);
+				newUp = glm::normalize(quaternion * newUp * conjQuat);
 				glm::orthonormalize(newFront, newUp);
 			}
 
@@ -84,7 +87,7 @@ namespace Lux
 		projectionMatrix = glm::perspective(vFov, aspectRatio, nearPlane, farPlane);
 	}
 
-	glm::vec3 PerspectiveCamera::NearPlanePos(glm::vec2 pos)
+	glm::vec3 PerspectiveCamera::NearPlanePos(glm::vec2& pos)
 	{
 		float nearPlaneWidth = tan(hFov * 0.5f) * nearPlane;
 		float nearPlaneHeight = tan(vFov * 0.5f) * nearPlane;
@@ -92,12 +95,12 @@ namespace Lux
 		pos.x = pos.x * nearPlaneWidth;
 		pos.y = pos.y * nearPlaneHeight;
 
-		glm::vec3 right = glm::cross(front, up);
+		const glm::vec3& right = glm::cross(front, up);
 
 		return position + front * nearPlane + pos.x * right + pos.y * up;
 	}
 
-	glm::vec3 PerspectiveCamera::FarPlanePos(glm::vec2 pos)
+	glm::vec3 PerspectiveCamera::FarPlanePos(glm::vec2& pos)
 	{
 		float farPlaneWidth = tan(hFov * 0.5f) * farPlane;
 		float farPlaneHeight = tan(vFov * 0.5f) * farPlane;
@@ -105,21 +108,14 @@ namespace Lux
 		pos.x = pos.x * farPlaneWidth;
 		pos.y = pos.y * farPlaneHeight;
 
-		glm::vec3 right = glm::cross(front, up);
+		const glm::vec3& right = glm::cross(front, up);
 
 		return position + (front * farPlane) + (pos.x * right) + (pos.y * up);
-	}
-
-	glm::vec3 PerspectiveCamera::Cross(const glm::vec3& v1, const glm::vec3& v2)
-	{
-		return glm::vec3(v1.y * v2.z - v1.z - v2.y,
-			v1.z * v2.x - v1.x * v2.z,
-			v1.x * v2.y - v1.y * v2.x);
 	}
 	
 	const glm::mat3x4 PerspectiveCamera::ComputeViewMatrix()
 	{
-		glm::vec3 worldRight = glm::normalize(glm::cross(front, up));
+		const glm::vec3& worldRight = glm::normalize(glm::cross(front, up));
 
 		glm::mat3x4 matrix =
 		{

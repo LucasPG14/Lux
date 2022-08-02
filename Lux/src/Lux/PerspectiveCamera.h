@@ -22,13 +22,11 @@ namespace Lux
 
 		inline const glm::vec3& GetPosition() const { return position; }
 
-		glm::vec3 NearPlanePos(glm::vec2 pos);
-		glm::vec3 FarPlanePos(glm::vec2 pos);
+		glm::vec3 NearPlanePos(glm::vec2& pos);
+		glm::vec3 FarPlanePos(glm::vec2& pos);
 	
 	private:	
 		const glm::mat3x4 ComputeViewMatrix();
-
-		glm::vec3 Cross(const glm::vec3& v1, const glm::vec3& v2);
 
 	private:
 		glm::mat4 viewMatrix;
