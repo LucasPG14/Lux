@@ -151,7 +151,6 @@ namespace Lux
 		Renderer::BeginScene(camera);
 
 		scene->Update();
-		//Renderer::DrawSkybox(vao, skybox, skyboxShader, camera.GetViewMatrix(), camera.GetProjectionMatrix());
 
 		Renderer::EndScene();
 
@@ -173,40 +172,45 @@ namespace Lux
 		const auto& lights = scene->GetLights();
 
 		int pointLights = 0;
+		int spotLights = 0;
 		for (int i = 0; i < lights.size(); ++i)
 		{
+			TransformComponent* transform = lights[i].first;
 			LightComponent* light = lights[i].second;
 			switch (light->GetType())
 			{
 			case LightType::DIRECTIONAL:
-				lightingPass->SetUniformFloat3("dirLight.direction", lights[i].first->GetRotation());
-				lightingPass->SetUniformFloat3("dirLight.ambient", glm::vec3(0.5f, 0.5f, 0.5f));
-				lightingPass->SetUniformFloat3("dirLight.diffuse", light->GetColor());
-				lightingPass->SetUniformFloat3("dirLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+			{
+				lightingPass->SetUniformFloat3("dirLight.direction", transform->GetRotation());
+				lightingPass->SetUniformFloat3("dirLight.radiance", light->GetColor());
 				break;
+			}
 			case LightType::POINT:
-				std::string number = std::to_string(pointLights);
-				lightingPass->SetUniformFloat3("pointLights[" + number + "].position", lights[i].first->GetPosition());
-				lightingPass->SetUniformFloat3("pointLights[" + number + "].ambient", glm::vec3(0.5f, 0.5f, 0.5f));
-				lightingPass->SetUniformFloat3("pointLights[" + number + "].diffuse", light->GetColor());
-				lightingPass->SetUniformFloat3("pointLights[" + number + "].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+			{
+				std::string number = std::to_string(pointLights++);
+				lightingPass->SetUniformFloat3("pointLights[" + number + "].position", transform->GetPosition());
+				lightingPass->SetUniformFloat3("pointLights[" + number + "].radiance", light->GetColor());
 
-				lightingPass->SetUniformFloat("pointLights[" + number + "].constant", 1.0f);
-				lightingPass->SetUniformFloat("pointLights[" + number + "].linear", 0.7f);
-				lightingPass->SetUniformFloat("pointLights[" + number + "].quadratic", 1.8f);
-				
-				float lightMax = std::fmaxf(std::fmaxf(light->GetColor().r, light->GetColor().g), light->GetColor().b);
-				float radius = (-0.09f + std::sqrtf(0.7f * 0.7f - 4 * 1.8f * (1.0f - (256.0f / 5.0f) * lightMax))) / (2 * 1.8f);
-				lightingPass->SetUniformFloat("pointLights[" + number + "].radius", radius);
-
-				float length = glm::length(lights[i].first->GetPosition() - glm::vec3(0.0f, 0.0f, 0.0f));
-
-				pointLights++;
+				lightingPass->SetUniformFloat("pointLights[" + number + "].radius", 5.0f);
 				break;
+			}
+			case LightType::SPOT:
+			{
+				std::string number = std::to_string(spotLights++);
+				lightingPass->SetUniformFloat3("spotLights[" + number + "].position", transform->GetPosition());
+				lightingPass->SetUniformFloat3("spotLights[" + number + "].direction", transform->GetRotation());
+				lightingPass->SetUniformFloat3("spotLights[" + number + "].radiance", light->GetColor());
+
+				lightingPass->SetUniformFloat("spotLights[" + number + "].radius", light->GetRange());
+				lightingPass->SetUniformFloat("spotLights[" + number + "].cutOff", glm::cos(glm::radians(light->GetCutOff())));
+				lightingPass->SetUniformFloat("spotLights[" + number + "].outerCutOff", glm::cos(glm::radians(light->GetCutOff() + 2.0f)));
+				break;
+			}
 			}
 		}
 
 		Renderer::DrawFullscreenQuad();
+		//Renderer::DrawSkybox(vao, skybox, skyboxShader, camera.GetViewMatrix(), camera.GetProjectionMatrix());
 
 		viewportFramebuffer->Unbind();
 	}

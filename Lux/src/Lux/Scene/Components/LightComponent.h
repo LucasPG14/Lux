@@ -22,8 +22,12 @@ namespace Lux
 		void Update() override;
 
 		inline const glm::vec3& GetColor() const { return color; }
+		inline const float GetCutOff() const { return cutOff; }
+		inline const float GetRange() const { return range; }
 
 		inline glm::vec3& GetModifiedColor() { return color; }
+		inline float& GetModifiedCutOff() { return cutOff; }
+		inline float& GetModifiedRange() { return range; }
 
 		inline const LightType& GetType() const { return lightType; }
 
@@ -32,6 +36,9 @@ namespace Lux
 	private:
 		ComponentType type;
 		glm::vec3 color;
+
+		float cutOff;
+		float range;
 
 		LightType lightType;
 	};

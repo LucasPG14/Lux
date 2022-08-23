@@ -28,9 +28,9 @@ namespace Lux
 		}
 
 		// Setters
-		inline void SetPosition(glm::vec3& pos) { position = pos; }
-		inline void SetRotation(glm::vec3& rot) { rotation = rot; }
-		inline void SetScale(glm::vec3& sca) { scale = sca; }
+		inline void SetPosition(const glm::vec3& pos) { position = pos; }
+		inline void SetRotation(const glm::vec3& rot) { rotation = rot; }
+		inline void SetScale(const glm::vec3& sca) { scale = sca; }
 
 		// Getters
 		inline const glm::vec3& GetPosition() { return position; }

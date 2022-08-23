@@ -23,10 +23,13 @@ namespace Lux
 		shader = CreateSharedPtr<Shader>("Assets/Shaders/Deferred.glsl");
 
 		Entity& dirLight = CreateEntity("Directional Light");
-		AddLight(dirLight.Get<TransformComponent>(), dirLight.CreateComponent<LightComponent>(LightType::DIRECTIONAL));
+		TransformComponent* transform = dirLight.Get<TransformComponent>();
+		transform->SetPosition({ 0.0f, 3.0f, 0.0f });
+		transform->SetRotation({ 50.0f, -30.0f, -70.0f });
+		AddLight(transform, dirLight.CreateComponent<LightComponent>(LightType::DIRECTIONAL));
 
-		Entity& pointLight = CreateEntity("Point Light");
-		AddLight(pointLight.Get<TransformComponent>(), pointLight.CreateComponent<LightComponent>(LightType::POINT));
+		Entity& pointLight = CreateEntity("Spot Light");
+		AddLight(pointLight.Get<TransformComponent>(), pointLight.CreateComponent<LightComponent>(LightType::SPOT));
 	}
 	
 	Scene::~Scene()

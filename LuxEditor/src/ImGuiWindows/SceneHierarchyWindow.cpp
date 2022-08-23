@@ -135,6 +135,8 @@ namespace Lux
 			if (ImGui::CollapsingHeader("Light Component"))
 			{
 				ImGui::ColorPicker3("Light Color", glm::value_ptr(component->GetModifiedColor()));
+				ImGui::DragFloat("Cut Off", &(component->GetModifiedCutOff()), 1.0f, 0.0f, 180.0f);
+				ImGui::DragFloat("Range", &(component->GetModifiedRange()));
 			}
 		}
 	}
