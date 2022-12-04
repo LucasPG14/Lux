@@ -183,3 +183,60 @@ project "LuxEditor"
 		defines "LUX_DIST"
 		runtime "Release"
 		optimize "on"
+
+project "LuxOfflineRenderer"
+	location "LuxOfflineRenderer"
+	kind "ConsoleApp"
+	language "C++"
+	cppdialect "C++17"
+	staticruntime "on"
+
+	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+
+	files
+	{
+		"%{prj.name}/src/**.h",
+		"%{prj.name}/src/**.cpp"
+	}
+
+	includedirs
+	{
+		"Lux/vendor/spdlog/include",
+		"Lux/src",
+		"Lux/vendor",
+		"%{IncludeDir.glm}",
+	}
+
+	links
+	{
+		"Lux"
+	}
+
+	defines
+	{
+		"_CRT_SECURE_NO_WARNINGS",
+	}
+
+	filter "system:windows"
+		systemversion "latest"
+
+		defines
+		{
+			"LUX_PLATFORM_WINDOWS"
+		}
+
+	filter "configurations:Debug"
+		defines "LUX_DEBUG"
+		runtime "Debug"
+		symbols "on"
+
+	filter "configurations:Release"
+		defines "LUX_RELEASE"
+		runtime "Release"
+		optimize "on"
+
+	filter "configurations:Dist"
+		defines "LUX_DIST"
+		runtime "Release"
+		optimize "on"

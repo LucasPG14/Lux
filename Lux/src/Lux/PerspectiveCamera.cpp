@@ -16,7 +16,7 @@ namespace Lux
 		front(0.0f, 0.0f, -1.0f), hFov(glm::radians(70.0f)), vFov(0.0f), nearPlane(0.5f), farPlane(1000.0f), mouseInitialPos(0.0f)
 	{
 		Window& window = Application::Get().GetWindow();
-		float aspectRatio = (float)window.GetWidth() / (float)window.GetHeight();
+		aspectRatio = (float)window.GetWidth() / (float)window.GetHeight();
 		vFov = 2 * glm::atan(glm::tan(hFov / 2) * aspectRatio);
 		projectionMatrix = glm::perspective(vFov, aspectRatio, nearPlane, farPlane);
 		viewMatrix = ComputeViewMatrix();
@@ -82,7 +82,7 @@ namespace Lux
 	
 	void PerspectiveCamera::SetDimensions(float width, float height)
 	{
-		float aspectRatio = width / height;
+		aspectRatio = width / height;
 		vFov = 2 * glm::atan(glm::tan(hFov / 2) * aspectRatio);
 		projectionMatrix = glm::perspective(vFov, aspectRatio, nearPlane, farPlane);
 	}

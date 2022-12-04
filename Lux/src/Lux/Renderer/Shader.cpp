@@ -74,6 +74,12 @@ namespace Lux
 		glUniform3fv(location, 1, glm::value_ptr(value));
 	}
 
+	void Shader::SetUniformFloat2(const std::string& name, const glm::vec2& value)
+	{
+		GLint location = glGetUniformLocation(shaderID, name.c_str());
+		glUniform2fv(location, 1, glm::value_ptr(value));
+	}
+
 	void Shader::SetUniformFloat(const std::string& name, float value)
 	{
 		GLint location = glGetUniformLocation(shaderID, name.c_str());

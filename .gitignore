@@ -2,7 +2,7 @@
 **/bin/
 bin-int/
 
-# Hazel files
+# Lux files
 *.log
 
 # Visual Studio files and folder

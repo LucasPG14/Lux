@@ -214,5 +214,5 @@ void main()
 
     color = color / (color + vec3(1.0));
 
-    fragColor = vec4(color, 1.0);
+    fragColor = vec4(fragPos, 1.0);
 }

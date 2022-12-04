@@ -78,7 +78,6 @@ namespace Lux
 		OPTICK_EVENT("ImGui Layer Begin");
 
 		ImGui_ImplOpenGL3_NewFrame();
-		//ImGui_ImplVulkan_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 		ImGuizmo::BeginFrame();

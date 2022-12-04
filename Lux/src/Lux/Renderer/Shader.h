@@ -21,6 +21,7 @@ namespace Lux
 		void SetUniformMat4(const std::string& name, const glm::mat4& matrix);
 		void SetUniformInt(const std::string& name, uint32_t value);
 		void SetUniformFloat3(const std::string& name, const glm::vec3& value);
+		void SetUniformFloat2(const std::string& name, const glm::vec2& value);
 		void SetUniformFloat(const std::string& name, float value);
 
 	private:

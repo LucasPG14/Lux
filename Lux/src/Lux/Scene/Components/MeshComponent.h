@@ -21,6 +21,8 @@ namespace Lux
 
 		const std::shared_ptr<VertexArray>& GetVertexArray() { return vao; }
 
+		const std::vector<AABB>& GetAABB() { return aabbs; }
+
 		ComponentType GetType() { return type; }
 		COMPONENT_TYPE(MESH)
 	private:
@@ -28,6 +30,7 @@ namespace Lux
 
 		std::vector<Vertex> vertices;
 		std::vector<uint32_t> indices;
+		std::vector<AABB> aabbs;
 
 		std::shared_ptr<VertexArray> vao;
 		std::shared_ptr<VertexBuffer> vbo;

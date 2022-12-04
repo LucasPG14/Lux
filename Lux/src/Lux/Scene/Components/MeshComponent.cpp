@@ -11,7 +11,26 @@ namespace Lux
 	MeshComponent::MeshComponent()
 	{
 		//CreateSphere(vertices, indices);
-		Importer::ImportFBX(vertices, indices, "Assets/Models/model.fbx");
+		Importer::ImportFBX(vertices, indices, "Assets/Models/Cube.obj");
+
+		int numTriangles = indices.size() / 3;
+		for (int i = 0; i < numTriangles; ++i)
+		{
+			AABB& aabb = aabbs.emplace_back();
+
+			glm::vec3 v1 = vertices[indices[(i * 3)]].position;
+			glm::vec3 v2 = vertices[indices[(i * 3) + 1]].position;
+			glm::vec3 v3 = vertices[indices[(i * 3) + 2]].position;
+
+			aabb.min = glm::min(aabb.min, v1);
+			aabb.min = glm::min(aabb.min, v2);
+			aabb.min = glm::min(aabb.min, v3);
+
+			aabb.max = glm::max(aabb.max, v1);
+			aabb.max = glm::max(aabb.max, v2);
+			aabb.max = glm::max(aabb.max, v3);
+		}
+
 		vao = CreateSharedPtr<VertexArray>();
 
 		vbo = CreateSharedPtr<VertexBuffer>(vertices.data(), vertices.size() * sizeof(Vertex));

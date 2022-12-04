@@ -22,7 +22,7 @@ namespace Lux
 		contentBrowser = ContentBrowserWindow();
 		hierarchy = SceneHierarchyWindow(scene);
 
-		lightingPass = CreateSharedPtr<Shader>("Assets/Shaders/Quad.glsl");
+		lightingPass = CreateSharedPtr<Shader>("Assets/Shaders/PathTracing.glsl");
 		skyboxShader = CreateSharedPtr<Shader>("Assets/Shaders/Skybox.glsl");
 
 		std::vector<float> vertices =
@@ -209,6 +209,42 @@ namespace Lux
 			}
 		}
 
+		for (int i = 0; i < scene->GetWorld().size(); ++i)
+		{
+			Entity& entity = scene->GetWorld()[i];
+			if (MeshComponent* mesh = entity.Get<MeshComponent>())
+			{
+				for (int j = 0; j < mesh->GetAABB().size(); ++j)
+				{
+					lightingPass->SetUniformFloat3("aabbs[" + std::to_string(j) + "].min", mesh->GetAABB()[j].min);
+					lightingPass->SetUniformFloat3("aabbs[" + std::to_string(j) + "].max", mesh->GetAABB()[j].max);
+				}
+			}
+		}
+
+		glm::vec2 viewportSize = { 2.0f * camera.GetAspectRatio(), 2.0f };
+
+		lightingPass->SetUniformFloat3("viewPos", camera.GetPosition());
+		lightingPass->SetUniformFloat3("right", camera.GetRight());
+		lightingPass->SetUniformFloat3("up", camera.GetUp());
+		lightingPass->SetUniformFloat3("front", camera.GetFront());
+		
+		lightingPass->SetUniformFloat2("canvas", viewSize);
+		lightingPass->SetUniformFloat2("viewportSize", viewportSize);
+
+		lightingPass->SetUniformFloat("nearPlane", camera.GetNearPlane());
+		lightingPass->SetUniformFloat("farPlane", camera.GetFarPlane());
+
+		lightingPass->SetUniformFloat("horizontalFov", camera.GetHorizontalFov());
+		lightingPass->SetUniformFloat("verticalFov", camera.GetVerticalFov());
+		
+		//lightingPass->SetUniformFloat("fov", camera.GetHorizontalFov());
+		lightingPass->SetUniformFloat("aspectRatio", camera.GetAspectRatio());
+		lightingPass->SetUniformFloat("scale", glm::tan(glm::radians(camera.GetVerticalFov() * 0.5f)));
+		
+		lightingPass->SetUniformMat4("inverseCamera", glm::inverse(camera.GetProjectionMatrix() * camera.GetViewMatrix()));
+		lightingPass->SetUniformMat4("modelMatrix", scene->GetWorld()[0].Get<TransformComponent>()->GetTransform());
+
 		Renderer::DrawFullscreenQuad();
 		//Renderer::DrawSkybox(vao, skybox, skyboxShader, camera.GetViewMatrix(), camera.GetProjectionMatrix());
 
@@ -316,11 +352,12 @@ namespace Lux
 
 		ImGui::Begin("Viewport", &viewportEnabled, viewportFlags);
 		ImVec2 size = ImGui::GetWindowContentRegionMax();
-		ImGui::Image((ImTextureID)viewportFramebuffer->GetID(), { viewSize.x, viewSize.y }, { 0, 1 }, { 1, 0 });
+		ImGui::Image((void*)viewportFramebuffer->GetID(), { viewSize.x, viewSize.y }, { 0, 1 }, { 1, 0 });
 		if (size.x != viewSize.x || size.y != viewSize.y)
 		{
 			viewSize = { size.x, size.y };
 			sceneFramebuffer->Resize(viewSize.x, viewSize.y);
+			viewportFramebuffer->Resize(viewSize.x, viewSize.y);
 			camera.SetDimensions(viewSize.x, viewSize.y);
 		}
 
