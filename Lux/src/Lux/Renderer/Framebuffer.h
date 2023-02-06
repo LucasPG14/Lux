@@ -58,11 +58,12 @@ namespace Lux
 		void Bind();
 		void Unbind();
 
-		void BindTextures();
+		void BindTextures(uint32_t offset = 0);
+		void UnbindTextures();
 
 		void Resize(uint32_t width, uint32_t height);
 
-		uint32_t GetID() const { return framebufferID; }
+		uint32_t GetID() const { return colorAttachments[0]; }
 
 		const FramebufferSpecification& GetSpec() const { return spec; }
 

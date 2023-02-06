@@ -35,7 +35,9 @@ namespace Lux
 
 		std::shared_ptr<Framebuffer> sceneFramebuffer;
 		std::shared_ptr<Framebuffer> viewportFramebuffer;
+		std::shared_ptr<Framebuffer> accumulateFramebuffer;
 		std::shared_ptr<Shader> lightingPass;
+		std::shared_ptr<Shader> defaultShader;
 
 		std::shared_ptr<TextureCube> skybox;
 		std::shared_ptr<Shader> skyboxShader;
@@ -44,8 +46,16 @@ namespace Lux
 		std::shared_ptr<VertexBuffer> vbo;
 		std::shared_ptr<IndexBuffer> ebo;
 
+		std::shared_ptr<Shader> outputShader;
+
 		PerspectiveCamera camera;
 
 		glm::vec2 viewSize;
+
+		int samples;
+
+		// DEBUG: DELETE THIS WHEN FINISHED
+		float accumulateTimer;
+		float accumulateTime;
 	};
 }

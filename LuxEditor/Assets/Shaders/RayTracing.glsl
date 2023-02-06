@@ -49,10 +49,37 @@ struct HitRecord
 	Mat material;
 };
 
-bool ScatterMetallic(const Ray inRay, const HitRecord hit, inout vec3 attenuation, inout Ray scatteredRay)
+uniform int samples;
+
+float nrand(vec2 n)
+{
+    return fract(sin(dot(n.xy, vec2(12.9898, 78.233)))* 43758.5453);
+}
+
+float trand(vec2 n, float seed)
+{
+    return nrand(n * seed * float(samples));
+}
+
+vec3 randomPointInUnitSphere(vec2 uv, float seed)
+{
+    // this is doing rejection sampling, which is simple but not super
+    // efficient
+    vec3 p;
+    do {
+        p = vec3(trand(uv, seed),
+                 trand(uv, 2.333*seed),
+                 trand(uv, -1.134*seed));
+        seed *= 1.312;
+    } while (dot(p, p) >= 1.0);
+    return p;
+}
+
+bool ScatterMetallic(const Ray inRay, vec2 uv, const HitRecord hit, inout vec3 attenuation, inout Ray scatteredRay)
 {
 	scatteredRay.origin = hit.point;
 	scatteredRay.direction = reflect(normalize(inRay.direction), hit.normal);
+	scatteredRay.direction += hit.material.metallic * randomPointInUnitSphere(uv, 1.0);
 	attenuation = hit.material.albedo;
 
 	return (dot(scatteredRay.direction, hit.normal) > 0.0);
@@ -63,9 +90,10 @@ float Rand(vec2 coord)
 	return fract(sin(dot(coord, vec2(12.9898, 78.233))) * 43758.5453);
 }
 
-bool ScatterAlbedo(const Ray inRay, const HitRecord hit, inout vec3 attenuation, inout Ray scatteredRay)
+bool ScatterAlbedo(const Ray inRay, vec2 uv, const HitRecord hit, inout vec3 attenuation, inout Ray scatteredRay)
 {
-	scatteredRay.direction = hit.normal + vec3(Rand(hit.point.xy), Rand(hit.point.xz), Rand(hit.point.yz));
+	scatteredRay.origin = hit.point;
+	scatteredRay.direction = hit.normal + randomPointInUnitSphere(uv, 1.0);
 
 	attenuation = hit.material.albedo;
 	return true;
@@ -133,9 +161,9 @@ bool Hit(Sphere sphere, const Ray ray, float tMin, float tMax, inout HitRecord h
 
 	hit.t = root;
 	hit.point = GetRayAt(ray, root);
-	vec3 normal = (hit.point - sphere.center) / sphere.radius;
-	hit.frontFace = dot(ray.direction, normal) < 0.0;
-	hit.normal = hit.frontFace ? normal : -normal;
+	hit.normal = (hit.point - sphere.center) / sphere.radius;
+	hit.frontFace = dot(ray.direction, hit.normal) < 0.0;
+	hit.normal = hit.frontFace ? hit.normal : -hit.normal;
 	hit.material = sphere.mat;
 
 	return true;
@@ -261,7 +289,7 @@ float HitSphere(const vec3 center, float radius, const Ray ray)
 	return (-b - sqrt(discriminant) ) / (2.0 * a);
 }
 
-vec3 TracePath(Ray ray)
+vec3 TracePath(Ray ray, vec2 uv)
 {
 //	if (HitSphere(vec3(0.0, 0.0, -1.0), 1.0, ray))
 //		return vec3(1.0, 0.0, 0.0);
@@ -280,73 +308,83 @@ vec3 TracePath(Ray ray)
 	Scene scene;
 	scene.spheres[0].center = vec3(0.0, 0.0, -1.0);
 	scene.spheres[0].radius = 0.5;
-	scene.spheres[0].mat.albedo = vec3(0.7, 0.3, 0.3);
-	scene.spheres[0].mat.metallic = 0.0;
+	//scene.spheres[0].mat.albedo = vec3(0.7, 0.3, 0.3);
+	scene.spheres[0].mat.albedo = vec3(0.18, 0.18, 0.0);
+	scene.spheres[0].mat.metallic = -1.0;
 
 	scene.spheres[1].center = vec3(0.0, -100.5, -1.0);
 	scene.spheres[1].radius = 100.0;
-	scene.spheres[1].mat.albedo = vec3(0.8, 0.8, 0.0);
-	scene.spheres[1].mat.metallic = 0.0;
+	//scene.spheres[1].mat.albedo = vec3(0.8, 0.8, 0.0);
+	scene.spheres[1].mat.albedo = vec3(0.18, 0.18, 0.18);
+	scene.spheres[1].mat.metallic = -1.0;
 
 	scene.spheres[2].center = vec3(-1.0, 0.0, -1.0);
 	scene.spheres[2].radius = 0.5;
-	scene.spheres[2].mat.albedo = vec3(0.8, 0.8, 0.8);
-	scene.spheres[2].mat.metallic = 1.0;
+	//scene.spheres[2].mat.albedo = vec3(0.8, 0.8, 0.8);
+	scene.spheres[2].mat.albedo = vec3(0.18, 0.0, 0.0);
+	//scene.spheres[2].mat.metallic = 1.0;
+	scene.spheres[2].mat.metallic = 0.0;
 
 	scene.spheres[3].center = vec3(1.0, 0.0, -1.0);
 	scene.spheres[3].radius = 0.5;
-	scene.spheres[3].mat.albedo = vec3(0.8, 0.6, 0.2);
+	//scene.spheres[3].mat.albedo = vec3(0.8, 0.6, 0.2);
+	scene.spheres[3].mat.albedo = vec3(0.18, 0.18, 0.18);
 	scene.spheres[3].mat.metallic = 1.0;
 	//float t = HitSphere(vec3(0.0, 0.0, -1.0), 1.0, ray);
 	Ray bounceRay = ray;
-	vec3 attenuation = vec3(1.0);
-	vec3 att = vec3(1.0);
-	
-	for (int i = 0; i < 50; ++i)
+
+	vec3 result = vec3(1.0);
+
+	float newSeed = 1.0;
+	int i = 0;
+	for (; i < 50; ++i)
 	{
 		if (IterateWorld(scene, bounceRay, 0.001, maxFloat, hit))
 		{
 			Ray scatterRay;
-			if (hit.material.metallic > 0.0)
+			vec3 attenuation;
+			if (hit.material.metallic >= 0.0)
 			{
-				if (ScatterMetallic(bounceRay, hit, att, scatterRay))
+				if (ScatterMetallic(bounceRay, uv * newSeed * 0.897, hit, attenuation, scatterRay))
 				{
-					attenuation *= att;
+					result *= attenuation;
 					bounceRay = scatterRay;
+					continue;
 				}
 				else
 				{
-					return vec3(0.0);
+					result = vec3(0.0);
+					break;
 				}
 			}
 			else
 			{
-				if (ScatterAlbedo(bounceRay, hit, att, scatterRay))
+				if (ScatterAlbedo(bounceRay, uv * newSeed * 0.897, hit, attenuation, scatterRay))
 				{
-					attenuation *= att;
+					result *= attenuation;
 					bounceRay = scatterRay;
+					continue;
 				}
 				else
 				{
-					return vec3(0.0);
+					result = vec3(0.0);
+					break;
 				}
 			}
-
-			vec3 target = hit.point + hit.normal + RandomUnitSphere();
-
-			bounceRay.origin = hit.point;
-			bounceRay.direction = target - hit.point;
-			attenuation *= 0.5;
+			newSeed *= 1.456;
 		}
 		else
 		{
 			float t = 0.5 * (normalize(bounceRay.direction).y + 1.0);
-			vec3 backColor = ((1.0 - t) * vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0));
-			return attenuation * backColor;
+			result *= ((1.0 - t) * vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0));
+			break;
 		}
 	}
 
-	return vec3(0.0);
+	if (i == 50)
+		return vec3(0.0);
+
+	return result;
 }
 
 Ray GetRayDir()
@@ -408,17 +446,18 @@ void main()
 	vec3 color = vec3(0.0);
 
 	vec2 frag = gl_FragCoord.xy;
+	vec2 uv = frag / canvas;
 
-	for (int i = 0; i < 100; ++i)
+	for (int i = 0; i < 50; ++i)
 	{
-		float rx = Rand(vec2(frag.x + float(i), frag.y + float(i)));
-		float ry = Rand(vec2(frag.y + float(i), frag.x + float(i)));
+		float rx = trand(uv, 0.123);
+		float ry = trand(uv, 0.456);
 		
 		ray.direction = GetRayDirection(ray.origin, rx, ry);
-		color += TracePath(ray);
+		color += TracePath(ray, frag / canvas);
 	}
 
-	float scale = 1.0 / 100.0;
+	float scale = 1.0 / 50.0;
 	color *= scale;
 	//color = sqrt(scale * color);
 

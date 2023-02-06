@@ -29,6 +29,17 @@ namespace Lux
 			aabb.max = glm::max(aabb.max, v1);
 			aabb.max = glm::max(aabb.max, v2);
 			aabb.max = glm::max(aabb.max, v3);
+
+			// Get the normal of this face
+			glm::vec3 u = v2 - v1;
+			glm::vec3 v = v3 - v1;
+
+			aabb.normal.x = (u.y * v.z) - (u.z * v.y);
+			aabb.normal.y = (u.z * v.x) - (u.x * v.z);
+			aabb.normal.z = (u.x * v.y) - (u.y * v.x);
+
+			globalAABB.min = glm::min(globalAABB.min, aabb.min);
+			globalAABB.max = glm::max(globalAABB.max, aabb.max);
 		}
 
 		vao = CreateSharedPtr<VertexArray>();

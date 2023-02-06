@@ -16,14 +16,16 @@ namespace Lux
 {
 	extern const std::filesystem::path assetsDir;
 
-	EditorLayer::EditorLayer() : guizmoState(ImGuizmo::TRANSLATE)
+	EditorLayer::EditorLayer() : guizmoState(ImGuizmo::TRANSLATE), samples(0), accumulateTime(0.0f), accumulateTimer(5.0f)
 	{
 		scene = std::make_shared<Scene>();
 		contentBrowser = ContentBrowserWindow();
 		hierarchy = SceneHierarchyWindow(scene);
 
-		lightingPass = CreateSharedPtr<Shader>("Assets/Shaders/PathTracing.glsl");
+		lightingPass = CreateSharedPtr<Shader>("Assets/Shaders/RayTracing.glsl");
 		skyboxShader = CreateSharedPtr<Shader>("Assets/Shaders/Skybox.glsl");
+		
+		defaultShader = CreateSharedPtr<Shader>("Assets/Shaders/Default.glsl");
 
 		std::vector<float> vertices =
 		{
@@ -119,6 +121,22 @@ namespace Lux
 			viewportFramebuffer = CreateSharedPtr<Framebuffer>(spec);
 		}
 
+		// Creating viewport framebuffer
+		{
+			FramebufferSpecification spec;
+			spec.width = 1280;
+			spec.height = 720;
+			spec.swapChainTarget = true;
+
+			spec.attachments.attachments =
+			{
+				FramebufferTextureFormat::RGBA16,
+				FramebufferTextureFormat::DEPTH24_STENCIL8
+			};
+
+			accumulateFramebuffer = CreateSharedPtr<Framebuffer>(spec);
+		}
+
 		std::vector<std::string> faces = 
 		{
 				"Assets/Textures/right.jpg",
@@ -167,7 +185,17 @@ namespace Lux
 		lightingPass->SetUniformInt("normals", 1);
 		lightingPass->SetUniformInt("albedoSpecular", 2);
 
+		if (samples > 0)
+		{
+			accumulateFramebuffer->BindTextures(3);
+			lightingPass->SetUniformInt("accumulateTexture", 3);
+			lightingPass->SetUniformInt("samples", samples);
+		}
+		samples++;
+
 		lightingPass->SetUniformFloat3("viewPos", camera.GetPosition());
+		float seed = rand();
+		lightingPass->SetUniformFloat("seed", seed);
 
 		const auto& lights = scene->GetLights();
 
@@ -209,16 +237,34 @@ namespace Lux
 			}
 		}
 
+		int index = 0;
+		int offset = 0;
 		for (int i = 0; i < scene->GetWorld().size(); ++i)
 		{
 			Entity& entity = scene->GetWorld()[i];
 			if (MeshComponent* mesh = entity.Get<MeshComponent>())
 			{
-				for (int j = 0; j < mesh->GetAABB().size(); ++j)
+				// Setting the global AABB of the object
+				lightingPass->SetUniformFloat3("bvhs[" + std::to_string(index) + "].aabb.min", mesh->GetAABB().min);
+				lightingPass->SetUniformFloat3("bvhs[" + std::to_string(index) + "].aabb.max", mesh->GetAABB().max);
+				lightingPass->SetUniformInt("bvhs[" + std::to_string(index) + "].offset", offset);
+				lightingPass->SetUniformInt("bvhs[" + std::to_string(index) + "].count", mesh->GetAABBGeometry().size());
+
+				// Setting the transform and the material of the object
+				lightingPass->SetUniformMat4("modelsMatrix[" + std::to_string(index) + "]", entity.Get<TransformComponent>()->GetTransform());
+				lightingPass->SetUniformFloat3("materials[" + std::to_string(index) + "].color", entity.Get<MaterialComponent>()->GetMaterial()->GetColor());
+
+				// Setting the AABB of each triangle of the mesh
+				for (int j = 0; j < mesh->GetAABBGeometry().size(); ++j)
 				{
-					lightingPass->SetUniformFloat3("aabbs[" + std::to_string(j) + "].min", mesh->GetAABB()[j].min);
-					lightingPass->SetUniformFloat3("aabbs[" + std::to_string(j) + "].max", mesh->GetAABB()[j].max);
+					lightingPass->SetUniformFloat3("aabbs[" + std::to_string(offset + j) + "].min", mesh->GetAABBGeometry()[j].min);
+					lightingPass->SetUniformFloat3("aabbs[" + std::to_string(offset + j) + "].max", mesh->GetAABBGeometry()[j].max);
+					lightingPass->SetUniformFloat3("aabbs[" + std::to_string(offset + j) + "].normal", mesh->GetAABBGeometry()[j].normal);
 				}
+
+				// Incrementing the offset and the size
+				offset += mesh->GetAABBGeometry().size();
+				index++;
 			}
 		}
 
@@ -243,12 +289,36 @@ namespace Lux
 		lightingPass->SetUniformFloat("scale", glm::tan(glm::radians(camera.GetVerticalFov() * 0.5f)));
 		
 		lightingPass->SetUniformMat4("inverseCamera", glm::inverse(camera.GetProjectionMatrix() * camera.GetViewMatrix()));
-		lightingPass->SetUniformMat4("modelMatrix", scene->GetWorld()[0].Get<TransformComponent>()->GetTransform());
 
 		Renderer::DrawFullscreenQuad();
 		//Renderer::DrawSkybox(vao, skybox, skyboxShader, camera.GetViewMatrix(), camera.GetProjectionMatrix());
 
+		sceneFramebuffer->UnbindTextures();
 		viewportFramebuffer->Unbind();
+
+		// Accumulating for path tracing
+		accumulateFramebuffer->Bind();
+
+		Renderer::ClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
+		Renderer::Clear();
+
+		defaultShader->Bind();
+
+		viewportFramebuffer->BindTextures();
+		defaultShader->SetUniformInt("pathColor", 0);
+		
+		Renderer::DrawFullscreenQuad();
+
+		defaultShader->Unbind();
+
+		accumulateFramebuffer->Unbind();
+
+		//accumulateTime += timer.GetSeconds();
+		//if (accumulateTime >= accumulateTimer)
+		//{
+		//	accumulateTime = 0.0f;
+		//	samples++;
+		//}
 	}
 
 	void EditorLayer::RenderImGui()
@@ -352,12 +422,13 @@ namespace Lux
 
 		ImGui::Begin("Viewport", &viewportEnabled, viewportFlags);
 		ImVec2 size = ImGui::GetWindowContentRegionMax();
-		ImGui::Image((void*)viewportFramebuffer->GetID(), { viewSize.x, viewSize.y }, { 0, 1 }, { 1, 0 });
+		ImGui::Image((void*)accumulateFramebuffer->GetID(), { viewSize.x, viewSize.y }, { 0, 1 }, { 1, 0 });
 		if (size.x != viewSize.x || size.y != viewSize.y)
 		{
 			viewSize = { size.x, size.y };
 			sceneFramebuffer->Resize(viewSize.x, viewSize.y);
 			viewportFramebuffer->Resize(viewSize.x, viewSize.y);
+			accumulateFramebuffer->Resize(viewSize.x, viewSize.y);
 			camera.SetDimensions(viewSize.x, viewSize.y);
 		}
 

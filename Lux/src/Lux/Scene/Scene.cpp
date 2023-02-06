@@ -16,9 +16,12 @@ namespace Lux
 		//Entity& entity = CreateEntity("Main Camera");
 		//entity.CreateComponent<CameraComponent>();
 
-		Entity& ent = CreateEntity("Sphere");
-		ent.CreateComponent<MeshComponent>();
-		ent.CreateComponent<MaterialComponent>();
+		for (int i = 0; i < 1; ++i)
+		{
+			Entity& ent1 = CreateEntity("Cube" + std::to_string(i + 1));
+			ent1.CreateComponent<MeshComponent>();
+			ent1.CreateComponent<MaterialComponent>();
+		}
 
 		shader = CreateSharedPtr<Shader>("Assets/Shaders/Deferred.glsl");
 

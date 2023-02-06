@@ -133,12 +133,21 @@ namespace Lux
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 	
-	void Framebuffer::BindTextures()
+	void Framebuffer::BindTextures(uint32_t offset)
+	{
+		for (int i = 0; i < colorAttachments.size(); ++i)
+		{
+			glActiveTexture(GL_TEXTURE0 + i + offset);
+			glBindTexture(GL_TEXTURE_2D, colorAttachments[i]);
+		}
+	}
+
+	void Framebuffer::UnbindTextures()
 	{
 		for (int i = 0; i < colorAttachments.size(); ++i)
 		{
 			glActiveTexture(GL_TEXTURE0 + i);
-			glBindTexture(GL_TEXTURE_2D, colorAttachments[i]);
+			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 	}
 	
