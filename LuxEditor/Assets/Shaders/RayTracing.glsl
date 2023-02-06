@@ -85,11 +85,6 @@ bool ScatterMetallic(const Ray inRay, vec2 uv, const HitRecord hit, inout vec3 a
 	return (dot(scatteredRay.direction, hit.normal) > 0.0);
 }
 
-float Rand(vec2 coord)
-{
-	return fract(sin(dot(coord, vec2(12.9898, 78.233))) * 43758.5453);
-}
-
 bool ScatterAlbedo(const Ray inRay, vec2 uv, const HitRecord hit, inout vec3 attenuation, inout Ray scatteredRay)
 {
 	scatteredRay.origin = hit.point;
@@ -97,40 +92,6 @@ bool ScatterAlbedo(const Ray inRay, vec2 uv, const HitRecord hit, inout vec3 att
 
 	attenuation = hit.material.albedo;
 	return true;
-}
-
-vec3 GetRandomRange(float fMin, float fMax, vec2 value)
-{
-	vec3 randomVec = vec3(Rand(value), Rand(value + 3000.0), Rand(value + 6000.0));
-	//randomVec = min(randomVec, fMax);
-	//randomVec = max(randomVec, fMin);
-	return noise3(randomVec);
-}
-
-vec3 RandomUnitSphere()
-{
-	vec2 frag = gl_FragCoord.xy;
-	int i = 0;
-	while(true)
-	{
-		vec3 point = 2.0 * GetRandomRange(-1.0, 1.0, frag + float(i));
-		i += 9000;
-		//point = mix(vec3(-1.0), vec3(1.0), point);
-		if (dot(point, point) > 1.0) 
-			continue;
-
-		return point;
-	}
-}
-
-vec3 RandomHemisphere(vec3 normal)
-{
-	vec3 dir = RandomUnitSphere();
-	
-	if (dot(dir, normal) > 0.0)
-		return dir;
-
-	return -dir;
 }
 
 vec3 GetRayAt(const Ray ray, float t)
@@ -460,6 +421,8 @@ void main()
 	float scale = 1.0 / 50.0;
 	color *= scale;
 	//color = sqrt(scale * color);
+
+	color = pow(color, vec3(1.0 / 2.2));
 
 	fragColor = vec4(color, 1.0);
 }
