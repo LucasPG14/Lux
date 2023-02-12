@@ -55,17 +55,6 @@ struct BVH
 };
 uniform BVH bvhs[50];
 
-struct Sphere
-{
-	vec3 center;
-	float radius;
-};
-
-struct Scene
-{
-	Sphere spheres[2];
-};
-
 uniform vec3 viewPos;
 uniform vec2 canvas;
 uniform float verticalFov;
@@ -85,6 +74,30 @@ layout(location = 0) uniform sampler2D positions;
 layout(location = 1) uniform sampler2D normals;
 layout(location = 2) uniform sampler2D albedoSpecular;
 layout(location = 3) uniform sampler2D accumulateTexture;
+
+float nrand(vec2 n)
+{
+    return fract(sin(dot(n.xy, vec2(12.9898, 78.233)))* 43758.5453);
+}
+
+float trand(vec2 n, float seed)
+{
+    return nrand(n * seed * float(samples));
+}
+
+vec3 randomPointInUnitSphere(vec2 uv, float seed)
+{
+    // this is doing rejection sampling, which is simple but not super
+    // efficient
+    vec3 p;
+    do {
+        p = vec3(trand(uv, seed),
+                 trand(uv, 2.333 * seed),
+                 trand(uv, -1.134 * seed));
+        seed *= 1.312;
+    } while (dot(p, p) >= 1.0);
+    return p;
+}
 
 vec3 GetRayAt(const Ray ray, float t)
 {
@@ -158,7 +171,7 @@ bool Intersection(Ray ray, inout HitRecord hit, float minT, float maxT)
 
 			maxT = hit.t;
 			hit.point = GetRayAt(ray, hit.t);
-			hit.normal = dot(ray.direction, aabb.normal) < 0 ? aabb.normal : -aabb.normal;
+			hit.normal = dot(ray.direction, aabb.normal) < 0.0 ? aabb.normal : -aabb.normal;
 			hit.material = materials[i];
 			somethingHit = true;
 		}
@@ -167,153 +180,45 @@ bool Intersection(Ray ray, inout HitRecord hit, float minT, float maxT)
 	return somethingHit;
 }
 
-bool Intersection2(Ray ray, inout HitRecord hit, float minT, float maxT, vec3 center, float radius)
+vec3 TracePath(const Ray ray, vec2 uv)
 {
-	vec3 oc = ray.origin - center;
-    float a = dot(ray.direction, ray.direction);
-    float b = dot(oc, ray.direction);
-    float c = dot(oc, oc) - radius * radius;
-
-    float discriminant = b * b - a * c;
-    if (discriminant < 0.0) return false;
-
-	float sqrtDiscriminant = sqrt(discriminant);
-
-	float root = (-b - sqrtDiscriminant) / a;
-    if (root < minT || maxT < root) 
-	{
-        root = (-b + sqrtDiscriminant) / a;
-        if (root < minT || maxT < root)
-            return false;
-    }
-
-    hit.t = root;
-    hit.point = GetRayAt(ray, hit.t);
-    hit.normal = (hit.point - center) / radius;
-
-	bool frontFace = dot(ray.direction, hit.normal) < 0.0;
-	hit.normal = frontFace ? hit.normal : -hit.normal;
-
-    return true;
-}
-
-float hash1(inout float seed) 
-{
-    return fract(sin(seed += 0.1)*43758.5453123);
-}
-
-vec2 hash2(inout float seed) 
-{
-    return fract(sin(vec2(seed+=0.1,seed+=0.1))*vec2(43758.5453123,22578.1459123));
-}
-
-vec3 hash3(inout float seed) 
-{
-    return fract(sin(vec3(seed+=0.1,seed+=0.1,seed+=0.1))*vec3(43758.5453123,22578.1459123,19642.3490423));
-}
-
-vec3 randomSphereDirection(inout float seed) 
-{
-    vec2 h = hash2(seed) * vec2(2.0, 6.28318530718) - vec2(1.0, 0.0);
-    float phi = h.y;
-	return vec3(sqrt(1.0 - h.x * h.x) * vec2(sin(phi), cos(phi)), h.x);
-}
-
-vec3 randomHemisphereDirection( const vec3 n, inout float seed ) 
-{
-	vec3 dr = randomSphereDirection(seed);
-	return dot(dr,n) * dr;
-}
-
-bool CheckWorld(Ray ray, Scene scene, inout HitRecord hit, float tMin, float tMax)
-{
-	bool somethingHit = false;
-	HitRecord tempHit;
-	float closest = tMax;
-
-	for (int i = 0; i < 2; ++i)
-	{
-		if (Intersection2(ray, tempHit, tMin, closest, scene.spheres[i].center, scene.spheres[i].radius))
-		{
-			somethingHit = true;
-			closest = tempHit.t;
-			hit = tempHit;
-		}
-	}
-
-	return somethingHit;
-}
-
-vec3 TracePath(const Ray ray)
-{
-	vec3 color = vec3(0.0);
+	vec3 color = vec3(1.0);
 	HitRecord hit;
 	Ray hitRay = ray;
 	float tMax = 1000000.0;
 
-	float newSeed = 0.0;
-
+	float newSeed = 1.0;
 	float accum = 1.0;
-
-	Scene scene;
-	scene.spheres[0].center = vec3(0.0, 0.0, -1.0);
-	scene.spheres[0].radius = 0.5;
-
-	scene.spheres[1].center = vec3(0.0, -100.5, -1.0);
-	scene.spheres[1].radius = 100.0;
-
+	
 	int i = 0;
-	for(; i < 50; ++i)
+	for (; i < 50; ++i)
 	{
-		if (CheckWorld(hitRay, scene, hit, 0.0, tMax))
+		if (Intersection(hitRay, hit, 0.001, tMax))
 		{
-			//color = 0.5 * (hit.normal + vec3(1.0, 1.0, 1.0));
-			vec3 target = normalize(hit.normal + randomSphereDirection(newSeed));
-			newSeed *= 1.456;
-			//return 0.5 * ray_color(ray(rec.p, target - rec.p), world);
 			hitRay.origin = hit.point;
-			hitRay.direction = target;
-			accum *= 0.5;
+			hitRay.direction = hit.normal + randomPointInUnitSphere(uv, 1.0);
+			tMax = hit.t;
+			color *= hit.material.color;
+			newSeed *= 1.456;
 		}
 		else
 		{
 			float t = 0.5 * (normalize(hitRay.direction).y + 1.0);
-			color = (1.0 - t) * vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0);
+			color *= ((1.0 - t) * vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0));
 			break;
 		}
 	}
 
-	if (i==5)
-		return vec3(0.0);
+	if (i == 50)
+		color = vec3(0.0, 0.0, 0.0);
 
-	return color * accum;
-//    	if (Intersection(hitRay, hit, 0.0, tMax))
-//    	{
-//			hitRay.origin = hit.point;
-//			hitRay.direction = hit.point + randomHemisphereDirection(hit.normal, newSeed);
-//			hitRay.direction -= hit.point;
-//			tMax = hit.t;
-//    	}
-//		else
-//		{
-//			float t = 0.5 * (normalize(hitRay.direction).y + 1.0);
-//			colors[i] = ((1.0 - t) * vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0));
-//			break;
-//		}
-	//}
-
-	//return color;
+	return color;
 }
 
-vec3 GetRayDirection(const vec3 pos)
+vec3 GetRayDirection(const vec3 pos, const vec2 fragCoord, float rx, float ry)
 {
-    vec2 fragCoord = gl_FragCoord.xy;
-
-    float x = ((fragCoord.x + 0.5) / canvas.x) * 2.0 - 1.0;
-    float y = ((fragCoord.y + 0.5) / canvas.y) * 2.0 - 1.0;
-
-    //x = x * sin(horizontalFov / 2.0);
-    //y = y * sin(verticalFov / 2.0);
+    float x = ((fragCoord.x + rx) / canvas.x) * 2.0 - 1.0;
+    float y = ((fragCoord.y + ry) / canvas.y) * 2.0 - 1.0;
 
     return vec3(inverseCamera * normalize(vec4(x, y, -1.0, 1.0)));
 }
@@ -322,15 +227,22 @@ void main()
 {
     Ray ray;
     ray.origin = viewPos;
-    ray.direction = GetRayDirection(ray.origin);
 
-    //vec3 color = texture(accumulateTexture, texCoord).rgb;
-    //vec3 color = vec3(0.0);
+	vec3 color;
+	vec3 prev = texture(accumulateTexture, texCoord).rgb;
 
-	vec3 color = TracePath(ray);
-//
-//	float scaleFactor = 1.0 / float(50.0);
-//	color *= sqrt(scaleFactor);
+	vec2 fragCoord = gl_FragCoord.xy;
+	vec2 uv = fragCoord / canvas;
+
+	float rx = trand(uv, 0.123);
+	float ry = trand(uv, 0.456);
+
+    ray.direction = GetRayDirection(ray.origin, fragCoord, rx, ry);
+
+	color = TracePath(ray, uv);
+
+	color = pow(color, vec3(1.0 / 2.2));
+	color = (float(samples - 1) * prev + color) / float(samples);
 
     fragColor = vec4(color, 1.0);
 }

@@ -185,13 +185,9 @@ namespace Lux
 		lightingPass->SetUniformInt("normals", 1);
 		lightingPass->SetUniformInt("albedoSpecular", 2);
 
-		if (samples > 0)
-		{
-			accumulateFramebuffer->BindTextures(3);
-			lightingPass->SetUniformInt("accumulateTexture", 3);
-			lightingPass->SetUniformInt("samples", samples);
-		}
-		samples++;
+		accumulateFramebuffer->BindTextures(3);
+		lightingPass->SetUniformInt("accumulateTexture", 3);
+		lightingPass->SetUniformInt("samples", samples++);
 
 		lightingPass->SetUniformFloat3("viewPos", camera.GetPosition());
 		float seed = rand();
@@ -488,6 +484,10 @@ namespace Lux
 		ImGui::PopStyleVar();
 		ImGui::End();
 		// Viewport End
+
+		ImGui::Begin("Path Tracing samples");
+		ImGui::Text(std::to_string(samples).c_str());
+		ImGui::End();
 
 		hierarchy.Render();
 		//contentBrowser.Render();

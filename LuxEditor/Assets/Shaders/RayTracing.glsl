@@ -161,6 +161,7 @@ out vec4 fragColor;
 layout(location = 0) uniform sampler2D positions;
 layout(location = 1) uniform sampler2D normals;
 layout(location = 2) uniform sampler2D albedoSpecular;
+layout(location = 3) uniform sampler2D accumulateTexture;
 
 in vec2 texCoord;
 
@@ -271,20 +272,20 @@ vec3 TracePath(Ray ray, vec2 uv)
 	scene.spheres[0].radius = 0.5;
 	//scene.spheres[0].mat.albedo = vec3(0.7, 0.3, 0.3);
 	scene.spheres[0].mat.albedo = vec3(0.18, 0.18, 0.0);
-	scene.spheres[0].mat.metallic = -1.0;
+	scene.spheres[0].mat.metallic = 0.0;
 
 	scene.spheres[1].center = vec3(0.0, -100.5, -1.0);
 	scene.spheres[1].radius = 100.0;
 	//scene.spheres[1].mat.albedo = vec3(0.8, 0.8, 0.0);
 	scene.spheres[1].mat.albedo = vec3(0.18, 0.18, 0.18);
-	scene.spheres[1].mat.metallic = -1.0;
+	scene.spheres[1].mat.metallic = 0.0;
 
 	scene.spheres[2].center = vec3(-1.0, 0.0, -1.0);
 	scene.spheres[2].radius = 0.5;
 	//scene.spheres[2].mat.albedo = vec3(0.8, 0.8, 0.8);
 	scene.spheres[2].mat.albedo = vec3(0.18, 0.0, 0.0);
 	//scene.spheres[2].mat.metallic = 1.0;
-	scene.spheres[2].mat.metallic = 0.0;
+	scene.spheres[2].mat.metallic = 0.1;
 
 	scene.spheres[3].center = vec3(1.0, 0.0, -1.0);
 	scene.spheres[3].radius = 0.5;
@@ -304,7 +305,7 @@ vec3 TracePath(Ray ray, vec2 uv)
 		{
 			Ray scatterRay;
 			vec3 attenuation;
-			if (hit.material.metallic >= 0.0)
+			if (hit.material.metallic > 0.0)
 			{
 				if (ScatterMetallic(bounceRay, uv * newSeed * 0.897, hit, attenuation, scatterRay))
 				{
@@ -393,36 +394,23 @@ Ray GetRayDir()
 
 void main()
 {
-	vec3 position = texture(positions, texCoord).rgb;
-	vec3 normals = texture(normals, texCoord).rgb;
-	vec3 albedo = texture(albedoSpecular, texCoord).rgb;
-
-	Ray ray;
-	ray.origin = viewPos;
-	//ray.direction = vec3(cameraMatrix * vec4(GetRayDirection(ray.origin), 1.0));
-
-	//Ray ray = GetRayDir();
-	//ray.origin = vec3(cameraMatrix * vec4(ray.origin, 1.0));
-	//ray.direction = vec3(cameraMatrix * vec4(ray.direction, 1.0));
-	vec3 color = vec3(0.0);
-
+	vec3 prev = texture(accumulateTexture, texCoord).rgb;
+	
 	vec2 frag = gl_FragCoord.xy;
 	vec2 uv = frag / canvas;
 
-	for (int i = 0; i < 50; ++i)
-	{
-		float rx = trand(uv, 0.123);
-		float ry = trand(uv, 0.456);
-		
-		ray.direction = GetRayDirection(ray.origin, rx, ry);
-		color += TracePath(ray, frag / canvas);
-	}
+	float rx = trand(uv, 0.123);
+	float ry = trand(uv, 0.456);
+	
+	Ray ray;
+	ray.origin = viewPos;	
+	ray.direction = GetRayDirection(ray.origin, rx, ry);
+	
+	vec3 color = TracePath(ray, uv);
 
-	float scale = 1.0 / 50.0;
-	color *= scale;
-	//color = sqrt(scale * color);
-
+	// Applying gama correction 
 	color = pow(color, vec3(1.0 / 2.2));
+	color = (float(samples - 1) * prev + color) / float(samples);
 
 	fragColor = vec4(color, 1.0);
 }

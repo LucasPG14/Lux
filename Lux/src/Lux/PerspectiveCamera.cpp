@@ -12,7 +12,7 @@
 
 namespace Lux
 {
-	PerspectiveCamera::PerspectiveCamera() : viewMatrix(1.0f), projectionMatrix(1.0f), position(0.0f, 0.0f, 5.0f), up(0.0f, 1.0f, 0.0f),
+	PerspectiveCamera::PerspectiveCamera() : viewMatrix(1.0f), projectionMatrix(1.0f), position(0.0f, 0.0f, 2.0f), up(0.0f, 1.0f, 0.0f),
 		front(0.0f, 0.0f, -1.0f), hFov(glm::radians(70.0f)), vFov(0.0f), nearPlane(0.5f), farPlane(1000.0f), mouseInitialPos(0.0f)
 	{
 		Window& window = Application::Get().GetWindow();

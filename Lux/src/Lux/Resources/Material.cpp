@@ -3,7 +3,7 @@
 
 namespace Lux
 {
-	Material::Material() : albedoColor(1.0f, 1.0f, 1.0f)
+	Material::Material() : albedoColor(1.0f, 0.0f, 0.0f)
 	{
 		albedo = CreateSharedPtr<Texture2D>("Assets/Textures/rustediron2_basecolor.png");
 		normal = CreateSharedPtr<Texture2D>("Assets/Textures/rustediron2_normal.png");
