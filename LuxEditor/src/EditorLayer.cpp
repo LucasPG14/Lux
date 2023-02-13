@@ -16,7 +16,7 @@ namespace Lux
 {
 	extern const std::filesystem::path assetsDir;
 
-	EditorLayer::EditorLayer() : guizmoState(ImGuizmo::TRANSLATE), samples(0), accumulateTime(0.0f), accumulateTimer(5.0f)
+	EditorLayer::EditorLayer() : guizmoState(ImGuizmo::TRANSLATE), samples(0), maxSamples(5)
 	{
 		scene = std::make_shared<Scene>();
 		contentBrowser = ContentBrowserWindow();
@@ -161,6 +161,14 @@ namespace Lux
 
 		camera.Update(timer);
 
+		if (Input::IsKeyPressed(Keys::P))
+		{
+			ResetRenderer();
+		}
+
+		if (samples >= maxSamples)
+			return;
+
 		sceneFramebuffer->Bind();
 
 		Renderer::ClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
@@ -190,8 +198,6 @@ namespace Lux
 		lightingPass->SetUniformInt("samples", samples++);
 
 		lightingPass->SetUniformFloat3("viewPos", camera.GetPosition());
-		float seed = rand();
-		lightingPass->SetUniformFloat("seed", seed);
 
 		const auto& lights = scene->GetLights();
 
@@ -280,7 +286,6 @@ namespace Lux
 		lightingPass->SetUniformFloat("horizontalFov", camera.GetHorizontalFov());
 		lightingPass->SetUniformFloat("verticalFov", camera.GetVerticalFov());
 		
-		//lightingPass->SetUniformFloat("fov", camera.GetHorizontalFov());
 		lightingPass->SetUniformFloat("aspectRatio", camera.GetAspectRatio());
 		lightingPass->SetUniformFloat("scale", glm::tan(glm::radians(camera.GetVerticalFov() * 0.5f)));
 		
@@ -301,20 +306,14 @@ namespace Lux
 		defaultShader->Bind();
 
 		viewportFramebuffer->BindTextures();
-		defaultShader->SetUniformInt("pathColor", 0);
+		defaultShader->SetUniformInt("accumulateColor", 0);
 		
 		Renderer::DrawFullscreenQuad();
 
+		viewportFramebuffer->UnbindTextures();
 		defaultShader->Unbind();
 
 		accumulateFramebuffer->Unbind();
-
-		//accumulateTime += timer.GetSeconds();
-		//if (accumulateTime >= accumulateTimer)
-		//{
-		//	accumulateTime = 0.0f;
-		//	samples++;
-		//}
 	}
 
 	void EditorLayer::RenderImGui()
@@ -426,6 +425,8 @@ namespace Lux
 			viewportFramebuffer->Resize(viewSize.x, viewSize.y);
 			accumulateFramebuffer->Resize(viewSize.x, viewSize.y);
 			camera.SetDimensions(viewSize.x, viewSize.y);
+
+			//ResetRenderer();
 		}
 
 		// DragAndDrop Target
@@ -486,13 +487,26 @@ namespace Lux
 		// Viewport End
 
 		ImGui::Begin("Path Tracing samples");
+		ImGui::Text("Samples: ");
+		ImGui::SameLine();
 		ImGui::Text(std::to_string(samples).c_str());
+		ImGui::DragInt("Max samples", &maxSamples);
 		ImGui::End();
 
 		hierarchy.Render();
 		//contentBrowser.Render();
 
 		ImGui::End();
+	}
+
+	void EditorLayer::ResetRenderer()
+	{
+		samples = 0;
+
+		accumulateFramebuffer->Bind();
+		Renderer::ClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
+		Renderer::Clear();
+		accumulateFramebuffer->Unbind();
 	}
 
 	void EditorLayer::OnEvent(Event& e)

@@ -20,6 +20,8 @@ namespace Lux
 		void Update(Timer timer) override;
 		void RenderImGui() override;
 
+		void ResetRenderer();
+
 		void OnEvent(Event& e) override;
 
 	private:
@@ -52,10 +54,8 @@ namespace Lux
 
 		glm::vec2 viewSize;
 
+		// Rendering options
 		int samples;
-
-		// DEBUG: DELETE THIS WHEN FINISHED
-		float accumulateTimer;
-		float accumulateTime;
+		int maxSamples;
 	};
 }
