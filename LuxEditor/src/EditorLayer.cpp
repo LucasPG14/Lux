@@ -22,7 +22,7 @@ namespace Lux
 		contentBrowser = ContentBrowserWindow();
 		hierarchy = SceneHierarchyWindow(scene);
 
-		lightingPass = CreateSharedPtr<Shader>("Assets/Shaders/RayTracing.glsl");
+		lightingPass = CreateSharedPtr<Shader>("Assets/Shaders/PathTracing.glsl");
 		skyboxShader = CreateSharedPtr<Shader>("Assets/Shaders/Skybox.glsl");
 		
 		defaultShader = CreateSharedPtr<Shader>("Assets/Shaders/Default.glsl");
@@ -159,12 +159,10 @@ namespace Lux
 	{
 		OPTICK_EVENT("Editor Layer Update");
 
-		camera.Update(timer);
+		bool moving = camera.Update(timer);
 
-		if (Input::IsKeyPressed(Keys::P))
-		{
+		if (moving)
 			ResetRenderer();
-		}
 
 		if (samples >= maxSamples)
 			return;
@@ -255,6 +253,7 @@ namespace Lux
 				// Setting the transform and the material of the object
 				lightingPass->SetUniformMat4("modelsMatrix[" + std::to_string(index) + "]", entity.Get<TransformComponent>()->GetTransform());
 				lightingPass->SetUniformFloat3("materials[" + std::to_string(index) + "].color", entity.Get<MaterialComponent>()->GetMaterial()->GetColor());
+				lightingPass->SetUniformFloat("materials[" + std::to_string(index) + "].type", entity.Get<MaterialComponent>()->GetMaterial()->GetType());
 
 				// Setting the AABB of each triangle of the mesh
 				for (int j = 0; j < mesh->GetAABBGeometry().size(); ++j)
@@ -425,8 +424,7 @@ namespace Lux
 			viewportFramebuffer->Resize(viewSize.x, viewSize.y);
 			accumulateFramebuffer->Resize(viewSize.x, viewSize.y);
 			camera.SetDimensions(viewSize.x, viewSize.y);
-
-			//ResetRenderer();
+			ResetRenderer();
 		}
 
 		// DragAndDrop Target

@@ -21,6 +21,7 @@ in vec2 texCoord;
 
 struct Material
 {
+	int type;
 	vec3 color;
 };
 
@@ -104,9 +105,23 @@ vec3 GetRayAt(const Ray ray, float t)
 	return ray.origin + t * ray.direction;
 }
 
+bool ScatterAlbedo()
+{
+	return true;
+}
+
+bool ScatterRay(in Ray ray, inout HitRecord hit, out Ray scatteredRay)
+{
+	if (hit.material.type == 1)
+		return ScatterAlbedo();
+	
+	return true;
+}
+
 bool Intersection(Ray ray, inout HitRecord hit, float minT, float maxT)
 {
 	bool somethingHit = false;
+	float closest = maxT;
 
 	for (int i = 0; i < 50; ++i)
 	{
@@ -129,9 +144,9 @@ bool Intersection(Ray ray, inout HitRecord hit, float minT, float maxT)
 		if (globalT1 < globalT0)
 			continue;
 
-		if (globalT0 < minT || maxT < globalT0)
+		if (globalT0 < minT || closest < globalT0)
 		{
-			if (globalT1 < minT || maxT < globalT1)
+			if (globalT1 < minT || closest < globalT1)
 			{
 				continue;
 			}
@@ -158,9 +173,9 @@ bool Intersection(Ray ray, inout HitRecord hit, float minT, float maxT)
 			if (t1 < t0)
 				continue;
 
-			if (t0 < minT || maxT < t0)
+			if (t0 < minT || closest < t0)
 			{
-				if (t1 < minT || maxT < t1)
+				if (t1 < minT || closest < t1)
 				{
 					continue;
 				}
@@ -209,9 +224,6 @@ vec3 TracePath(const Ray ray, vec2 uv)
 		}
 	}
 
-	if (i == 50)
-		color = vec3(0.0, 0.0, 0.0);
-
 	return color;
 }
 
@@ -242,7 +254,13 @@ void main()
 	color = TracePath(ray, uv);
 
 	color = pow(color, vec3(1.0 / 2.2));
-	color = (float(samples - 1) * prev + color) / float(samples);
+	
+	if (prev != vec3(0.0, 0.0, 0.0))
+	{
+		color = (float(samples - 1) * prev + color) / float(samples);
+	}
+
+	//color = texture(albedoSpecular, texCoord).rgb;
 
     fragColor = vec4(color, 1.0);
 }

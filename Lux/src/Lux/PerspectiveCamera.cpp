@@ -28,6 +28,8 @@ namespace Lux
 	
 	bool PerspectiveCamera::Update(Timer timer)
 	{
+		bool moving = false;
+
 		glm::vec3 newPos = position;
 		glm::vec3 newFront = front;
 		glm::vec3 newUp = up;
@@ -72,12 +74,14 @@ namespace Lux
 			position = newPos;
 			up = newUp;
 			front = newFront;
+
+			moving = true;
 		}
 
 		viewMatrix = ComputeViewMatrix();
 		viewMatrix = glm::inverse(viewMatrix);
 
-		return true;
+		return moving;
 	}
 	
 	void PerspectiveCamera::SetDimensions(float width, float height)

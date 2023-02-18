@@ -16,7 +16,7 @@ namespace Lux
 		//Entity& entity = CreateEntity("Main Camera");
 		//entity.CreateComponent<CameraComponent>();
 
-		for (int i = 0; i < 1; ++i)
+		for (int i = 0; i < 2; ++i)
 		{
 			Entity& ent1 = CreateEntity("Cube" + std::to_string(i + 1));
 			ent1.CreateComponent<MeshComponent>();
