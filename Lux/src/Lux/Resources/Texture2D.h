@@ -6,6 +6,7 @@ namespace Lux
 	{
 	public:
 		Texture2D(const void* data, int width, int height);
+		Texture2D(int width, int height);
 		Texture2D(const std::string& path);
 		virtual ~Texture2D();
 
@@ -16,6 +17,11 @@ namespace Lux
 
 		void Bind(uint32_t slot = 0) const;
 		void Unbind(uint32_t slot = 0) const;
+
+		void BindImage(uint32_t slot = 0) const;
+		void UnbindImage(uint32_t slot = 0) const;
+
+		void Resize(int w, int h);
 
 	private:
 		uint32_t width;

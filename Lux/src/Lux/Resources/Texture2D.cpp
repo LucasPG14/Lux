@@ -50,6 +50,18 @@ namespace Lux
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
+	Texture2D::Texture2D(int w, int h) : width(w), height(h)
+	{
+		glCreateTextures(GL_TEXTURE_2D, 1, &textureID);
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, w, h, 0, GL_RGBA, GL_FLOAT, NULL);
+		glBindImageTexture(0, textureID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+	}
+
 	Texture2D::Texture2D(const std::string& path)
 	{
 		int w, h, channels;
@@ -92,5 +104,30 @@ namespace Lux
 	void Texture2D::Unbind(uint32_t slot) const
 	{
 		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	void Texture2D::BindImage(uint32_t slot) const
+	{
+		glBindImageTexture(0, textureID, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+	}
+
+	void Texture2D::UnbindImage(uint32_t slot) const
+	{
+		glBindImageTexture(0, 0, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+	}
+	
+	void Texture2D::Resize(int w, int h)
+	{
+		width = w;
+		height = h;
+
+		glCreateTextures(GL_TEXTURE_2D, 1, &textureID);
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, w, h, 0, GL_RGBA, GL_FLOAT, NULL);
+		glBindImageTexture(0, textureID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
 	}
 }

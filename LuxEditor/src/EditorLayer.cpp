@@ -22,10 +22,11 @@ namespace Lux
 		contentBrowser = ContentBrowserWindow();
 		hierarchy = SceneHierarchyWindow(scene);
 
-		lightingPass = CreateSharedPtr<Shader>("Assets/Shaders/PathTracing.glsl");
+		lightingPass = CreateSharedPtr<Shader>("Assets/Shaders/RayTracing.glsl");
 		skyboxShader = CreateSharedPtr<Shader>("Assets/Shaders/Skybox.glsl");
 		
 		defaultShader = CreateSharedPtr<Shader>("Assets/Shaders/Default.glsl");
+		computeShader = CreateSharedPtr<ComputeShader>("Assets/Shaders/ComputeShader.glsl");
 
 		std::vector<float> vertices =
 		{
@@ -296,6 +297,11 @@ namespace Lux
 		sceneFramebuffer->UnbindTextures();
 		viewportFramebuffer->Unbind();
 
+		//computeShader->Bind();
+		//computeShader->SetUniformInt("imgOutput", 0);
+		//computeShader->DispatchCompute();
+		//computeShader->Unbind();
+
 		// Accumulating for path tracing
 		accumulateFramebuffer->Bind();
 
@@ -305,10 +311,12 @@ namespace Lux
 		defaultShader->Bind();
 
 		viewportFramebuffer->BindTextures();
+		//computeShader->BindTexture();
 		defaultShader->SetUniformInt("accumulateColor", 0);
 		
 		Renderer::DrawFullscreenQuad();
 
+		//computeShader->UnbindTexture();
 		viewportFramebuffer->UnbindTextures();
 		defaultShader->Unbind();
 

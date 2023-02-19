@@ -406,11 +406,12 @@ void main()
 	ray.origin = viewPos;	
 	ray.direction = GetRayDirection(ray.origin, rx, ry);
 	
+
 	vec3 color = TracePath(ray, uv);
 
 	// Applying gama correction 
-	color = pow(color, vec3(1.0 / 2.2));
 
+	color = pow(color, vec3(1.0 / 2.2));
 	if (prev != vec3(0.0, 0.0, 0.0))
 	{
 		color = (float(samples - 1) * prev + color) / float(samples);

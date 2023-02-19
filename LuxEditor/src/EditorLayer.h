@@ -49,6 +49,7 @@ namespace Lux
 		std::shared_ptr<IndexBuffer> ebo;
 
 		std::shared_ptr<Shader> outputShader;
+		std::shared_ptr<ComputeShader> computeShader;
 
 		PerspectiveCamera camera;
 
