@@ -51,6 +51,8 @@ namespace Lux
 		std::shared_ptr<Shader> outputShader;
 		std::shared_ptr<ComputeShader> computeShader;
 
+		std::shared_ptr<BufferTexture> transformsTexture;
+
 		PerspectiveCamera camera;
 
 		glm::vec2 viewSize;

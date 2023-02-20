@@ -18,15 +18,27 @@ namespace Lux
 
 	EditorLayer::EditorLayer() : guizmoState(ImGuizmo::TRANSLATE), samples(0), maxSamples(5)
 	{
-		scene = std::make_shared<Scene>();
+		scene = CreateSharedPtr<Scene>();
 		contentBrowser = ContentBrowserWindow();
 		hierarchy = SceneHierarchyWindow(scene);
 
-		lightingPass = CreateSharedPtr<Shader>("Assets/Shaders/RayTracing.glsl");
+		lightingPass = CreateSharedPtr<Shader>("Assets/Shaders/PathTracing.glsl");
 		skyboxShader = CreateSharedPtr<Shader>("Assets/Shaders/Skybox.glsl");
 		
 		defaultShader = CreateSharedPtr<Shader>("Assets/Shaders/Default.glsl");
 		computeShader = CreateSharedPtr<ComputeShader>("Assets/Shaders/ComputeShader.glsl");
+
+		
+
+		for (int i = 0; i < scene->GetWorld().size(); ++i)
+		{
+			Entity& entity = scene->GetWorld()[i];
+			if (entity.Get<MeshComponent>() != nullptr)
+			{
+				int size = sizeof(glm::mat4);
+				transformsTexture = CreateSharedPtr<BufferTexture>((void*)&entity.Get<TransformComponent>()->GetTransform(), size);
+			}
+		}
 
 		std::vector<float> vertices =
 		{
