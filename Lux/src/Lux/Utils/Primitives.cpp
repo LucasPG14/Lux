@@ -166,97 +166,97 @@ namespace Lux
 
 	void CreateSphere(std::vector<Vertex>& vertices, std::vector<uint32_t>& indices)
 	{
-		constexpr AABB aabb = { {-1.0f, -1.0f, -1.0f}, {1.0f, 1.0f, 1.0f} };
+		//constexpr AABB aabb = { {-1.0f, -1.0f, -1.0f}, {1.0f, 1.0f, 1.0f} };
 
-		float z, xy;									// vertex position
-		float nx, ny, nz, lengthInv = 1.0f / 1.0f;		// vertex normal
-		float s, t;                                     // vertex texCoord
+		//float z, xy;									// vertex position
+		//float nx, ny, nz, lengthInv = 1.0f / 1.0f;		// vertex normal
+		//float s, t;                                     // vertex texCoord
 
-		constexpr float sectorStep = 2 * M_PI / 20;
-		constexpr float stackStep = M_PI / 20;
-		float sectorAngle, stackAngle;
+		//constexpr float sectorStep = 2 * M_PI / 20;
+		//constexpr float stackStep = M_PI / 20;
+		//float sectorAngle, stackAngle;
 
-		for (int i = 0; i <= 20; ++i)
-		{
-			stackAngle = M_PI / 2 - i * stackStep;        // starting from pi/2 to -pi/2
-			xy = 1.0f * cosf(stackAngle);             // r * cos(u)
-			z = 1.0f * sinf(stackAngle);              // r * sin(u)
+		//for (int i = 0; i <= 20; ++i)
+		//{
+		//	stackAngle = M_PI / 2 - i * stackStep;        // starting from pi/2 to -pi/2
+		//	xy = 1.0f * cosf(stackAngle);             // r * cos(u)
+		//	z = 1.0f * sinf(stackAngle);              // r * sin(u)
 
-			// add (sectorCount+1) vertices per stack
-			// the first and last vertices have same position and normal, but different tex coords
-			for (int j = 0; j <= 20; ++j)
-			{
-				Vertex& vertex = vertices.emplace_back();
-				sectorAngle = j * sectorStep;           // starting from 0 to 2pi
+		//	// add (sectorCount+1) vertices per stack
+		//	// the first and last vertices have same position and normal, but different tex coords
+		//	for (int j = 0; j <= 20; ++j)
+		//	{
+		//		Vertex& vertex = vertices.emplace_back();
+		//		sectorAngle = j * sectorStep;           // starting from 0 to 2pi
 
-				// vertex position (x, y, z)
-				vertex.position.x = xy * cosf(sectorAngle);
-				vertex.position.y = xy * sinf(sectorAngle);
-				vertex.position.z = z;
+		//		// vertex position (x, y, z)
+		//		vertex.position.x = xy * cosf(sectorAngle);
+		//		vertex.position.y = xy * sinf(sectorAngle);
+		//		vertex.position.z = z;
 
-				// normalized vertex normal (nx, ny, nz)
-				vertex.normals.x = vertex.position.x * lengthInv;
-				vertex.normals.y = vertex.position.y * lengthInv;
-				vertex.normals.z = vertex.position.z * lengthInv;
+		//		// normalized vertex normal (nx, ny, nz)
+		//		vertex.normals.x = vertex.position.x * lengthInv;
+		//		vertex.normals.y = vertex.position.y * lengthInv;
+		//		vertex.normals.z = vertex.position.z * lengthInv;
 
-				// vertex tex coord (s, t) range between [0, 1]
-				vertex.texCoords.x = (float)j / 20;
-				vertex.texCoords.y = (float)i / 20;
-			}
-		}
+		//		// vertex tex coord (s, t) range between [0, 1]
+		//		vertex.texCoords.x = (float)j / 20;
+		//		vertex.texCoords.y = (float)i / 20;
+		//	}
+		//}
 
-		int k1, k2;
-		for (int i = 0; i < 20; ++i)
-		{
-			k1 = i * (20 + 1);
-			k2 = k1 + 20 + 1;
+		//int k1, k2;
+		//for (int i = 0; i < 20; ++i)
+		//{
+		//	k1 = i * (20 + 1);
+		//	k2 = k1 + 20 + 1;
 
-			for (int j = 0; j < 20; ++j, ++k1, ++k2)
-			{
-				if (i != 0)
-				{
-					indices.emplace_back(k1);
-					indices.emplace_back(k2);
-					indices.emplace_back(k1 + 1);
-				}
+		//	for (int j = 0; j < 20; ++j, ++k1, ++k2)
+		//	{
+		//		if (i != 0)
+		//		{
+		//			indices.emplace_back(k1);
+		//			indices.emplace_back(k2);
+		//			indices.emplace_back(k1 + 1);
+		//		}
 
-				// k1+1 => k2 => k2+1
-				if (i != (20 - 1))
-				{
-					indices.emplace_back(k1 + 1);
-					indices.emplace_back(k2);
-					indices.emplace_back(k2 + 1);
-				}
-			}
-		}
+		//		// k1+1 => k2 => k2+1
+		//		if (i != (20 - 1))
+		//		{
+		//			indices.emplace_back(k1 + 1);
+		//			indices.emplace_back(k2);
+		//			indices.emplace_back(k2 + 1);
+		//		}
+		//	}
+		//}
 
-		for (int i = 0; i < indices.size(); i += 3)
-		{
-			Vertex& vertex = vertices[indices[i]];
+		//for (int i = 0; i < indices.size(); i += 3)
+		//{
+		//	Vertex& vertex = vertices[indices[i]];
 
-			glm::vec2 uv1 = { vertices[indices[i]].texCoords };
-			glm::vec2 uv2 = { vertices[indices[i + 1]].texCoords };
-			glm::vec2 uv3 = { vertices[indices[i + 2]].texCoords };
+		//	glm::vec2 uv1 = { vertices[indices[i]].texCoords };
+		//	glm::vec2 uv2 = { vertices[indices[i + 1]].texCoords };
+		//	glm::vec2 uv3 = { vertices[indices[i + 2]].texCoords };
 
-			glm::vec2 deltaUv1 = uv2 - uv1;
-			glm::vec2 deltaUv2 = uv3 - uv1;
+		//	glm::vec2 deltaUv1 = uv2 - uv1;
+		//	glm::vec2 deltaUv2 = uv3 - uv1;
 
-			glm::vec3 edge1 = vertices[indices[i + 1]].position - vertex.position;
-			glm::vec3 edge2 = vertices[indices[i + 2]].position - vertex.position;
+		//	glm::vec3 edge1 = vertices[indices[i + 1]].position - vertex.position;
+		//	glm::vec3 edge2 = vertices[indices[i + 2]].position - vertex.position;
 
-			float f = 1.0f / (deltaUv1.x * deltaUv2.y - deltaUv2.x * deltaUv1.y);
+		//	float f = 1.0f / (deltaUv1.x * deltaUv2.y - deltaUv2.x * deltaUv1.y);
 
-			vertex.tangents.x = f * (deltaUv2.y * edge1.x - deltaUv1.y * edge2.x);
-			vertex.tangents.y = f * (deltaUv2.y * edge1.y - deltaUv1.y * edge2.y);
-			vertex.tangents.z = f * (deltaUv2.y * edge1.z - deltaUv1.y * edge2.z);
-			glm::normalize(vertex.tangents);
+		//	vertex.tangents.x = f * (deltaUv2.y * edge1.x - deltaUv1.y * edge2.x);
+		//	vertex.tangents.y = f * (deltaUv2.y * edge1.y - deltaUv1.y * edge2.y);
+		//	vertex.tangents.z = f * (deltaUv2.y * edge1.z - deltaUv1.y * edge2.z);
+		//	glm::normalize(vertex.tangents);
 
-			vertex.bitangents.x = f * (-deltaUv2.x * edge1.x + deltaUv1.x * edge2.x);
-			vertex.bitangents.y = f * (-deltaUv2.x * edge1.y + deltaUv1.x * edge2.y);
-			vertex.bitangents.z = f * (-deltaUv2.x * edge1.z + deltaUv1.x * edge2.z);
+		//	vertex.bitangents.x = f * (-deltaUv2.x * edge1.x + deltaUv1.x * edge2.x);
+		//	vertex.bitangents.y = f * (-deltaUv2.x * edge1.y + deltaUv1.x * edge2.y);
+		//	vertex.bitangents.z = f * (-deltaUv2.x * edge1.z + deltaUv1.x * edge2.z);
 
-			if (i + 3 >= indices.size())
-				break;
-		}
+		//	if (i + 3 >= indices.size())
+		//		break;
+		//}
 	}
 }

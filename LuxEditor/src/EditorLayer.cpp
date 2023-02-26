@@ -16,7 +16,8 @@ namespace Lux
 {
 	extern const std::filesystem::path assetsDir;
 
-	EditorLayer::EditorLayer() : guizmoState(ImGuizmo::TRANSLATE), samples(0), maxSamples(5)
+	EditorLayer::EditorLayer() 
+		: guizmoState(ImGuizmo::TRANSLATE), samples(0), maxSamples(5), needToUpdate(NeedToUpdate::NONE), sceneChanged(false)
 	{
 		scene = CreateSharedPtr<Scene>();
 		contentBrowser = ContentBrowserWindow();
@@ -26,19 +27,20 @@ namespace Lux
 		skyboxShader = CreateSharedPtr<Shader>("Assets/Shaders/Skybox.glsl");
 		
 		defaultShader = CreateSharedPtr<Shader>("Assets/Shaders/Default.glsl");
-		computeShader = CreateSharedPtr<ComputeShader>("Assets/Shaders/ComputeShader.glsl");
+		//computeShader = CreateSharedPtr<ComputeShader>("Assets/Shaders/ComputeShader.glsl");
 
-		
+		scene->CollectInformation();
+		transformsTexture = CreateSharedPtr<Texture2D>(scene->GetTransforms().data(), sizeof(glm::mat4) / sizeof(glm::vec4) * scene->GetTransforms().size());
+		aabbsTexture = CreateSharedPtr<Texture2D>(scene->GetAABBs().data(), sizeof(AABB) / sizeof(glm::vec4) * scene->GetAABBs().size());
+		objectsTexture = CreateSharedPtr<Texture2D>(scene->GetObjectsInfo().data(), sizeof(ObjectInfo) / sizeof(glm::vec4) * scene->GetObjectsInfo().size());
 
-		for (int i = 0; i < scene->GetWorld().size(); ++i)
-		{
-			Entity& entity = scene->GetWorld()[i];
-			if (entity.Get<MeshComponent>() != nullptr)
-			{
-				int size = sizeof(glm::mat4);
-				transformsTexture = CreateSharedPtr<BufferTexture>((void*)&entity.Get<TransformComponent>()->GetTransform(), size);
-			}
-		}
+		textureArray = CreateSharedPtr<Texture2DArray>("Assets/Textures/rustediron2_basecolor.png");
+		//textureArray->AddTexture("Assets/Textures/rustediron2_normal.png");
+		//textureArray->AddTexture("Assets/Textures/rustediron2_metallic.png");
+		//textureArray = CreateSharedPtr<Texture2DArray>(scene->GetWorld()[0].Get<MaterialComponent>()->GetMaterial());
+
+		//textureArray->AddMaterial(scene->GetWorld()[0].Get<MaterialComponent>()->GetMaterial());
+		//textureArray->AddTexture("Assets/Textures/rustediron2_basecolor.png");
 
 		std::vector<float> vertices =
 		{
@@ -174,7 +176,9 @@ namespace Lux
 
 		bool moving = camera.Update(timer);
 
-		if (moving)
+		sceneChanged = moving == true ? moving : sceneChanged;
+
+		if (sceneChanged)
 			ResetRenderer();
 
 		if (samples >= maxSamples)
@@ -207,6 +211,18 @@ namespace Lux
 		accumulateFramebuffer->BindTextures(3);
 		lightingPass->SetUniformInt("accumulateTexture", 3);
 		lightingPass->SetUniformInt("samples", samples++);
+
+		transformsTexture->Bind(4);
+		lightingPass->SetUniformInt("transformsTex", 4);
+
+		textureArray->Bind(5);
+		lightingPass->SetUniformInt("texturesTex", 5);
+
+		aabbsTexture->Bind(6);
+		lightingPass->SetUniformInt("aabbsTex", 6);
+
+		aabbsTexture->Bind(7);
+		lightingPass->SetUniformInt("objectsTex", 7);
 
 		lightingPass->SetUniformFloat3("viewPos", camera.GetPosition());
 
@@ -273,7 +289,7 @@ namespace Lux
 				{
 					lightingPass->SetUniformFloat3("aabbs[" + std::to_string(offset + j) + "].min", mesh->GetAABBGeometry()[j].min);
 					lightingPass->SetUniformFloat3("aabbs[" + std::to_string(offset + j) + "].max", mesh->GetAABBGeometry()[j].max);
-					lightingPass->SetUniformFloat3("aabbs[" + std::to_string(offset + j) + "].normal", mesh->GetAABBGeometry()[j].normal);
+					//lightingPass->SetUniformFloat3("aabbs[" + std::to_string(offset + j) + "].normal", mesh->GetAABBGeometry()[j].normal);
 				}
 
 				// Incrementing the offset and the size
@@ -444,7 +460,7 @@ namespace Lux
 			viewportFramebuffer->Resize(viewSize.x, viewSize.y);
 			accumulateFramebuffer->Resize(viewSize.x, viewSize.y);
 			camera.SetDimensions(viewSize.x, viewSize.y);
-			ResetRenderer();
+			sceneChanged = true;
 		}
 
 		// DragAndDrop Target
@@ -486,6 +502,8 @@ namespace Lux
 				tComponent->SetPosition(position);
 				tComponent->SetRotation(glm::degrees(rotation));
 				tComponent->SetScale(scale);
+
+				sceneChanged = true;
 			}
 		}
 		// ImGuizmo End
@@ -525,6 +543,22 @@ namespace Lux
 		Renderer::ClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
 		Renderer::Clear();
 		accumulateFramebuffer->Unbind();
+
+		scene->CollectInformation();
+		transformsTexture = CreateSharedPtr<Texture2D>(scene->GetTransforms().data(), sizeof(glm::mat4) / sizeof(glm::vec4) * scene->GetTransforms().size());
+		
+		sceneChanged = false;
+		//switch (needToUpdate)
+		//{
+		//case NeedToUpdate::TRANSFORMS:
+		//{
+		//	break;
+		//}
+		//case NeedToUpdate::MATERIALS:
+		//	break;
+		//}
+
+		//needToUpdate = NeedToUpdate::NONE;
 	}
 
 	void EditorLayer::OnEvent(Event& e)

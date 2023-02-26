@@ -37,7 +37,7 @@ namespace Lux
 	}
 
 	// Texture 2D
-	Texture2D::Texture2D(const void* data, int w, int h) : width(w), height(h)
+	Texture2D::Texture2D(void* d, int w, int h) : width(w), height(h), data(d)
 	{
 		glCreateTextures(GL_TEXTURE_2D, 1, &textureID);
 		glBindTexture(GL_TEXTURE_2D, textureID);
@@ -46,7 +46,7 @@ namespace Lux
 		glTextureParameteri(textureID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTextureParameteri(textureID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		glTextureSubImage2D(textureID, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glTextureSubImage2D(textureID, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, d);
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
@@ -60,6 +60,16 @@ namespace Lux
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, w, h, 0, GL_RGBA, GL_FLOAT, NULL);
 		glBindImageTexture(0, textureID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+	}
+
+	Texture2D::Texture2D(const void* data, int w) : width(w), height(1)
+	{
+		glCreateTextures(GL_TEXTURE_2D, 1, &textureID);
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, w, 1, 0, GL_RGBA, GL_FLOAT, data);
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 	Texture2D::Texture2D(const std::string& path)

@@ -15,8 +15,10 @@ namespace Lux
 
 	struct AABB
 	{
-		glm::vec3 min = glm::vec3(std::numeric_limits<float>().max());
-		glm::vec3 max = glm::vec3(std::numeric_limits<float>().min());
-		glm::vec3 normal;
+		glm::vec4 min;
+		glm::vec4 max;
+		glm::vec4 texCoords;
+		glm::vec4 normal;
+		//glm::vec3 normal;
 	};
 }

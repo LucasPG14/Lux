@@ -7,6 +7,15 @@
 
 namespace Lux
 {
+	enum class NeedToUpdate
+	{
+		NONE = 0,
+		TRANSFORMS = 1,
+		MATERIALS = 2,
+		TEXTURES = 3,
+		CAMERA = 4
+	};
+
 	class EditorLayer : public Layer
 	{
 	public:
@@ -51,7 +60,11 @@ namespace Lux
 		std::shared_ptr<Shader> outputShader;
 		std::shared_ptr<ComputeShader> computeShader;
 
-		std::shared_ptr<BufferTexture> transformsTexture;
+		std::shared_ptr<Texture2D> transformsTexture;
+		std::shared_ptr<Texture2D> aabbsTexture;
+		std::shared_ptr<Texture2D> objectsTexture;
+		
+		std::shared_ptr<Texture2DArray> textureArray;
 
 		PerspectiveCamera camera;
 
@@ -60,5 +73,8 @@ namespace Lux
 		// Rendering options
 		int samples;
 		int maxSamples;
+
+		NeedToUpdate needToUpdate;
+		bool sceneChanged;
 	};
 }

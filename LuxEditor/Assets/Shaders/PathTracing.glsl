@@ -70,6 +70,11 @@ layout(location = 1) uniform sampler2D normals;
 layout(location = 2) uniform sampler2D albedoSpecular;
 layout(location = 3) uniform sampler2D accumulateTexture;
 
+layout(location = 4) uniform sampler2D transformsTex;
+layout(location = 5) uniform sampler2DArray texturesTex;
+layout(location = 6) uniform sampler2D aabbsTex;
+layout(location = 7) uniform sampler2D objectsTex;
+
 float nrand(vec2 n)
 {
     return fract(sin(dot(n.xy, vec2(12.9898, 78.233)))* 43758.5453);
@@ -99,6 +104,71 @@ vec3 GetRayAt(const Ray ray, float t)
 	return ray.origin + t * ray.direction;
 }
 
+bool Intersection2(Ray ray, inout HitRecord hit, float minT, float maxT)
+{
+	bool somethingHit = false;
+	float closest = maxT;
+
+	for (int i = 0; i < 2; ++i)
+	{
+		vec4 objectInfo = texelFetch(objectsTex, ivec2(3, 0), 0).xyzw;
+
+		vec4 r1 = texelFetch(transformsTex, ivec2(i * 4, 0), 0).xyzw;
+		vec4 r2 = texelFetch(transformsTex, ivec2(i * 4 + 1, 0), 0).xyzw;
+		vec4 r3 = texelFetch(transformsTex, ivec2(i * 4 + 2, 0), 0).xyzw;
+		vec4 r4 = texelFetch(transformsTex, ivec2(i * 4 + 3, 0), 0).xyzw;
+
+		mat4 modelMatrix = mat4(r1, r2, r3, r4);
+
+		for (int j = int(objectInfo.y); j < int(objectInfo.z); ++j)
+		{
+			AABB aabb = aabbs[j];
+
+			//aabb.min = texelFetch(aabbsTex, ivec2(j * 4, 0), 0).xyz;
+			//aabb.max = texelFetch(aabbsTex, ivec2(j * 4 + 1, 0), 0).xyz;
+			//aabb.normal = texelFetch(aabbsTex, ivec2(j * 4 + 3, 0), 0).xyz;
+
+			//aabb.min = 
+
+            aabb.min = vec3(modelMatrix * vec4(aabb.min, 1.0));
+			aabb.max = vec3(modelMatrix * vec4(aabb.max, 1.0));
+
+			vec3 invDir = 1.0 / ray.direction;
+
+    		vec3 f = (aabb.max - ray.origin) * invDir;
+    		vec3 n = (aabb.min - ray.origin) * invDir;
+
+    		vec3 tMax = max(f, n);
+    		vec3 tMin = min(f, n);
+
+    		float t1 = min(tMax.x, min(tMax.y, tMax.z));
+    		float t0 = max(tMin.x, max(tMin.y, tMin.z));
+
+			if (t1 < t0)
+				continue;
+
+			if (t0 < minT || closest < t0)
+			{
+				if (t1 < minT || closest < t1)
+				{
+					continue;
+				}
+			}
+
+			if (t0 > 0.0) hit.t = t0;
+			else hit.t = t1;
+
+			closest = hit.t;
+			hit.point = GetRayAt(ray, hit.t);
+			hit.normal = dot(ray.direction, aabb.normal) < 0.0 ? aabb.normal : -aabb.normal;
+			hit.material = materials[i];
+			somethingHit = true;
+		}
+	}
+
+	return somethingHit;
+}
+
 bool Intersection(Ray ray, inout HitRecord hit, float minT, float maxT)
 {
 	bool somethingHit = false;
@@ -108,8 +178,15 @@ bool Intersection(Ray ray, inout HitRecord hit, float minT, float maxT)
 	{
 		BVH bvh = bvhs[i];
 
-        bvh.aabb.min = vec3(modelsMatrix[i] * vec4(bvh.aabb.min, 1.0));
-		bvh.aabb.max = vec3(modelsMatrix[i] * vec4(bvh.aabb.max, 1.0));
+		vec4 r1 = texelFetch(transformsTex, ivec2(i * 4, 0), 0).xyzw;
+		vec4 r2 = texelFetch(transformsTex, ivec2(i * 4 + 1, 0), 0).xyzw;
+		vec4 r3 = texelFetch(transformsTex, ivec2(i * 4 + 2, 0), 0).xyzw;
+		vec4 r4 = texelFetch(transformsTex, ivec2(i * 4 + 3, 0), 0).xyzw;
+
+		mat4 modelMatrix = mat4(r1, r2, r3, r4);
+
+        bvh.aabb.min = vec3(modelMatrix * vec4(bvh.aabb.min, 1.0));
+		bvh.aabb.max = vec3(modelMatrix * vec4(bvh.aabb.max, 1.0));
 
 		vec3 invDir = 1.0 / ray.direction;
 
@@ -137,8 +214,8 @@ bool Intersection(Ray ray, inout HitRecord hit, float minT, float maxT)
 		{
             AABB aabb = aabbs[j];
 
-            aabb.min = vec3(modelsMatrix[i] * vec4(aabb.min, 1.0));
-			aabb.max = vec3(modelsMatrix[i] * vec4(aabb.max, 1.0));
+            aabb.min = vec3(modelMatrix * vec4(aabb.min, 1.0));
+			aabb.max = vec3(modelMatrix * vec4(aabb.max, 1.0));
 
 			vec3 invDir = 1.0 / ray.direction;
 
@@ -189,12 +266,12 @@ vec3 TracePath(const Ray ray, vec2 uv)
 	int i = 0;
 	for (; i < 50; ++i)
 	{
-		if (Intersection(hitRay, hit, 0.001, tMax))
+		if (Intersection2(hitRay, hit, 0.001, tMax))
 		{
 			hitRay.origin = hit.point;
 			hitRay.direction = hit.normal + randomPointInUnitSphere(uv, 1.0);
 			tMax = hit.t;
-			color *= hit.material.color;
+			color *= texture(texturesTex, vec3(0.5, 0.5, 2.0)).rgb;
 			newSeed *= 1.456;
 		}
 		else

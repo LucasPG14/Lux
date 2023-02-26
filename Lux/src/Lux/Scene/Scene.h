@@ -8,6 +8,12 @@ namespace Lux
 {
 	class TransformComponent;
 	class LightComponent;
+	struct AABB;
+
+	struct ObjectInfo
+	{
+		glm::vec4 info;
+	};
 
 	class Scene
 	{
@@ -16,6 +22,8 @@ namespace Lux
 		~Scene();
 
 		void Update();
+
+		void CollectInformation();
 
 		inline std::vector<Entity>& GetWorld() { return world; }
 
@@ -26,8 +34,17 @@ namespace Lux
 
 		const std::vector<std::pair<TransformComponent*, LightComponent*>>& GetLights() { return lights; }
 
+		const std::vector<glm::mat4>& GetTransforms() { return transforms; }
+		const std::vector<char>& GetTextures() { return textures; }
+		const std::vector<AABB>& GetAABBs() { return verticesAndCoords; }
+		const std::vector<ObjectInfo>& GetObjectsInfo() { return objectsInfo; }
 	private:
 		std::vector<Entity> world;
+		
+		std::vector<glm::mat4> transforms;
+		std::vector<char> textures;
+		std::vector<AABB> verticesAndCoords;
+		std::vector<ObjectInfo> objectsInfo;
 
 		std::vector<std::pair<TransformComponent*, LightComponent*>> lights;
 

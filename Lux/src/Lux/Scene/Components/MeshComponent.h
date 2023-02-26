@@ -21,7 +21,7 @@ namespace Lux
 
 		const std::shared_ptr<VertexArray>& GetVertexArray() { return vao; }
 
-		const std::vector<AABB>& GetAABBGeometry() { return aabbs; }
+		std::vector<AABB>& GetAABBGeometry() { return aabbs; }
 		const AABB& GetAABB() { return globalAABB; }
 
 		ComponentType GetType() { return type; }
