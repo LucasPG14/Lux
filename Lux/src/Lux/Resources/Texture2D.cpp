@@ -34,6 +34,28 @@ namespace Lux
 
 			LUX_CORE_ASSERT(internalFormat && dataFormat, "Texture format not supported!");
 		}
+
+		static GLenum GetFormat(TextureFormat format)
+		{
+			switch (format)
+			{
+			case TextureFormat::INT:
+				return GL_INT;
+			case TextureFormat::FLOAT:
+				return GL_FLOAT;
+			}
+		}
+
+		static GLenum GetInternalFormat(TextureFormat format)
+		{
+			switch (format)
+			{
+			case TextureFormat::INT:
+				return GL_RGBA32I;
+			case TextureFormat::FLOAT:
+				return GL_RGBA32F;
+			}
+		}
 	}
 
 	// Texture 2D
@@ -62,13 +84,13 @@ namespace Lux
 		glBindImageTexture(0, textureID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
 	}
 
-	Texture2D::Texture2D(const void* data, int w) : width(w), height(1)
+	Texture2D::Texture2D(const void* data, int w, const TextureSpecification& spec) : width(w), height(1)
 	{
 		glCreateTextures(GL_TEXTURE_2D, 1, &textureID);
 		glBindTexture(GL_TEXTURE_2D, textureID);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, w, 1, 0, GL_RGBA, GL_FLOAT, data);
+		glTexImage2D(GL_TEXTURE_2D, 0, Utilities::GetInternalFormat(spec.format), w, 1, 0, GL_RGBA, Utilities::GetFormat(spec.format), data);
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 

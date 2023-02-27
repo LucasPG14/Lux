@@ -13,7 +13,7 @@ namespace Lux
 {
 	Scene::Scene()
 	{
-		for (int i = 0; i < 2; ++i)
+		for (int i = 0; i < 8; ++i)
 		{
 			Entity& ent1 = CreateEntity("Cube" + std::to_string(i + 1));
 			ent1.CreateComponent<MeshComponent>();
@@ -55,28 +55,24 @@ namespace Lux
 		verticesAndCoords.clear();
 		objectsInfo.clear();
 
+		float transformsCount = 0.0f;
+
 		for (int i = 0; i < world.size(); ++i)
 		{
 			Entity& entity = world[i];
 			if (MeshComponent* comp = entity.Get<MeshComponent>())
 			{
 				ObjectInfo info;
-				int offset = verticesAndCoords.size();
+				float offset = verticesAndCoords.size();
 				transforms.push_back(entity.Get<TransformComponent>()->GetTransform());
 				verticesAndCoords.resize(/*offset + (comp->GetAABBGeometry().size() * sizeof(AABB))*/offset + comp->GetAABBGeometry().size());
 				
-				//for (int i = 0; i < comp->GetAABBGeometry().size(); ++i)
-				//{
-				//	verticesAndCoords[offset + (i * 4)] = comp->GetAABBGeometry()[i].min;
-				//	verticesAndCoords[offset + (i * 4) + 1] = comp->GetAABBGeometry()[i].max;
-				//	verticesAndCoords[offset + (i * 4) + 2] = comp->GetAABBGeometry()[i].texCoords;
-				//	verticesAndCoords[offset + (i * 4) + 3] = comp->GetAABBGeometry()[i].normal;
-				//}
 				std::copy(comp->GetAABBGeometry().begin(), comp->GetAABBGeometry().end(), &verticesAndCoords[offset]);
 
-				info.info.x = transforms.size();
+				info.info.x = transforms.size() - 1;
 				info.info.y = offset;
-				info.info.z = verticesAndCoords.size();
+				info.info.z = /*sizeof(AABB) / sizeof(glm::vec4) **/ verticesAndCoords.size();
+				info.info.w = 0.0f;
 				objectsInfo.push_back(info);
 			}
 		}

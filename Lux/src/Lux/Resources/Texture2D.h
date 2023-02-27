@@ -2,14 +2,24 @@
 
 namespace Lux
 {
+	enum class TextureFormat
+	{
+		INT = 0,
+		FLOAT = 1
+	};
+
+	struct TextureSpecification
+	{
+		TextureFormat format;
+	};
+
 	class Texture2D
 	{
 	public:
 		Texture2D(void* data, int width, int height);
 		Texture2D(int width, int height);
-		Texture2D(const void* data, int w);
+		Texture2D(const void* data, int w, const TextureSpecification& spec);
 		Texture2D(const std::string& path);
-		Texture2D();
 		virtual ~Texture2D();
 
 		uint32_t GetWidth() const { return width; }

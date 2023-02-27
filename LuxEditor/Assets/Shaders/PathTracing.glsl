@@ -109,9 +109,9 @@ bool Intersection2(Ray ray, inout HitRecord hit, float minT, float maxT)
 	bool somethingHit = false;
 	float closest = maxT;
 
-	for (int i = 0; i < 2; ++i)
+	for (int i = 0; i < 8; ++i)
 	{
-		vec4 objectInfo = texelFetch(objectsTex, ivec2(3, 0), 0).xyzw;
+		vec4 objectInfo = texelFetch(objectsTex, ivec2(i, 0), 0).xyzw;
 
 		vec4 r1 = texelFetch(transformsTex, ivec2(i * 4, 0), 0).xyzw;
 		vec4 r2 = texelFetch(transformsTex, ivec2(i * 4 + 1, 0), 0).xyzw;
@@ -120,12 +120,13 @@ bool Intersection2(Ray ray, inout HitRecord hit, float minT, float maxT)
 
 		mat4 modelMatrix = mat4(r1, r2, r3, r4);
 
-		for (int j = int(objectInfo.y); j < int(objectInfo.z); ++j)
+		for (int j = 0; j < 12; ++j)
 		{
-			AABB aabb = aabbs[j];
+			//AABB aabb = aabbs[j];
 
-			//aabb.min = texelFetch(aabbsTex, ivec2(j * 4, 0), 0).xyz;
-			//aabb.max = texelFetch(aabbsTex, ivec2(j * 4 + 1, 0), 0).xyz;
+			AABB aabb;
+			aabb.min = texelFetch(aabbsTex, ivec2(j * 4, 0), 0).xyz;
+			aabb.max = texelFetch(aabbsTex, ivec2(j * 4 + 1, 0), 0).xyz;
 			//aabb.normal = texelFetch(aabbsTex, ivec2(j * 4 + 3, 0), 0).xyz;
 
 			//aabb.min = 
@@ -177,6 +178,8 @@ bool Intersection(Ray ray, inout HitRecord hit, float minT, float maxT)
 	for (int i = 0; i < 50; ++i)
 	{
 		BVH bvh = bvhs[i];
+
+		vec4 objectInfo = texelFetch(objectsTex, ivec2(i, 0), 0).xyzw;
 
 		vec4 r1 = texelFetch(transformsTex, ivec2(i * 4, 0), 0).xyzw;
 		vec4 r2 = texelFetch(transformsTex, ivec2(i * 4 + 1, 0), 0).xyzw;
@@ -321,4 +324,5 @@ void main()
 	//color = texture(albedoSpecular, texCoord).rgb;
 
     fragColor = vec4(color, 1.0);
+    //fragColor = vec4(texelFetch(aabbsTex, ivec2(0 * 4 + 1, 0), 0).xyz, 1.0);
 }

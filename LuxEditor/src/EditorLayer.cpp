@@ -30,10 +30,20 @@ namespace Lux
 		//computeShader = CreateSharedPtr<ComputeShader>("Assets/Shaders/ComputeShader.glsl");
 
 		scene->CollectInformation();
-		transformsTexture = CreateSharedPtr<Texture2D>(scene->GetTransforms().data(), sizeof(glm::mat4) / sizeof(glm::vec4) * scene->GetTransforms().size());
-		aabbsTexture = CreateSharedPtr<Texture2D>(scene->GetAABBs().data(), sizeof(AABB) / sizeof(glm::vec4) * scene->GetAABBs().size());
-		objectsTexture = CreateSharedPtr<Texture2D>(scene->GetObjectsInfo().data(), sizeof(ObjectInfo) / sizeof(glm::vec4) * scene->GetObjectsInfo().size());
 
+		{
+			TextureSpecification spec;
+			spec.format = TextureFormat::FLOAT;
+
+			transformsTexture = CreateSharedPtr<Texture2D>(scene->GetTransforms().data(), sizeof(glm::mat4) / sizeof(glm::vec4) * scene->GetTransforms().size(), spec);
+			aabbsTexture = CreateSharedPtr<Texture2D>(scene->GetAABBs().data(), sizeof(AABB) / sizeof(glm::vec4) * scene->GetAABBs().size(), spec);
+		}
+		{
+			TextureSpecification spec;
+			spec.format = TextureFormat::FLOAT;
+
+			objectsTexture = CreateSharedPtr<Texture2D>(scene->GetObjectsInfo().data(), /*sizeof(ObjectInfo) / sizeof(glm::vec4) **/ scene->GetObjectsInfo().size(), spec);
+		}
 		textureArray = CreateSharedPtr<Texture2DArray>("Assets/Textures/rustediron2_basecolor.png");
 		//textureArray->AddTexture("Assets/Textures/rustediron2_normal.png");
 		//textureArray->AddTexture("Assets/Textures/rustediron2_metallic.png");
@@ -545,8 +555,11 @@ namespace Lux
 		accumulateFramebuffer->Unbind();
 
 		scene->CollectInformation();
-		transformsTexture = CreateSharedPtr<Texture2D>(scene->GetTransforms().data(), sizeof(glm::mat4) / sizeof(glm::vec4) * scene->GetTransforms().size());
-		
+		{
+			TextureSpecification spec;
+			spec.format = TextureFormat::FLOAT;
+			transformsTexture = CreateSharedPtr<Texture2D>(scene->GetTransforms().data(), sizeof(glm::mat4) / sizeof(glm::vec4) * scene->GetTransforms().size(), spec);
+		}
 		sceneChanged = false;
 		//switch (needToUpdate)
 		//{
