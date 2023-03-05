@@ -61,7 +61,9 @@ namespace Lux
 		std::shared_ptr<ComputeShader> computeShader;
 
 		std::shared_ptr<Texture2D> transformsTexture;
-		std::shared_ptr<Texture2D> aabbsTexture;
+		std::shared_ptr<Texture2D> verticesTexture;
+		std::shared_ptr<Texture2D> indicesTexture;
+		std::shared_ptr<Texture2D> normalsTexture;
 		std::shared_ptr<Texture2D> objectsTexture;
 		
 		std::shared_ptr<Texture2DArray> textureArray;

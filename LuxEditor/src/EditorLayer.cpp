@@ -36,7 +36,9 @@ namespace Lux
 			spec.format = TextureFormat::FLOAT;
 
 			transformsTexture = CreateSharedPtr<Texture2D>(scene->GetTransforms().data(), sizeof(glm::mat4) / sizeof(glm::vec4) * scene->GetTransforms().size(), spec);
-			aabbsTexture = CreateSharedPtr<Texture2D>(scene->GetAABBs().data(), sizeof(AABB) / sizeof(glm::vec4) * scene->GetAABBs().size(), spec);
+			verticesTexture = CreateSharedPtr<Texture2D>(scene->GetPositions().data(), sizeof(glm::vec4) / sizeof(glm::vec4) * scene->GetPositions().size(), spec);
+			indicesTexture = CreateSharedPtr<Texture2D>(scene->GetIndices().data(), sizeof(glm::vec4) / sizeof(glm::vec4) * scene->GetIndices().size(), spec);
+			normalsTexture = CreateSharedPtr<Texture2D>(scene->GetNormals().data(), sizeof(glm::vec4) / sizeof(glm::vec4) * scene->GetNormals().size(), spec);
 		}
 		{
 			TextureSpecification spec;
@@ -44,7 +46,7 @@ namespace Lux
 
 			objectsTexture = CreateSharedPtr<Texture2D>(scene->GetObjectsInfo().data(), /*sizeof(ObjectInfo) / sizeof(glm::vec4) **/ scene->GetObjectsInfo().size(), spec);
 		}
-		textureArray = CreateSharedPtr<Texture2DArray>("Assets/Textures/rustediron2_basecolor.png");
+		textureArray = CreateSharedPtr<Texture2DArray>("Assets/Textures/bakeHouse.png");
 		//textureArray->AddTexture("Assets/Textures/rustediron2_normal.png");
 		//textureArray->AddTexture("Assets/Textures/rustediron2_metallic.png");
 		//textureArray = CreateSharedPtr<Texture2DArray>(scene->GetWorld()[0].Get<MaterialComponent>()->GetMaterial());
@@ -228,11 +230,17 @@ namespace Lux
 		textureArray->Bind(5);
 		lightingPass->SetUniformInt("texturesTex", 5);
 
-		aabbsTexture->Bind(6);
-		lightingPass->SetUniformInt("aabbsTex", 6);
+		verticesTexture->Bind(6);
+		lightingPass->SetUniformInt("verticesTex", 6);
 
-		aabbsTexture->Bind(7);
-		lightingPass->SetUniformInt("objectsTex", 7);
+		indicesTexture->Bind(7);
+		lightingPass->SetUniformInt("indicesTex", 7);
+
+		normalsTexture->Bind(8);
+		lightingPass->SetUniformInt("normalsTex", 8);
+
+		objectsTexture->Bind(9);
+		lightingPass->SetUniformInt("objectsTex", 9);
 
 		lightingPass->SetUniformFloat3("viewPos", camera.GetPosition());
 

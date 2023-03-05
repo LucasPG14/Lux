@@ -31,6 +31,8 @@ struct HitRecord
 	vec3 normal;
 	float t;
 
+	vec2 texCoords;
+
 	Material material;
 };
 
@@ -72,8 +74,10 @@ layout(location = 3) uniform sampler2D accumulateTexture;
 
 layout(location = 4) uniform sampler2D transformsTex;
 layout(location = 5) uniform sampler2DArray texturesTex;
-layout(location = 6) uniform sampler2D aabbsTex;
-layout(location = 7) uniform sampler2D objectsTex;
+layout(location = 6) uniform sampler2D verticesTex;
+layout(location = 7) uniform sampler2D indicesTex;
+layout(location = 8) uniform sampler2D normalsTex;
+layout(location = 9) uniform sampler2D objectsTex;
 
 float nrand(vec2 n)
 {
@@ -104,29 +108,150 @@ vec3 GetRayAt(const Ray ray, float t)
 	return ray.origin + t * ray.direction;
 }
 
+bool RayTriangleHit(Ray ray, inout HitRecord hit, float minT, float maxT)
+{
+	bool somethingHit = false;
+	float closest = maxT;
+
+	vec4 r1 = texelFetch(transformsTex, ivec2(0 * 4, 0), 0).xyzw;
+	vec4 r2 = texelFetch(transformsTex, ivec2(0 * 4 + 1, 0), 0).xyzw;
+	vec4 r3 = texelFetch(transformsTex, ivec2(0 * 4 + 2, 0), 0).xyzw;
+	vec4 r4 = texelFetch(transformsTex, ivec2(0 * 4 + 3, 0), 0).xyzw;
+
+	mat4 modelMatrix = mat4(r1, r2, r3, r4);
+
+	//vec3 origin = vec3(modelMatrix * vec4(ray.origin, 1.0));
+	//vec3 direction = vec3(modelMatrix * vec4(ray.direction, 1.0));
+	vec3 origin = ray.origin;
+	vec3 direction = ray.direction;
+
+	for (int i = 0; i < 1025; ++i)
+	{
+		vec3 indices = texelFetch(indicesTex, ivec2(i, 0), 0).xyz;
+
+		vec3 v1 = texelFetch(verticesTex, ivec2(indices.x, 0), 0).xyz;
+		vec3 v2 = texelFetch(verticesTex, ivec2(indices.y, 0), 0).xyz;
+		vec3 v3 = texelFetch(verticesTex, ivec2(indices.z, 0), 0).xyz;
+
+		v1 = vec3(modelMatrix * vec4(v1, 1.0));
+		v2 = vec3(modelMatrix * vec4(v2, 1.0));
+		v3 = vec3(modelMatrix * vec4(v3, 1.0));
+
+		vec3 v1v2 = v2 - v1;
+    	vec3 v1v3 = v3 - v1;
+
+		// OPTIMIZED VERSION
+		vec3 point = cross(direction, v1v3);
+		float det = dot(v1v2, point);
+
+		if (det < 0.0003)
+			continue;
+
+		float invDet = 1.0 / det;
+
+		vec3 tVector = origin - v1;
+		float u = dot(tVector, point) * invDet;
+		if (u < 0.0 || u > 1.0) 
+			continue;
+
+		vec3 qVector = cross(tVector, v1v2);
+		float v = dot(direction, qVector) * invDet;
+		if (v < 0.0 || u + v > 1.0) 
+			continue;
+
+		float t = dot(v1v3, qVector) * invDet;
+
+//		vec3 n = cross(v1v2, v1v3);
+//		float area2 = length(n);
+//
+//		float NdotRayDirection = dot(n, direction);
+//		if (abs(NdotRayDirection) < 0.00003) // almost 0
+//			continue;
+//
+//		float d = -dot(n, v1);
+//		float t = -(dot(n, origin) + d) / NdotRayDirection;
+//
+//		if (t < 0.0 || t < minT || closest < t) 
+//			continue;
+//
+//		vec3 point = GetRayAt(ray, t);
+//
+//		// Edge 0
+//		vec3 edge0 = v2 - v1; 
+//		vec3 vp0 = point - v1;
+//		vec3 c = cross(edge0, vp0);
+//		if (dot(n, c) < 0.0) 
+//			continue;
+//
+//		// Edge 1
+//		vec3 edge1 = v3 - v2; 
+//		vec3 vp1 = point - v2;
+//		c = cross(edge1, vp1);
+//		float u = length(c) / area2;
+//		if (dot(n, c) < 0.0)  
+//			continue;
+//
+//		// Edge 2
+//		vec3 edge2 = v1 - v3; 
+//		vec3 vp2 = point - v3;
+//		c = cross(edge2, vp2);
+//		float v = length(c) / area2;
+//		if (dot(n, c) < 0.0)  
+//			continue;
+
+		if (t > 0.0 && minT < t && t < closest )
+		{
+			closest = t;
+			somethingHit = true;
+			hit.t = t;
+
+			hit.point = GetRayAt(ray, t);
+
+			vec2 tC1 = vec2(texelFetch(verticesTex, ivec2(indices.x, 0), 0).w, texelFetch(normalsTex, ivec2(indices.x, 0), 0).w);
+			vec2 tC2 = vec2(texelFetch(verticesTex, ivec2(indices.y, 0), 0).w, texelFetch(normalsTex, ivec2(indices.y, 0), 0).w);
+			vec2 tC3 = vec2(texelFetch(verticesTex, ivec2(indices.z, 0), 0).w, texelFetch(normalsTex, ivec2(indices.z, 0), 0).w);
+
+			vec2 texCoords = tC1 * (1.0 - u - v) + tC2 * u + tC3 * v;
+			hit.texCoords = texCoords;
+
+			vec3 normal1 = texelFetch(normalsTex, ivec2(indices.x, 0), 0).xyz;
+			vec3 normal2 = texelFetch(normalsTex, ivec2(indices.y, 0), 0).xyz;
+			vec3 normal3 = texelFetch(normalsTex, ivec2(indices.z, 0), 0).xyz;
+
+			hit.normal = normalize(normal1 * (1.0 - u -v) + normal2 * u + normal3 * v);
+			hit.normal = dot(ray.direction, hit.normal) < 0.0 ? hit.normal : -hit.normal;
+		}
+	}
+
+	return somethingHit;
+}
+
 bool Intersection2(Ray ray, inout HitRecord hit, float minT, float maxT)
 {
 	bool somethingHit = false;
 	float closest = maxT;
 
-	for (int i = 0; i < 8; ++i)
+	for (int i = 0; i < 1; ++i)
 	{
 		vec4 objectInfo = texelFetch(objectsTex, ivec2(i, 0), 0).xyzw;
 
-		vec4 r1 = texelFetch(transformsTex, ivec2(i * 4, 0), 0).xyzw;
-		vec4 r2 = texelFetch(transformsTex, ivec2(i * 4 + 1, 0), 0).xyzw;
-		vec4 r3 = texelFetch(transformsTex, ivec2(i * 4 + 2, 0), 0).xyzw;
-		vec4 r4 = texelFetch(transformsTex, ivec2(i * 4 + 3, 0), 0).xyzw;
+		vec4 r1 = texelFetch(transformsTex, ivec2(objectInfo.x * 4, 0), 0).xyzw;
+		vec4 r2 = texelFetch(transformsTex, ivec2(objectInfo.x * 4 + 1, 0), 0).xyzw;
+		vec4 r3 = texelFetch(transformsTex, ivec2(objectInfo.x * 4 + 2, 0), 0).xyzw;
+		vec4 r4 = texelFetch(transformsTex, ivec2(objectInfo.x * 4 + 3, 0), 0).xyzw;
 
 		mat4 modelMatrix = mat4(r1, r2, r3, r4);
 
-		for (int j = 0; j < 12; ++j)
+//		vec3 origin = vec3(inverse(modelMatrix) * vec4(ray.origin, 1.0));
+//		vec3 direction = vec3(inverse(modelMatrix) * vec4(ray.direction, 1.0));
+
+		for (int j = int(objectInfo.y); j < int(objectInfo.z); ++j)
 		{
 			//AABB aabb = aabbs[j];
 
 			AABB aabb;
-			aabb.min = texelFetch(aabbsTex, ivec2(j * 4, 0), 0).xyz;
-			aabb.max = texelFetch(aabbsTex, ivec2(j * 4 + 1, 0), 0).xyz;
+			//aabb.min = texelFetch(aabbsTex, ivec2(j * 4, 0), 0).xyz;
+			//aabb.max = texelFetch(aabbsTex, ivec2(j * 4 + 1, 0), 0).xyz;
 			//aabb.normal = texelFetch(aabbsTex, ivec2(j * 4 + 3, 0), 0).xyz;
 
 			//aabb.min = 
@@ -269,12 +394,12 @@ vec3 TracePath(const Ray ray, vec2 uv)
 	int i = 0;
 	for (; i < 50; ++i)
 	{
-		if (Intersection2(hitRay, hit, 0.001, tMax))
+		if (RayTriangleHit(hitRay, hit, 0.001, tMax))
 		{
 			hitRay.origin = hit.point;
 			hitRay.direction = hit.normal + randomPointInUnitSphere(uv, 1.0);
 			tMax = hit.t;
-			color *= texture(texturesTex, vec3(0.5, 0.5, 2.0)).rgb;
+			color = texture(texturesTex, vec3(hit.texCoords, 0.0)).rgb;
 			newSeed *= 1.456;
 		}
 		else

@@ -13,7 +13,7 @@ namespace Lux
 {
 	Scene::Scene()
 	{
-		for (int i = 0; i < 8; ++i)
+		for (int i = 0; i < 1; ++i)
 		{
 			Entity& ent1 = CreateEntity("Cube" + std::to_string(i + 1));
 			ent1.CreateComponent<MeshComponent>();
@@ -52,7 +52,9 @@ namespace Lux
 	void Scene::CollectInformation()
 	{
 		transforms.clear();
-		verticesAndCoords.clear();
+		positions.clear();
+		indices.clear();
+		normals.clear();
 		objectsInfo.clear();
 
 		float transformsCount = 0.0f;
@@ -62,16 +64,24 @@ namespace Lux
 			Entity& entity = world[i];
 			if (MeshComponent* comp = entity.Get<MeshComponent>())
 			{
-				ObjectInfo info;
-				float offset = verticesAndCoords.size();
 				transforms.push_back(entity.Get<TransformComponent>()->GetTransform());
-				verticesAndCoords.resize(/*offset + (comp->GetAABBGeometry().size() * sizeof(AABB))*/offset + comp->GetAABBGeometry().size());
 				
-				std::copy(comp->GetAABBGeometry().begin(), comp->GetAABBGeometry().end(), &verticesAndCoords[offset]);
+				float offsetVertices = positions.size();
+				positions.resize(/*offset + (comp->GetAABBGeometry().size() * sizeof(AABB))*/offsetVertices + comp->GetPositions().size());
+				std::copy(comp->GetPositions().begin(), comp->GetPositions().end(), &positions[offsetVertices]);
+				
+				float offsetIndices = indices.size();
+				indices.resize(/*offset + (comp->GetAABBGeometry().size() * sizeof(AABB))*/offsetIndices + comp->GetIndices().size());
+				std::copy(comp->GetIndices().begin(), comp->GetIndices().end(), &indices[offsetIndices]);
 
+				float offsetNormals = normals.size();
+				normals.resize(/*offset + (comp->GetAABBGeometry().size() * sizeof(AABB))*/offsetNormals + comp->GetNormals().size());
+				std::copy(comp->GetNormals().begin(), comp->GetNormals().end(), &normals[offsetNormals]);
+
+				ObjectInfo info;
 				info.info.x = transforms.size() - 1;
-				info.info.y = offset;
-				info.info.z = /*sizeof(AABB) / sizeof(glm::vec4) **/ verticesAndCoords.size();
+				info.info.y = offsetVertices;
+				info.info.z = /*sizeof(AABB) / sizeof(glm::vec4) **/ positions.size();
 				info.info.w = 0.0f;
 				objectsInfo.push_back(info);
 			}

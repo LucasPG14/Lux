@@ -37,6 +37,9 @@ namespace Lux
 		const std::vector<glm::mat4>& GetTransforms() { return transforms; }
 		const std::vector<char>& GetTextures() { return textures; }
 		const std::vector<AABB>& GetAABBs() { return verticesAndCoords; }
+		const std::vector<glm::vec4>& GetPositions() { return positions; }
+		const std::vector<glm::vec4>& GetIndices() { return indices; }
+		const std::vector<glm::vec4>& GetNormals() { return normals; }
 		const std::vector<ObjectInfo>& GetObjectsInfo() { return objectsInfo; }
 	private:
 		std::vector<Entity> world;
@@ -44,6 +47,9 @@ namespace Lux
 		std::vector<glm::mat4> transforms;
 		std::vector<char> textures;
 		std::vector<AABB> verticesAndCoords;
+		std::vector<glm::vec4> positions;
+		std::vector<glm::vec4> indices;
+		std::vector<glm::vec4> normals;
 		std::vector<ObjectInfo> objectsInfo;
 
 		std::vector<std::pair<TransformComponent*, LightComponent*>> lights;

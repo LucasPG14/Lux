@@ -24,6 +24,10 @@ namespace Lux
 		std::vector<AABB>& GetAABBGeometry() { return aabbs; }
 		const AABB& GetAABB() { return globalAABB; }
 
+		const std::vector<glm::vec4>& GetPositions() { return positions; }
+		const std::vector<glm::vec4>& GetIndices() { return indices2; }
+		const std::vector<glm::vec4>& GetNormals() { return normals; }
+
 		ComponentType GetType() { return type; }
 		COMPONENT_TYPE(MESH)
 	private:
@@ -33,6 +37,10 @@ namespace Lux
 		std::vector<uint32_t> indices;
 		std::vector<AABB> aabbs;
 		AABB globalAABB;
+
+		std::vector<glm::vec4> positions;
+		std::vector<glm::vec4> normals;
+		std::vector<glm::vec4> indices2;
 
 		std::shared_ptr<VertexArray> vao;
 		std::shared_ptr<VertexBuffer> vbo;
