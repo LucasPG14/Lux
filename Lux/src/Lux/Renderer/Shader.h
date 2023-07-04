@@ -24,6 +24,8 @@ namespace Lux
 		void SetUniformFloat2(const std::string& name, const glm::vec2& value);
 		void SetUniformFloat(const std::string& name, float value);
 
+		void SetStorageBlock(const std::string& name, int blockIndexBinding);
+
 	private:
 		void CompileShader(const std::unordered_map<GLenum, std::string>& map);
 		std::unordered_map<GLenum, std::string> PreProcessShader(const std::string& src);

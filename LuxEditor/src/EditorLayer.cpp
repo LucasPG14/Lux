@@ -47,6 +47,16 @@ namespace Lux
 			objectsTexture = CreateSharedPtr<Texture2D>(scene->GetObjectsInfo().data(), /*sizeof(ObjectInfo) / sizeof(glm::vec4) **/ scene->GetObjectsInfo().size(), spec);
 		}
 		textureArray = CreateSharedPtr<Texture2DArray>("Assets/Textures/bakeHouse.png");
+
+		verticesSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetPositions().data(), sizeof(glm::vec4) * scene->GetPositions().size(), 0);
+		indicesSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetIndices().data(), sizeof(glm::vec4) * scene->GetIndices().size(), 1);
+		objectsSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetObjectsInfo().data(), sizeof(glm::vec4) * scene->GetObjectsInfo().size(), 2);
+
+
+		lightingPass->SetStorageBlock("verticesSSBO", verticesSsbo->GetBindingIndex());
+		lightingPass->SetStorageBlock("indicesSSBO", indicesSsbo->GetBindingIndex());
+		lightingPass->SetStorageBlock("objectsSSBO", objectsSsbo->GetBindingIndex());
+
 		//textureArray->AddTexture("Assets/Textures/rustediron2_normal.png");
 		//textureArray->AddTexture("Assets/Textures/rustediron2_metallic.png");
 		//textureArray = CreateSharedPtr<Texture2DArray>(scene->GetWorld()[0].Get<MaterialComponent>()->GetMaterial());
@@ -215,6 +225,9 @@ namespace Lux
 		Renderer::Clear();
 
 		lightingPass->Bind();
+
+		verticesSsbo->Bind();
+
 		sceneFramebuffer->BindTextures();
 		lightingPass->SetUniformInt("positions", 0);
 		lightingPass->SetUniformInt("normals", 1);

@@ -41,6 +41,10 @@ namespace Lux
 		const std::vector<glm::vec4>& GetIndices() { return indices; }
 		const std::vector<glm::vec4>& GetNormals() { return normals; }
 		const std::vector<ObjectInfo>& GetObjectsInfo() { return objectsInfo; }
+
+	private:
+		void DrawCube(const glm::vec3& color, const glm::vec3& pos = glm::vec3(0.0f), const glm::vec3& scale = glm::vec3(1.0f), const glm::vec3& rot = glm::vec3(0.0f));
+
 	private:
 		std::vector<Entity> world;
 		

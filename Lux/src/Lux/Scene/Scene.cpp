@@ -13,12 +13,14 @@ namespace Lux
 {
 	Scene::Scene()
 	{
-		for (int i = 0; i < 1; ++i)
-		{
-			Entity& ent1 = CreateEntity("Cube" + std::to_string(i + 1));
-			ent1.CreateComponent<MeshComponent>();
-			ent1.CreateComponent<MaterialComponent>();
-		}
+		DrawCube({ 1.0, 0.0, 0.0 }, { -1.5f, 0.0f, 0.0f }, { 0.1f, 3.0f, 3.0f });
+		DrawCube({ 0.0, 1.0, 0.0 }, { 1.5f, 0.0f, 0.0f }, { 0.1f, 3.0f, 3.0f });
+		DrawCube({ 0.0, 0.0, 1.0 }, { 0.0f, 0.0f, 1.5f }, { 0.1f, 3.0f, 3.0f }, {0.0f, 90.0f, 0.0f});
+		DrawCube({ 1.0, 1.0, 0.0 }, { 0.0f, 0.0f, -1.5f }, { 0.1f, 3.0f, 3.0f }, {0.0f, 90.0f, 0.0f});
+		DrawCube({ 0.0, 1.0, 1.0 }, { 0.0f, -1.5f, 0.0f }, { 0.1f, 3.0f, 3.0f }, {0.0f, 0.0f, 90.0f});
+		DrawCube({ 1.0, 0.0, 1.0 }, { 0.0f, 1.5f, 0.0f }, { 0.1f, 3.0f, 3.0f }, {0.0f, 0.0f, 90.0f});
+		
+		DrawCube({ 1.0, 0.0, 0.0 }, { 0.0f, -1.0f, 0.0f }, { 1.0f, 1.0f, 1.0f }, {0.0f, 0.0f, 0.0f});
 
 		shader = CreateSharedPtr<Shader>("Assets/Shaders/Deferred.glsl");
 
@@ -67,11 +69,11 @@ namespace Lux
 				transforms.push_back(entity.Get<TransformComponent>()->GetTransform());
 				
 				float offsetVertices = positions.size();
-				positions.resize(/*offset + (comp->GetAABBGeometry().size() * sizeof(AABB))*/offsetVertices + comp->GetPositions().size());
+				positions.resize(offsetVertices + comp->GetPositions().size());
 				std::copy(comp->GetPositions().begin(), comp->GetPositions().end(), &positions[offsetVertices]);
 				
 				float offsetIndices = indices.size();
-				indices.resize(/*offset + (comp->GetAABBGeometry().size() * sizeof(AABB))*/offsetIndices + comp->GetIndices().size());
+				indices.resize(offsetIndices + comp->GetIndices().size());
 				std::copy(comp->GetIndices().begin(), comp->GetIndices().end(), &indices[offsetIndices]);
 
 				float offsetNormals = normals.size();
@@ -79,10 +81,11 @@ namespace Lux
 				std::copy(comp->GetNormals().begin(), comp->GetNormals().end(), &normals[offsetNormals]);
 
 				ObjectInfo info;
-				info.info.x = transforms.size() - 1;
-				info.info.y = offsetVertices;
-				info.info.z = /*sizeof(AABB) / sizeof(glm::vec4) **/ positions.size();
-				info.info.w = 0.0f;
+				glm::vec3 color = entity.Get<MaterialComponent>()->GetMaterial()->GetColor();
+				info.info.x = color.x;
+				info.info.y = color.y;
+				info.info.z = color.z;
+				info.info.w = transforms.size() - 1;
 				objectsInfo.push_back(info);
 			}
 		}
@@ -96,5 +99,19 @@ namespace Lux
 	Entity& Scene::CreateEntityWithUUID(UUID id, const std::string& name)
 	{
 		return world.emplace_back(id, name);
+	}
+	
+	void Scene::DrawCube(const glm::vec3& color, const glm::vec3& pos, const glm::vec3& scale, const glm::vec3& rot)
+	{
+		Entity& ent1 = CreateEntity("Cube" + std::to_string(world.size()));
+		ent1.CreateComponent<MeshComponent>();
+		ent1.CreateComponent<MaterialComponent>();
+
+		ent1.Get<MaterialComponent>()->GetMaterial()->GetColor() = color;
+
+		TransformComponent* transform = ent1.Get<TransformComponent>();
+		transform->SetPosition(pos);
+		transform->SetScale(scale);
+		transform->SetRotation(rot);
 	}
 }

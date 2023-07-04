@@ -68,6 +68,10 @@ namespace Lux
 		
 		std::shared_ptr<Texture2DArray> textureArray;
 
+		std::shared_ptr<ShaderStorageBuffer> verticesSsbo;
+		std::shared_ptr<ShaderStorageBuffer> indicesSsbo;
+		std::shared_ptr<ShaderStorageBuffer> objectsSsbo;
+
 		PerspectiveCamera camera;
 
 		glm::vec2 viewSize;

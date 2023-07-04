@@ -34,3 +34,4 @@
 #include "Lux/Renderer/ComputeShader.h"
 #include "Lux/Renderer/Framebuffer.h"
 #include "Lux/Renderer/VertexArray.h"
+#include "Lux/Renderer/ShaderStorageBuffer.h"

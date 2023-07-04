@@ -67,6 +67,26 @@ uniform Material materials[5];
 
 uniform int samples;
 
+struct ObjectInfo
+{
+	vec4 color;
+};
+
+layout(std430, binding = 0) buffer verticesSSBO
+{
+    vec4 vertices[];
+};
+
+layout(std430, binding = 1) buffer indicesSSBO
+{
+    vec4 indices[];
+};
+
+layout(std430, binding = 2) buffer objectsSSBO
+{
+    vec4 objects[];
+};
+
 layout(location = 0) uniform sampler2D positions;
 layout(location = 1) uniform sampler2D normals;
 layout(location = 2) uniform sampler2D albedoSpecular;
@@ -113,25 +133,34 @@ bool RayTriangleHit(Ray ray, inout HitRecord hit, float minT, float maxT)
 	bool somethingHit = false;
 	float closest = maxT;
 
-	vec4 r1 = texelFetch(transformsTex, ivec2(0 * 4, 0), 0).xyzw;
-	vec4 r2 = texelFetch(transformsTex, ivec2(0 * 4 + 1, 0), 0).xyzw;
-	vec4 r3 = texelFetch(transformsTex, ivec2(0 * 4 + 2, 0), 0).xyzw;
-	vec4 r4 = texelFetch(transformsTex, ivec2(0 * 4 + 3, 0), 0).xyzw;
-
-	mat4 modelMatrix = mat4(r1, r2, r3, r4);
-
-	//vec3 origin = vec3(modelMatrix * vec4(ray.origin, 1.0));
-	//vec3 direction = vec3(modelMatrix * vec4(ray.direction, 1.0));
-	vec3 origin = ray.origin;
-	vec3 direction = ray.direction;
-
-	for (int i = 0; i < 1025; ++i)
+	for (int j = 0; j < 7; ++j)
 	{
-		vec3 indices = texelFetch(indicesTex, ivec2(i, 0), 0).xyz;
+		vec4 object = objects[j];
 
-		vec3 v1 = texelFetch(verticesTex, ivec2(indices.x, 0), 0).xyz;
-		vec3 v2 = texelFetch(verticesTex, ivec2(indices.y, 0), 0).xyz;
-		vec3 v3 = texelFetch(verticesTex, ivec2(indices.z, 0), 0).xyz;
+		vec4 r1 = texelFetch(transformsTex, ivec2(object.w * 4, 0), 0).xyzw;
+		vec4 r2 = texelFetch(transformsTex, ivec2(object.w * 4 + 1, 0), 0).xyzw;
+		vec4 r3 = texelFetch(transformsTex, ivec2(object.w * 4 + 2, 0), 0).xyzw;
+		vec4 r4 = texelFetch(transformsTex, ivec2(object.w * 4 + 3, 0), 0).xyzw;
+
+		mat4 modelMatrix = mat4(r1, r2, r3, r4);
+
+		//vec3 origin = vec3(modelMatrix * vec4(ray.origin, 1.0));
+		//vec3 direction = vec3(modelMatrix * vec4(ray.direction, 1.0));
+		vec3 origin = ray.origin;
+		vec3 direction = ray.direction;
+
+	for (int i = 0; i < 24; ++i)
+	{
+		//vec3 indices = texelFetch(indicesTex, ivec2(i, 0), 0).xyz;
+
+		//vec3 v1 = texelFetch(verticesTex, ivec2(indices.x, 0), 0).xyz;
+		//vec3 v2 = texelFetch(verticesTex, ivec2(indices.y, 0), 0).xyz;
+		//vec3 v3 = texelFetch(verticesTex, ivec2(indices.z, 0), 0).xyz;
+
+		//vec4 indicesTriangle = indices[i];
+		vec3 v1 = vertices[int(indices[i].x)].xyz;
+		vec3 v2 = vertices[int(indices[i].y)].xyz;
+		vec3 v3 = vertices[int(indices[i].z)].xyz;
 
 		v1 = vec3(modelMatrix * vec4(v1, 1.0));
 		v2 = vec3(modelMatrix * vec4(v2, 1.0));
@@ -199,7 +228,7 @@ bool RayTriangleHit(Ray ray, inout HitRecord hit, float minT, float maxT)
 //		if (dot(n, c) < 0.0)  
 //			continue;
 
-		if (t > 0.0 && minT < t && t < closest )
+		if (t > 0.0 && minT < t && t < closest)
 		{
 			closest = t;
 			somethingHit = true;
@@ -207,20 +236,23 @@ bool RayTriangleHit(Ray ray, inout HitRecord hit, float minT, float maxT)
 
 			hit.point = GetRayAt(ray, t);
 
-			vec2 tC1 = vec2(texelFetch(verticesTex, ivec2(indices.x, 0), 0).w, texelFetch(normalsTex, ivec2(indices.x, 0), 0).w);
-			vec2 tC2 = vec2(texelFetch(verticesTex, ivec2(indices.y, 0), 0).w, texelFetch(normalsTex, ivec2(indices.y, 0), 0).w);
-			vec2 tC3 = vec2(texelFetch(verticesTex, ivec2(indices.z, 0), 0).w, texelFetch(normalsTex, ivec2(indices.z, 0), 0).w);
+			vec2 tC1 = vec2(texelFetch(verticesTex, ivec2(int(indices[i].x), 0), 0).w, texelFetch(normalsTex, ivec2(int(indices[i].x), 0), 0).w);
+			vec2 tC2 = vec2(texelFetch(verticesTex, ivec2(int(indices[i].y), 0), 0).w, texelFetch(normalsTex, ivec2(int(indices[i].y), 0), 0).w);
+			vec2 tC3 = vec2(texelFetch(verticesTex, ivec2(int(indices[i].z), 0), 0).w, texelFetch(normalsTex, ivec2(int(indices[i].z), 0), 0).w);
 
 			vec2 texCoords = tC1 * (1.0 - u - v) + tC2 * u + tC3 * v;
 			hit.texCoords = texCoords;
 
-			vec3 normal1 = texelFetch(normalsTex, ivec2(indices.x, 0), 0).xyz;
-			vec3 normal2 = texelFetch(normalsTex, ivec2(indices.y, 0), 0).xyz;
-			vec3 normal3 = texelFetch(normalsTex, ivec2(indices.z, 0), 0).xyz;
+			hit.material.color = object.xyz;
+
+			vec3 normal1 = texelFetch(normalsTex, ivec2(int(indices[i].x), 0), 0).xyz;
+			vec3 normal2 = texelFetch(normalsTex, ivec2(int(indices[i].y), 0), 0).xyz;
+			vec3 normal3 = texelFetch(normalsTex, ivec2(int(indices[i].z), 0), 0).xyz;
 
 			hit.normal = normalize(normal1 * (1.0 - u -v) + normal2 * u + normal3 * v);
 			hit.normal = dot(ray.direction, hit.normal) < 0.0 ? hit.normal : -hit.normal;
 		}
+	}
 	}
 
 	return somethingHit;
@@ -399,7 +431,8 @@ vec3 TracePath(const Ray ray, vec2 uv)
 			hitRay.origin = hit.point;
 			hitRay.direction = hit.normal + randomPointInUnitSphere(uv, 1.0);
 			tMax = hit.t;
-			color = texture(texturesTex, vec3(hit.texCoords, 0.0)).rgb;
+			color *= hit.material.color;
+			//color = vec3(1.0, 0.0, 0.0) ;
 			newSeed *= 1.456;
 		}
 		else

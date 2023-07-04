@@ -86,6 +86,13 @@ namespace Lux
 		glUniform1f(location, value);
 	}
 
+	void Shader::SetStorageBlock(const std::string& name, int blockIndexBinding)
+	{
+		GLuint blockIndex = 0;
+		blockIndex = glGetProgramResourceIndex(shaderID, GL_SHADER_STORAGE_BLOCK, name.c_str());
+		glShaderStorageBlockBinding(shaderID, blockIndex, blockIndexBinding);
+	}
+
 	void Shader::CompileShader(const std::unordered_map<GLenum, std::string>& map)
 	{
 		GLuint program = glCreateProgram();
