@@ -35,6 +35,8 @@ namespace Lux
 
 	private:
 		bool ShortCuts(KeyPressedEvent& e);
+
+		void SaveImage();
 	
 	private:
 		SceneHierarchyWindow hierarchy;
@@ -82,5 +84,7 @@ namespace Lux
 
 		NeedToUpdate needToUpdate;
 		bool sceneChanged;
+
+		bool imageSaved;
 	};
 }

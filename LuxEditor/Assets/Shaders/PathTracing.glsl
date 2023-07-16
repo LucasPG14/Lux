@@ -61,7 +61,6 @@ uniform BVH bvhs[50];
 uniform vec3 viewPos;
 uniform vec2 canvas;
 uniform mat4 inverseCamera;
-uniform mat4 modelsMatrix[5];
 
 uniform Material materials[5];
 
@@ -482,5 +481,4 @@ void main()
 	//color = texture(albedoSpecular, texCoord).rgb;
 
     fragColor = vec4(color, 1.0);
-    //fragColor = vec4(texelFetch(aabbsTex, ivec2(0 * 4 + 1, 0), 0).xyz, 1.0);
 }

@@ -59,8 +59,8 @@ project "Lux"
 		"%{prj.name}/vendor/glm/glm/**.inl",
 		"%{prj.name}/vendor/ImGuizmo/**.h",
 		"%{prj.name}/vendor/ImGuizmo/**.cpp",
-		"%{prj.name}/vendor/stb_image/**.h",
 		"%{prj.name}/vendor/VMA/include/**.h",
+		"%{prj.name}/vendor/stb_image/**.h",
 		"%{prj.name}/vendor/stb_image/**.cpp"
 	}
 

@@ -37,6 +37,8 @@ namespace Lux
 
 		void AddData(const void* data, int s);
 
+		void SaveToFile();
+
 		const void* GetData() { return data; }
 
 	private:

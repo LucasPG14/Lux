@@ -17,7 +17,7 @@ namespace Lux
 	extern const std::filesystem::path assetsDir;
 
 	EditorLayer::EditorLayer() 
-		: guizmoState(ImGuizmo::TRANSLATE), samples(0), maxSamples(5), needToUpdate(NeedToUpdate::NONE), sceneChanged(false)
+		: guizmoState(ImGuizmo::TRANSLATE), samples(0), maxSamples(5), needToUpdate(NeedToUpdate::NONE), sceneChanged(false), imageSaved(false)
 	{
 		scene = CreateSharedPtr<Scene>();
 		contentBrowser = ContentBrowserWindow();
@@ -27,10 +27,9 @@ namespace Lux
 		skyboxShader = CreateSharedPtr<Shader>("Assets/Shaders/Skybox.glsl");
 		
 		defaultShader = CreateSharedPtr<Shader>("Assets/Shaders/Default.glsl");
-		//computeShader = CreateSharedPtr<ComputeShader>("Assets/Shaders/ComputeShader.glsl");
+		computeShader = CreateSharedPtr<ComputeShader>("Assets/Shaders/ComputeShader.glsl");
 
 		scene->CollectInformation();
-
 		{
 			TextureSpecification spec;
 			spec.format = TextureFormat::FLOAT;
@@ -52,10 +51,13 @@ namespace Lux
 		indicesSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetIndices().data(), sizeof(glm::vec4) * scene->GetIndices().size(), 1);
 		objectsSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetObjectsInfo().data(), sizeof(glm::vec4) * scene->GetObjectsInfo().size(), 2);
 
-
-		lightingPass->SetStorageBlock("verticesSSBO", verticesSsbo->GetBindingIndex());
+/*		lightingPass->SetStorageBlock("verticesSSBO", verticesSsbo->GetBindingIndex());
 		lightingPass->SetStorageBlock("indicesSSBO", indicesSsbo->GetBindingIndex());
-		lightingPass->SetStorageBlock("objectsSSBO", objectsSsbo->GetBindingIndex());
+		lightingPass->SetStorageBlock("objectsSSBO", objectsSsbo->GetBindingIndex());	*/	
+		
+		computeShader->SetStorageBlock("verticesSSBO", verticesSsbo->GetBindingIndex());
+		computeShader->SetStorageBlock("indicesSSBO", indicesSsbo->GetBindingIndex());
+		computeShader->SetStorageBlock("objectsSSBO", objectsSsbo->GetBindingIndex());
 
 		//textureArray->AddTexture("Assets/Textures/rustediron2_normal.png");
 		//textureArray->AddTexture("Assets/Textures/rustediron2_metallic.png");
@@ -204,7 +206,13 @@ namespace Lux
 			ResetRenderer();
 
 		if (samples >= maxSamples)
+		{
+			if (!imageSaved)
+			{
+				SaveImage();
+			}
 			return;
+		}
 
 		sceneFramebuffer->Bind();
 
@@ -226,7 +234,7 @@ namespace Lux
 
 		lightingPass->Bind();
 
-		verticesSsbo->Bind();
+		//verticesSsbo->Bind();
 
 		sceneFramebuffer->BindTextures();
 		lightingPass->SetUniformInt("positions", 0);
@@ -235,7 +243,7 @@ namespace Lux
 
 		accumulateFramebuffer->BindTextures(3);
 		lightingPass->SetUniformInt("accumulateTexture", 3);
-		lightingPass->SetUniformInt("samples", samples++);
+		//lightingPass->SetUniformInt("samples", samples++);
 
 		transformsTexture->Bind(4);
 		lightingPass->SetUniformInt("transformsTex", 4);
@@ -361,6 +369,29 @@ namespace Lux
 		//computeShader->DispatchCompute();
 		//computeShader->Unbind();
 
+		{
+			computeShader->Bind();
+			computeShader->SetUniformInt("imgOutput", 0);
+
+			// Uniforms
+			computeShader->SetUniformFloat3("viewPos", camera.GetPosition());
+			computeShader->SetUniformFloat2("canvas", viewSize);
+			computeShader->SetUniformMat4("inverseCamera", glm::inverse(camera.GetProjectionMatrix()* camera.GetViewMatrix()));
+			computeShader->SetUniformInt("samples", samples);
+
+			// Textures
+			accumulateFramebuffer->BindTextures(1);
+			computeShader->SetUniformInt("accumulateTexture", 1);
+			transformsTexture->Bind(4);
+			computeShader->SetUniformInt("transformsTex", 4);
+			normalsTexture->Bind(8);
+			computeShader->SetUniformInt("normalsTex", 8);
+
+			computeShader->DispatchCompute();
+			computeShader->Unbind();
+		}
+		samples++;
+
 		// Accumulating for path tracing
 		accumulateFramebuffer->Bind();
 
@@ -369,14 +400,14 @@ namespace Lux
 
 		defaultShader->Bind();
 
-		viewportFramebuffer->BindTextures();
-		//computeShader->BindTexture();
+		//viewportFramebuffer->BindTextures();
+		computeShader->BindTexture();
 		defaultShader->SetUniformInt("accumulateColor", 0);
-		
+		//
 		Renderer::DrawFullscreenQuad();
 
-		//computeShader->UnbindTexture();
-		viewportFramebuffer->UnbindTextures();
+		computeShader->UnbindTexture();
+		//viewportFramebuffer->UnbindTextures();
 		defaultShader->Unbind();
 
 		accumulateFramebuffer->Unbind();
@@ -487,6 +518,7 @@ namespace Lux
 		if (size.x != viewSize.x || size.y != viewSize.y)
 		{
 			viewSize = { size.x, size.y };
+			computeShader->ResizeTexture(viewSize.x, viewSize.y);
 			sceneFramebuffer->Resize(viewSize.x, viewSize.y);
 			viewportFramebuffer->Resize(viewSize.x, viewSize.y);
 			accumulateFramebuffer->Resize(viewSize.x, viewSize.y);
@@ -582,17 +614,7 @@ namespace Lux
 			transformsTexture = CreateSharedPtr<Texture2D>(scene->GetTransforms().data(), sizeof(glm::mat4) / sizeof(glm::vec4) * scene->GetTransforms().size(), spec);
 		}
 		sceneChanged = false;
-		//switch (needToUpdate)
-		//{
-		//case NeedToUpdate::TRANSFORMS:
-		//{
-		//	break;
-		//}
-		//case NeedToUpdate::MATERIALS:
-		//	break;
-		//}
-
-		//needToUpdate = NeedToUpdate::NONE;
+		imageSaved = false;
 	}
 
 	void EditorLayer::OnEvent(Event& e)
@@ -649,5 +671,15 @@ namespace Lux
 		}
 
 		return true;
+	}
+	
+	void EditorLayer::SaveImage()
+	{
+		imageSaved = true;
+
+		std::string filename = FileDialog::SaveFile("png (*.png)\0*.png\0");
+
+		if (!filename.empty())
+			accumulateFramebuffer->SaveToFile(filename);
 	}
 }

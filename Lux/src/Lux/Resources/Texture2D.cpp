@@ -162,4 +162,23 @@ namespace Lux
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, w, h, 0, GL_RGBA, GL_FLOAT, NULL);
 		glBindImageTexture(0, textureID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
 	}
+	
+	void Texture2D::SaveToFile()
+	{
+		//GLuint* data = new GLuint[width * height * 4 * 4];
+
+		//glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+
+		//glActiveTexture(GL_TEXTURE0);
+		//glBindTexture(GL_TEXTURE_2D, textureID);
+
+		//glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, &data);
+
+		////if (stbi_write_png("hola.png", spec.width, spec.height, 4, data, 0))
+		//{
+
+		//}
+
+		//glBindTexture(GL_TEXTURE_2D, 0);
+	}
 }

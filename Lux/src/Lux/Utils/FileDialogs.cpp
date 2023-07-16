@@ -10,7 +10,7 @@
 
 namespace Lux
 {
-	std::string OpenFile(const char* filter)
+	std::string FileDialog::OpenFile(const char* filter)
 	{
 		OPENFILENAMEA openFileName;
 		CHAR sizeFile[260] = { 0 };
@@ -31,7 +31,7 @@ namespace Lux
 		return std::string();
 	}
 	
-	std::string SaveFile(const char* filter)
+	std::string FileDialog::SaveFile(const char* filter)
 	{
 		OPENFILENAMEA openFileName;
 		CHAR sizeFile[260] = { 0 };

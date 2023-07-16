@@ -3,6 +3,7 @@
 
 #include "Renderer.h"
 
+#include <stb_image_write.h>
 #include <glad/glad.h>
 
 namespace Lux
@@ -157,5 +158,31 @@ namespace Lux
 		spec.width = width;
 		spec.height = height;
 		Invalidate();
+	}
+
+	void Framebuffer::SaveToFile(const std::string& path)
+	{
+		unsigned char* data = new unsigned char[spec.width * spec.height * 4 * 4];
+
+		glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+		Bind();
+
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+		glReadBuffer(GL_COLOR_ATTACHMENT1);
+		glReadPixels(0, 0, spec.width, spec.height, GL_RGBA, GL_UNSIGNED_BYTE, &data);
+
+		if (!stbi_write_png((path + ".png").c_str(), spec.width, spec.height, 4, data, 0))
+		{
+			LUX_CORE_ERROR("Couldn't save the image");
+		}
+
+		//glPixelStorei(GL_PACK_ALIGNMENT, 1);
+		/*glBindTexture(GL_TEXTURE_2D, colorAttachments[0]);
+
+		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, &data);*/
+
+		Unbind();
+		//glBindTexture(GL_TEXTURE_2D, 0);
 	}
 }
