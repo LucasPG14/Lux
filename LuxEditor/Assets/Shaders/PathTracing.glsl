@@ -148,7 +148,7 @@ bool RayTriangleHit(Ray ray, inout HitRecord hit, float minT, float maxT)
 		vec3 origin = ray.origin;
 		vec3 direction = ray.direction;
 
-	for (int i = 0; i < 24; ++i)
+	for (int i = 0; i < 300; ++i)
 	{
 		//vec3 indices = texelFetch(indicesTex, ivec2(i, 0), 0).xyz;
 
@@ -235,9 +235,9 @@ bool RayTriangleHit(Ray ray, inout HitRecord hit, float minT, float maxT)
 
 			hit.point = GetRayAt(ray, t);
 
-			vec2 tC1 = vec2(texelFetch(verticesTex, ivec2(int(indices[i].x), 0), 0).w, texelFetch(normalsTex, ivec2(int(indices[i].x), 0), 0).w);
-			vec2 tC2 = vec2(texelFetch(verticesTex, ivec2(int(indices[i].y), 0), 0).w, texelFetch(normalsTex, ivec2(int(indices[i].y), 0), 0).w);
-			vec2 tC3 = vec2(texelFetch(verticesTex, ivec2(int(indices[i].z), 0), 0).w, texelFetch(normalsTex, ivec2(int(indices[i].z), 0), 0).w);
+			vec2 tC1 = vec2(vertices[int(indices[i].x)].w, texelFetch(normalsTex, ivec2(int(indices[i].x), 0), 0).w);
+			vec2 tC2 = vec2(vertices[int(indices[i].y)].w, texelFetch(normalsTex, ivec2(int(indices[i].y), 0), 0).w);
+			vec2 tC3 = vec2(vertices[int(indices[i].z)].w, texelFetch(normalsTex, ivec2(int(indices[i].z), 0), 0).w);
 
 			vec2 texCoords = tC1 * (1.0 - u - v) + tC2 * u + tC3 * v;
 			hit.texCoords = texCoords;
@@ -249,7 +249,9 @@ bool RayTriangleHit(Ray ray, inout HitRecord hit, float minT, float maxT)
 			vec3 normal3 = texelFetch(normalsTex, ivec2(int(indices[i].z), 0), 0).xyz;
 
 			hit.normal = normalize(normal1 * (1.0 - u -v) + normal2 * u + normal3 * v);
-			hit.normal = dot(ray.direction, hit.normal) < 0.0 ? hit.normal : -hit.normal;
+			hit.normal = normalize(transpose(inverse(mat3(modelMatrix))) * hit.normal);
+
+			hit.normal = dot(hit.normal, ray.direction) <= 0.0 ? hit.normal : -hit.normal;
 		}
 	}
 	}
@@ -423,12 +425,12 @@ vec3 TracePath(const Ray ray, vec2 uv)
 	float accum = 1.0;
 	
 	int i = 0;
-	for (; i < 50; ++i)
+	for (; i < 2; ++i)
 	{
 		if (RayTriangleHit(hitRay, hit, 0.001, tMax))
 		{
 			hitRay.origin = hit.point;
-			hitRay.direction = hit.normal + randomPointInUnitSphere(uv, 1.0);
+			hitRay.direction = hit.normal + randomPointInUnitSphere(uv, newSeed);
 			tMax = hit.t;
 			color *= hit.material.color;
 			//color = vec3(1.0, 0.0, 0.0) ;

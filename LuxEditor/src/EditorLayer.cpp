@@ -209,166 +209,14 @@ namespace Lux
 		{
 			if (!imageSaved)
 			{
-				SaveImage();
+				//SaveImage();
 			}
 			return;
 		}
 
-		sceneFramebuffer->Bind();
+		//PathTracingWithoutCS();
 
-		Renderer::ClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
-		Renderer::Clear();
-
-		Renderer::BeginScene(camera);
-
-		scene->Update();
-
-		Renderer::EndScene();
-
-		sceneFramebuffer->Unbind();
-
-		viewportFramebuffer->Bind();
-
-		Renderer::ClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
-		Renderer::Clear();
-
-		lightingPass->Bind();
-
-		//verticesSsbo->Bind();
-
-		sceneFramebuffer->BindTextures();
-		lightingPass->SetUniformInt("positions", 0);
-		lightingPass->SetUniformInt("normals", 1);
-		lightingPass->SetUniformInt("albedoSpecular", 2);
-
-		accumulateFramebuffer->BindTextures(3);
-		lightingPass->SetUniformInt("accumulateTexture", 3);
-		//lightingPass->SetUniformInt("samples", samples++);
-
-		transformsTexture->Bind(4);
-		lightingPass->SetUniformInt("transformsTex", 4);
-
-		textureArray->Bind(5);
-		lightingPass->SetUniformInt("texturesTex", 5);
-
-		verticesTexture->Bind(6);
-		lightingPass->SetUniformInt("verticesTex", 6);
-
-		indicesTexture->Bind(7);
-		lightingPass->SetUniformInt("indicesTex", 7);
-
-		normalsTexture->Bind(8);
-		lightingPass->SetUniformInt("normalsTex", 8);
-
-		objectsTexture->Bind(9);
-		lightingPass->SetUniformInt("objectsTex", 9);
-
-		lightingPass->SetUniformFloat3("viewPos", camera.GetPosition());
-
-		const auto& lights = scene->GetLights();
-
-		int pointLights = 0;
-		int spotLights = 0;
-		for (int i = 0; i < lights.size(); ++i)
-		{
-			TransformComponent* transform = lights[i].first;
-			LightComponent* light = lights[i].second;
-			switch (light->GetType())
-			{
-			case LightType::DIRECTIONAL:
-			{
-				lightingPass->SetUniformFloat3("dirLight.direction", transform->GetRotation());
-				lightingPass->SetUniformFloat3("dirLight.radiance", light->GetColor());
-				break;
-			}
-			case LightType::POINT:
-			{
-				std::string number = std::to_string(pointLights++);
-				lightingPass->SetUniformFloat3("pointLights[" + number + "].position", transform->GetPosition());
-				lightingPass->SetUniformFloat3("pointLights[" + number + "].radiance", light->GetColor());
-
-				lightingPass->SetUniformFloat("pointLights[" + number + "].radius", 5.0f);
-				break;
-			}
-			case LightType::SPOT:
-			{
-				std::string number = std::to_string(spotLights++);
-				lightingPass->SetUniformFloat3("spotLights[" + number + "].position", transform->GetPosition());
-				lightingPass->SetUniformFloat3("spotLights[" + number + "].direction", transform->GetRotation());
-				lightingPass->SetUniformFloat3("spotLights[" + number + "].radiance", light->GetColor());
-
-				lightingPass->SetUniformFloat("spotLights[" + number + "].radius", light->GetRange());
-				lightingPass->SetUniformFloat("spotLights[" + number + "].cutOff", glm::cos(glm::radians(light->GetCutOff())));
-				lightingPass->SetUniformFloat("spotLights[" + number + "].outerCutOff", glm::cos(glm::radians(light->GetCutOff() + 2.0f)));
-				break;
-			}
-			}
-		}
-
-		int index = 0;
-		int offset = 0;
-		for (int i = 0; i < scene->GetWorld().size(); ++i)
-		{
-			Entity& entity = scene->GetWorld()[i];
-			if (MeshComponent* mesh = entity.Get<MeshComponent>())
-			{
-				// Setting the global AABB of the object
-				lightingPass->SetUniformFloat3("bvhs[" + std::to_string(index) + "].aabb.min", mesh->GetAABB().min);
-				lightingPass->SetUniformFloat3("bvhs[" + std::to_string(index) + "].aabb.max", mesh->GetAABB().max);
-				lightingPass->SetUniformInt("bvhs[" + std::to_string(index) + "].offset", offset);
-				lightingPass->SetUniformInt("bvhs[" + std::to_string(index) + "].count", mesh->GetAABBGeometry().size());
-
-				// Setting the transform and the material of the object
-				lightingPass->SetUniformMat4("modelsMatrix[" + std::to_string(index) + "]", entity.Get<TransformComponent>()->GetTransform());
-				lightingPass->SetUniformFloat3("materials[" + std::to_string(index) + "].color", entity.Get<MaterialComponent>()->GetMaterial()->GetColor());
-				lightingPass->SetUniformFloat("materials[" + std::to_string(index) + "].type", entity.Get<MaterialComponent>()->GetMaterial()->GetType());
-
-				// Setting the AABB of each triangle of the mesh
-				for (int j = 0; j < mesh->GetAABBGeometry().size(); ++j)
-				{
-					lightingPass->SetUniformFloat3("aabbs[" + std::to_string(offset + j) + "].min", mesh->GetAABBGeometry()[j].min);
-					lightingPass->SetUniformFloat3("aabbs[" + std::to_string(offset + j) + "].max", mesh->GetAABBGeometry()[j].max);
-					//lightingPass->SetUniformFloat3("aabbs[" + std::to_string(offset + j) + "].normal", mesh->GetAABBGeometry()[j].normal);
-				}
-
-				// Incrementing the offset and the size
-				offset += mesh->GetAABBGeometry().size();
-				index++;
-			}
-		}
-
-		glm::vec2 viewportSize = { 2.0f * camera.GetAspectRatio(), 2.0f };
-
-		lightingPass->SetUniformFloat3("viewPos", camera.GetPosition());
-		lightingPass->SetUniformFloat3("right", camera.GetRight());
-		lightingPass->SetUniformFloat3("up", camera.GetUp());
-		lightingPass->SetUniformFloat3("front", camera.GetFront());
-		
-		lightingPass->SetUniformFloat2("canvas", viewSize);
-		lightingPass->SetUniformFloat2("viewportSize", viewportSize);
-
-		lightingPass->SetUniformFloat("nearPlane", camera.GetNearPlane());
-		lightingPass->SetUniformFloat("farPlane", camera.GetFarPlane());
-
-		lightingPass->SetUniformFloat("horizontalFov", camera.GetHorizontalFov());
-		lightingPass->SetUniformFloat("verticalFov", camera.GetVerticalFov());
-		
-		lightingPass->SetUniformFloat("aspectRatio", camera.GetAspectRatio());
-		lightingPass->SetUniformFloat("scale", glm::tan(glm::radians(camera.GetVerticalFov() * 0.5f)));
-		
-		lightingPass->SetUniformMat4("inverseCamera", glm::inverse(camera.GetProjectionMatrix() * camera.GetViewMatrix()));
-
-		Renderer::DrawFullscreenQuad();
-		//Renderer::DrawSkybox(vao, skybox, skyboxShader, camera.GetViewMatrix(), camera.GetProjectionMatrix());
-
-		sceneFramebuffer->UnbindTextures();
-		viewportFramebuffer->Unbind();
-
-		//computeShader->Bind();
-		//computeShader->SetUniformInt("imgOutput", 0);
-		//computeShader->DispatchCompute();
-		//computeShader->Unbind();
-
+		// Path Tracing with Compute Shader
 		{
 			computeShader->Bind();
 			computeShader->SetUniformInt("imgOutput", 0);
@@ -624,6 +472,157 @@ namespace Lux
 		contentBrowser.OnEvent(e);
 
 		dispatcher.Dispatch<KeyPressedEvent>(LUX_BIND_EVENT_FN(EditorLayer::ShortCuts));
+	}
+
+	void EditorLayer::PathTracingWithoutCS()
+	{
+		sceneFramebuffer->Bind();
+
+		Renderer::ClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
+		Renderer::Clear();
+
+		Renderer::BeginScene(camera);
+
+		scene->Update();
+
+		Renderer::EndScene();
+
+		sceneFramebuffer->Unbind();
+
+		viewportFramebuffer->Bind();
+
+		Renderer::ClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
+		Renderer::Clear();
+
+		lightingPass->Bind();
+
+		sceneFramebuffer->BindTextures();
+		lightingPass->SetUniformInt("positions", 0);
+		lightingPass->SetUniformInt("normals", 1);
+		lightingPass->SetUniformInt("albedoSpecular", 2);
+
+		accumulateFramebuffer->BindTextures(3);
+		lightingPass->SetUniformInt("accumulateTexture", 3);
+		lightingPass->SetUniformInt("samples", samples++);
+
+		transformsTexture->Bind(4);
+		lightingPass->SetUniformInt("transformsTex", 4);
+
+		textureArray->Bind(5);
+		lightingPass->SetUniformInt("texturesTex", 5);
+
+		verticesTexture->Bind(6);
+		lightingPass->SetUniformInt("verticesTex", 6);
+
+		indicesTexture->Bind(7);
+		lightingPass->SetUniformInt("indicesTex", 7);
+
+		normalsTexture->Bind(8);
+		lightingPass->SetUniformInt("normalsTex", 8);
+
+		objectsTexture->Bind(9);
+		lightingPass->SetUniformInt("objectsTex", 9);
+
+		lightingPass->SetUniformFloat3("viewPos", camera.GetPosition());
+
+		const auto& lights = scene->GetLights();
+
+		int pointLights = 0;
+		int spotLights = 0;
+		for (int i = 0; i < lights.size(); ++i)
+		{
+			TransformComponent* transform = lights[i].first;
+			LightComponent* light = lights[i].second;
+			switch (light->GetType())
+			{
+			case LightType::DIRECTIONAL:
+			{
+				lightingPass->SetUniformFloat3("dirLight.direction", transform->GetRotation());
+				lightingPass->SetUniformFloat3("dirLight.radiance", light->GetColor());
+				break;
+			}
+			case LightType::POINT:
+			{
+				std::string number = std::to_string(pointLights++);
+				lightingPass->SetUniformFloat3("pointLights[" + number + "].position", transform->GetPosition());
+				lightingPass->SetUniformFloat3("pointLights[" + number + "].radiance", light->GetColor());
+
+				lightingPass->SetUniformFloat("pointLights[" + number + "].radius", 5.0f);
+				break;
+			}
+			case LightType::SPOT:
+			{
+				std::string number = std::to_string(spotLights++);
+				lightingPass->SetUniformFloat3("spotLights[" + number + "].position", transform->GetPosition());
+				lightingPass->SetUniformFloat3("spotLights[" + number + "].direction", transform->GetRotation());
+				lightingPass->SetUniformFloat3("spotLights[" + number + "].radiance", light->GetColor());
+
+				lightingPass->SetUniformFloat("spotLights[" + number + "].radius", light->GetRange());
+				lightingPass->SetUniformFloat("spotLights[" + number + "].cutOff", glm::cos(glm::radians(light->GetCutOff())));
+				lightingPass->SetUniformFloat("spotLights[" + number + "].outerCutOff", glm::cos(glm::radians(light->GetCutOff() + 2.0f)));
+				break;
+			}
+			}
+		}
+
+		int index = 0;
+		int offset = 0;
+		for (int i = 0; i < scene->GetWorld().size(); ++i)
+		{
+			Entity& entity = scene->GetWorld()[i];
+			if (MeshComponent* mesh = entity.Get<MeshComponent>())
+			{
+				// Setting the global AABB of the object
+				lightingPass->SetUniformFloat3("bvhs[" + std::to_string(index) + "].aabb.min", mesh->GetAABB().min);
+				lightingPass->SetUniformFloat3("bvhs[" + std::to_string(index) + "].aabb.max", mesh->GetAABB().max);
+				lightingPass->SetUniformInt("bvhs[" + std::to_string(index) + "].offset", offset);
+				lightingPass->SetUniformInt("bvhs[" + std::to_string(index) + "].count", mesh->GetAABBGeometry().size());
+
+				// Setting the transform and the material of the object
+				lightingPass->SetUniformMat4("modelsMatrix[" + std::to_string(index) + "]", entity.Get<TransformComponent>()->GetTransform());
+				lightingPass->SetUniformFloat3("materials[" + std::to_string(index) + "].color", entity.Get<MaterialComponent>()->GetMaterial()->GetColor());
+				lightingPass->SetUniformFloat("materials[" + std::to_string(index) + "].type", entity.Get<MaterialComponent>()->GetMaterial()->GetType());
+
+				// Setting the AABB of each triangle of the mesh
+				for (int j = 0; j < mesh->GetAABBGeometry().size(); ++j)
+				{
+					lightingPass->SetUniformFloat3("aabbs[" + std::to_string(offset + j) + "].min", mesh->GetAABBGeometry()[j].min);
+					lightingPass->SetUniformFloat3("aabbs[" + std::to_string(offset + j) + "].max", mesh->GetAABBGeometry()[j].max);
+					//lightingPass->SetUniformFloat3("aabbs[" + std::to_string(offset + j) + "].normal", mesh->GetAABBGeometry()[j].normal);
+				}
+
+				// Incrementing the offset and the size
+				offset += mesh->GetAABBGeometry().size();
+				index++;
+			}
+		}
+
+		glm::vec2 viewportSize = { 2.0f * camera.GetAspectRatio(), 2.0f };
+
+		lightingPass->SetUniformFloat3("viewPos", camera.GetPosition());
+		lightingPass->SetUniformFloat3("right", camera.GetRight());
+		lightingPass->SetUniformFloat3("up", camera.GetUp());
+		lightingPass->SetUniformFloat3("front", camera.GetFront());
+
+		lightingPass->SetUniformFloat2("canvas", viewSize);
+		lightingPass->SetUniformFloat2("viewportSize", viewportSize);
+
+		lightingPass->SetUniformFloat("nearPlane", camera.GetNearPlane());
+		lightingPass->SetUniformFloat("farPlane", camera.GetFarPlane());
+
+		lightingPass->SetUniformFloat("horizontalFov", camera.GetHorizontalFov());
+		lightingPass->SetUniformFloat("verticalFov", camera.GetVerticalFov());
+
+		lightingPass->SetUniformFloat("aspectRatio", camera.GetAspectRatio());
+		lightingPass->SetUniformFloat("scale", glm::tan(glm::radians(camera.GetVerticalFov() * 0.5f)));
+
+		lightingPass->SetUniformMat4("inverseCamera", glm::inverse(camera.GetProjectionMatrix() * camera.GetViewMatrix()));
+
+		Renderer::DrawFullscreenQuad();
+		//Renderer::DrawSkybox(vao, skybox, skyboxShader, camera.GetViewMatrix(), camera.GetProjectionMatrix());
+
+		sceneFramebuffer->UnbindTextures();
+		viewportFramebuffer->Unbind();
 	}
 
 	bool EditorLayer::ShortCuts(KeyPressedEvent& e)

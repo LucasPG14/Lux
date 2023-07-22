@@ -89,7 +89,7 @@ bool RayTriangleHit(Ray ray, inout HitRecord hit, float minT, float maxT)
 	bool somethingHit = false;
 	float closest = maxT;
 
-	for (int j = 0; j < 2; ++j)
+	for (int j = 0; j < 6; ++j)
 	{
 		vec4 object = objects[j];
 
@@ -159,7 +159,9 @@ bool RayTriangleHit(Ray ray, inout HitRecord hit, float minT, float maxT)
 				vec3 normal3 = texelFetch(normalsTex, ivec2(int(indices[i].z), 0), 0).xyz;
 
 				hit.normal = normalize(normal1 * (1.0 - u -v) + normal2 * u + normal3 * v);
-				hit.normal = dot(ray.direction, hit.normal) < 0.0 ? hit.normal : -hit.normal;
+				hit.normal = normalize(transpose(inverse(mat3(modelMatrix))) * hit.normal);
+				
+				hit.normal = dot(ray.direction, hit.normal) < 0.0 ? -hit.normal : hit.normal;
 			}
 		}
 	}
@@ -178,15 +180,15 @@ vec3 TracePath(const Ray ray, vec2 uv)
 	float accum = 1.0;
 	
 	int i = 0;
-	for (; i < 50; ++i)
+	for (; i < 2; ++i)
 	{
 		if (RayTriangleHit(hitRay, hit, 0.001, tMax))
 		{
 			hitRay.origin = hit.point;
-			hitRay.direction = hit.normal + randomPointInUnitSphere(uv, newSeed);
+			//hitRay.direction = reflect(hitRay.direction, hit.normal);
+			hitRay.direction = normalize(hit.normal + randomPointInUnitSphere(uv, newSeed));
 			tMax = hit.t;
-			color = hit.material.color;
-			//color = vec3(1.0, 0.0, 0.0);
+			color *= (hit.material.color * 0.5);
 			newSeed *= 1.456;
 		}
 		else
@@ -216,8 +218,10 @@ void main()
 	ivec2 texelCoord = ivec2(gl_GlobalInvocationID.xy);
 
 	vec2 fragCoord;
-	fragCoord.x = float(texelCoord.x / 897.0) * 2.0 - 1.0;
-	fragCoord.y = float(texelCoord.y / 701.0) * 2.0 - 1.0;
+	fragCoord.x = float(texelCoord.x)/(gl_NumWorkGroups.x);
+    fragCoord.y = float(texelCoord.y)/(gl_NumWorkGroups.y);
+	//fragCoord.x = float(texelCoord.x / 897.0) * 2.0 - 1.0;
+	//fragCoord.y = float(texelCoord.y / 701.0) * 2.0 - 1.0;
 
 	vec2 uv = texelCoord / canvas;
 	vec3 color;
@@ -235,7 +239,7 @@ void main()
 	
 	if (prev != vec3(0.0, 0.0, 0.0))
 	{
-		color = (float(samples) * prev + color) / float(samples + 1);
+		color = (float(samples - 1) * prev + color) / float(samples);
 	}
 	
     imageStore(imgOutput, texelCoord, vec4(color, 1.0));

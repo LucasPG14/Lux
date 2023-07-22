@@ -33,6 +33,8 @@ namespace Lux
 
 		void OnEvent(Event& e) override;
 
+		void PathTracingWithoutCS();
+
 	private:
 		bool ShortCuts(KeyPressedEvent& e);
 
