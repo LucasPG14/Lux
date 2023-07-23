@@ -74,6 +74,7 @@ namespace Lux
 
 		std::shared_ptr<ShaderStorageBuffer> verticesSsbo;
 		std::shared_ptr<ShaderStorageBuffer> indicesSsbo;
+		std::shared_ptr<ShaderStorageBuffer> normalsSsbo;
 		std::shared_ptr<ShaderStorageBuffer> objectsSsbo;
 
 		PerspectiveCamera camera;

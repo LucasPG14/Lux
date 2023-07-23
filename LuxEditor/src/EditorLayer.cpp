@@ -49,7 +49,8 @@ namespace Lux
 
 		verticesSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetPositions().data(), sizeof(glm::vec4) * scene->GetPositions().size(), 0);
 		indicesSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetIndices().data(), sizeof(glm::vec4) * scene->GetIndices().size(), 1);
-		objectsSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetObjectsInfo().data(), sizeof(glm::vec4) * scene->GetObjectsInfo().size(), 2);
+		normalsSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetNormals().data(), sizeof(glm::vec4) * scene->GetNormals().size(), 2);
+		objectsSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetObjectsInfo().data(), sizeof(glm::vec4) * scene->GetObjectsInfo().size(), 3);
 
 /*		lightingPass->SetStorageBlock("verticesSSBO", verticesSsbo->GetBindingIndex());
 		lightingPass->SetStorageBlock("indicesSSBO", indicesSsbo->GetBindingIndex());
@@ -57,6 +58,7 @@ namespace Lux
 		
 		computeShader->SetStorageBlock("verticesSSBO", verticesSsbo->GetBindingIndex());
 		computeShader->SetStorageBlock("indicesSSBO", indicesSsbo->GetBindingIndex());
+		computeShader->SetStorageBlock("normalsSSBO", normalsSsbo->GetBindingIndex());
 		computeShader->SetStorageBlock("objectsSSBO", objectsSsbo->GetBindingIndex());
 
 		//textureArray->AddTexture("Assets/Textures/rustediron2_normal.png");
@@ -214,31 +216,31 @@ namespace Lux
 			return;
 		}
 
-		//PathTracingWithoutCS();
+		PathTracingWithoutCS();
 
 		// Path Tracing with Compute Shader
-		{
-			computeShader->Bind();
-			computeShader->SetUniformInt("imgOutput", 0);
+		//{
+		//	computeShader->Bind();
+		//	computeShader->SetUniformInt("imgOutput", 0);
 
-			// Uniforms
-			computeShader->SetUniformFloat3("viewPos", camera.GetPosition());
-			computeShader->SetUniformFloat2("canvas", viewSize);
-			computeShader->SetUniformMat4("inverseCamera", glm::inverse(camera.GetProjectionMatrix()* camera.GetViewMatrix()));
-			computeShader->SetUniformInt("samples", samples);
+		//	// Uniforms
+		//	computeShader->SetUniformFloat3("viewPos", camera.GetPosition());
+		//	computeShader->SetUniformFloat2("canvas", viewSize);
+		//	computeShader->SetUniformMat4("inverseCamera", glm::inverse(camera.GetProjectionMatrix()* camera.GetViewMatrix()));
+		//	computeShader->SetUniformInt("samples", samples);
 
-			// Textures
-			accumulateFramebuffer->BindTextures(1);
-			computeShader->SetUniformInt("accumulateTexture", 1);
-			transformsTexture->Bind(4);
-			computeShader->SetUniformInt("transformsTex", 4);
-			normalsTexture->Bind(8);
-			computeShader->SetUniformInt("normalsTex", 8);
+		//	// Textures
+		//	accumulateFramebuffer->BindTextures(1);
+		//	computeShader->SetUniformInt("accumulateTexture", 1);
+		//	transformsTexture->Bind(4);
+		//	computeShader->SetUniformInt("transformsTex", 4);
+		//	normalsTexture->Bind(8);
+		//	computeShader->SetUniformInt("normalsTex", 8);
 
-			computeShader->DispatchCompute();
-			computeShader->Unbind();
-		}
-		samples++;
+		//	computeShader->DispatchCompute();
+		//	computeShader->Unbind();
+		//}
+		//samples++;
 
 		// Accumulating for path tracing
 		accumulateFramebuffer->Bind();
@@ -248,14 +250,14 @@ namespace Lux
 
 		defaultShader->Bind();
 
-		//viewportFramebuffer->BindTextures();
-		computeShader->BindTexture();
+		viewportFramebuffer->BindTextures();
+		//computeShader->BindTexture();
 		defaultShader->SetUniformInt("accumulateColor", 0);
 		//
 		Renderer::DrawFullscreenQuad();
 
-		computeShader->UnbindTexture();
-		//viewportFramebuffer->UnbindTextures();
+		//computeShader->UnbindTexture();
+		viewportFramebuffer->UnbindTextures();
 		defaultShader->Unbind();
 
 		accumulateFramebuffer->Unbind();
