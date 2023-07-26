@@ -21,8 +21,6 @@ layout(location = 0) uniform sampler2D pathColor;
 
 in vec2 texCoord;
 
-uniform int samples;
-
 void main()
 {
     outColor = vec4(texture(pathColor, texCoord).rgb, 1.0);

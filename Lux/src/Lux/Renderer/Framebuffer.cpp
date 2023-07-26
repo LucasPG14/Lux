@@ -169,6 +169,8 @@ namespace Lux
 		glReadBuffer(GL_COLOR_ATTACHMENT0);
 		glReadPixels(0, 0, spec.width, spec.height, GL_RGBA, GL_UNSIGNED_BYTE, data.data());
 
+		stbi_flip_vertically_on_write(1);
+
 		if (!stbi_write_png((path + ".png").c_str(), spec.width, spec.height, 4, data.data(), 0))
 		{
 			LUX_CORE_ERROR("Couldn't save the image");

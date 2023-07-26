@@ -1,12 +1,14 @@
 #include "luxpch.h"
 #include "ResourceManager.h"
 
+#include "Mesh.h"
 #include "Material.h"
 
 namespace Lux
 {
 	uint32_t ResourceManager::materialsCount = 0;
 	std::vector<std::shared_ptr<Material>> ResourceManager::materials = {};
+	std::vector<std::shared_ptr<Mesh>> ResourceManager::meshes = {};
 
 	std::shared_ptr<Material> ResourceManager::CreateMaterial()
 	{
@@ -14,5 +16,13 @@ namespace Lux
 		
 		materials.push_back(material);
 		return material;
+	}
+
+	const std::shared_ptr<Mesh>& ResourceManager::CreateMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, const std::string& path, const std::string& origPath)
+	{
+		std::shared_ptr<Mesh> mesh = CreateSharedPtr<Mesh>(vertices, indices, path, origPath);
+		
+		meshes.push_back(mesh);
+		return mesh;
 	}
 }

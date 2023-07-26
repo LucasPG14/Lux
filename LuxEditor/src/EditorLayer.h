@@ -33,7 +33,9 @@ namespace Lux
 
 		void OnEvent(Event& e) override;
 
-		void PathTracingWithoutCS();
+		void PathTracingView();
+		
+		void PathTracing();
 
 	private:
 		bool ShortCuts(KeyPressedEvent& e);
@@ -52,6 +54,7 @@ namespace Lux
 		std::shared_ptr<Framebuffer> viewportFramebuffer;
 		std::shared_ptr<Framebuffer> accumulateFramebuffer;
 		std::shared_ptr<Shader> lightingPass;
+		std::shared_ptr<Shader> viewSceneShader;
 		std::shared_ptr<Shader> defaultShader;
 
 		std::shared_ptr<TextureCube> skybox;
@@ -76,6 +79,7 @@ namespace Lux
 		std::shared_ptr<ShaderStorageBuffer> indicesSsbo;
 		std::shared_ptr<ShaderStorageBuffer> normalsSsbo;
 		std::shared_ptr<ShaderStorageBuffer> objectsSsbo;
+		std::shared_ptr<ShaderStorageBuffer> transformsSsbo;
 
 		PerspectiveCamera camera;
 
@@ -89,5 +93,6 @@ namespace Lux
 		bool sceneChanged;
 
 		bool imageSaved;
+		bool startRenderer;
 	};
 }

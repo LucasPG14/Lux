@@ -42,29 +42,9 @@ struct Ray
     vec3 direction;
 };
 
-struct AABB
-{
-    vec3 min;
-    vec3 max;
-	vec3 normal;
-};
-uniform AABB aabbs[100];
-
-struct BVH
-{
-	AABB aabb;
-	int offset;
-	int count;
-};
-uniform BVH bvhs[50];
-
 uniform vec3 viewPos;
 uniform vec2 canvas;
 uniform mat4 inverseCamera;
-
-uniform Material materials[5];
-
-uniform int samples;
 
 layout(std430, binding = 0) buffer verticesSSBO
 {
@@ -86,26 +66,21 @@ layout(std430, binding = 3) buffer objectsSSBO
     vec4 objects[];
 };
 
-layout(location = 0) uniform sampler2D positions;
-layout(location = 1) uniform sampler2D normals;
-layout(location = 2) uniform sampler2D albedoSpecular;
-layout(location = 3) uniform sampler2D accumulateTexture;
+layout(std430, binding = 4) buffer transformsSSBO
+{
+    mat4 transforms[];
+};
 
 layout(location = 4) uniform sampler2D transformsTex;
-layout(location = 5) uniform sampler2DArray texturesTex;
-layout(location = 6) uniform sampler2D verticesTex;
-layout(location = 7) uniform sampler2D indicesTex;
-layout(location = 8) uniform sampler2D normalsTex;
-layout(location = 9) uniform sampler2D objectsTex;
 
 float nrand(vec2 n)
 {
-    return fract(sin(dot(n.xy, vec2(12.9898, 78.233)))* 43758.5453);
+    return fract(sin(dot(n.xy, vec2(12.9898, 78.233))) * 43758.5453);
 }
 
 float trand(vec2 n, float seed)
 {
-    return nrand(n * seed * float(samples));
+    return nrand(n * seed);
 }
 
 vec3 randomPointInUnitSphere(vec2 uv, float seed)
@@ -140,7 +115,13 @@ bool RayTriangleHit(Ray ray, inout HitRecord hit, float minT, float maxT)
 		vec4 r2 = texelFetch(transformsTex, ivec2(object.w * 4 + 1, 0), 0).xyzw;
 		vec4 r3 = texelFetch(transformsTex, ivec2(object.w * 4 + 2, 0), 0).xyzw;
 		vec4 r4 = texelFetch(transformsTex, ivec2(object.w * 4 + 3, 0), 0).xyzw;
-
+		
+		//vec4 r1 = transforms[j * 4];
+		//vec4 r2 = transforms[j * 4 + 1];
+		//vec4 r3 = transforms[j * 4 + 2];
+		//vec4 r4 = transforms[j * 4 + 3];
+		
+		//mat4 modelMatrix = transforms[j];
 		mat4 modelMatrix = mat4(r1, r2, r3, r4);
 
 		vec3 origin = vec3(inverse(modelMatrix) * vec4(ray.origin, 1.0));
@@ -220,28 +201,20 @@ vec3 TracePath(const Ray ray, vec2 uv)
 
 	vec3 attenuation = vec3(1.0);
 	
-	int i = 0;
-	for (; i < 2; ++i)
+	if (RayTriangleHit(hitRay, hit, 0.001, tMax))
 	{
-		if (RayTriangleHit(hitRay, hit, 0.001, tMax))
-		{
-			hitRay.origin = hit.point;
-			hitRay.direction = hit.normal + randomPointInUnitSphere(uv, newSeed);
-			tMax = hit.t;
-			color += (attenuation * hit.material.color);
-			attenuation *= 0.5;
-			newSeed *= 1.456;
-		}
-		else
-		{
-			float t = 0.5 * (normalize(hitRay.direction).y + 1.0);
-			color += (attenuation * ((1.0 - t) * vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0)));
-			break;
-		}
+		hitRay.origin = hit.point;
+		hitRay.direction = hit.normal + randomPointInUnitSphere(uv, newSeed);
+		tMax = hit.t;
+		color += hit.material.color;
+		attenuation *= 0.5;
+		newSeed *= 1.456;
 	}
-
-	if (i > 0)
-		color = sqrt(color / float(i));
+	else
+	{
+		float t = 0.5 * (normalize(hitRay.direction).y + 1.0);
+		color += ((1.0 - t) * vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0));
+	}
 
 	return color;
 }
@@ -260,7 +233,6 @@ void main()
     ray.origin = viewPos;
 
 	vec3 color;
-	vec3 prev = texture(accumulateTexture, texCoord).rgb;
 
 	vec2 fragCoord = gl_FragCoord.xy;
 	vec2 uv = fragCoord / canvas;
@@ -274,8 +246,6 @@ void main()
 
 	// Gamma correction
 	color = pow(color, vec3(1.0 / 2.2));
-
-	color = mix(prev, color, 1.0 / float(samples + 1));
 
     fragColor = vec4(color, 1.0);
 }
