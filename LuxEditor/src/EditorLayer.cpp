@@ -52,7 +52,9 @@ namespace Lux
 		indicesSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetIndices().data(), sizeof(glm::vec4) * scene->GetIndices().size(), 1);
 		normalsSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetNormals().data(), sizeof(glm::vec4) * scene->GetNormals().size(), 2);
 		objectsSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetObjectsInfo().data(), sizeof(glm::vec4) * scene->GetObjectsInfo().size(), 3);
-		transformsSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetTransforms().data(), sizeof(glm::mat4) / sizeof(glm::vec4) * scene->GetTransforms().size(), 4);
+		meshesSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetMeshesInfo().data(), sizeof(glm::vec4) * scene->GetMeshesInfo().size(), 4);
+		materialsSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetMaterialsInfo().data(), sizeof(MaterialInfo) * scene->GetMaterialsInfo().size(), 5);
+		transformsSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetTransforms().data(), sizeof(glm::mat4) * scene->GetTransforms().size(), 6);
 
 		Importer::ImportFBX2("Assets/Models/Cube.obj", assetsDir.string());
 
@@ -64,6 +66,8 @@ namespace Lux
 		viewSceneShader->SetStorageBlock("indicesSSBO", indicesSsbo->GetBindingIndex());
 		viewSceneShader->SetStorageBlock("normalsSSBO", normalsSsbo->GetBindingIndex());
 		viewSceneShader->SetStorageBlock("objectsSSBO", objectsSsbo->GetBindingIndex());
+		viewSceneShader->SetStorageBlock("meshesSSBO", meshesSsbo->GetBindingIndex());
+		viewSceneShader->SetStorageBlock("materialsSSBO", materialsSsbo->GetBindingIndex());
 		viewSceneShader->SetStorageBlock("transformsSSBO", transformsSsbo->GetBindingIndex());
 
 		//textureArray->AddTexture("Assets/Textures/rustediron2_normal.png");
@@ -205,16 +209,17 @@ namespace Lux
 	{
 		OPTICK_EVENT("Editor Layer Update");
 
-		if (startRenderer)
+		bool moving = camera.Update(timer);
+
+		sceneChanged = moving == true ? moving : sceneChanged;
+
+		if (sceneChanged)
+			ResetRenderer();
+		
+		if (!startRenderer)
 			PathTracing();
 		else
 		{
-			bool moving = camera.Update(timer);
-
-			sceneChanged = moving == true ? moving : sceneChanged;
-
-			if (sceneChanged)
-				ResetRenderer();
 
 			PathTracingView();
 
@@ -244,25 +249,24 @@ namespace Lux
 
 			// Accumulating for path tracing
 		}
-			accumulateFramebuffer->Bind();
+		accumulateFramebuffer->Bind();
 
-			Renderer::ClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
-			Renderer::Clear();
+		Renderer::ClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
+		Renderer::Clear();
 
-			defaultShader->Bind();
+		defaultShader->Bind();
 
-			viewportFramebuffer->BindTextures();
-			//computeShader->BindTexture();
-			defaultShader->SetUniformInt("pathColor", 0);
-			//
-			Renderer::DrawFullscreenQuad();
+		viewportFramebuffer->BindTextures();
+		//computeShader->BindTexture();
+		defaultShader->SetUniformInt("pathColor", 0);
+		//
+		Renderer::DrawFullscreenQuad();
 
-			//computeShader->UnbindTexture();
-			viewportFramebuffer->UnbindTextures();
-			defaultShader->Unbind();
+		//computeShader->UnbindTexture();
+		viewportFramebuffer->UnbindTextures();
+		defaultShader->Unbind();
 
-			accumulateFramebuffer->Unbind();
-		
+		accumulateFramebuffer->Unbind();
 	}
 
 	void EditorLayer::RenderImGui()
@@ -347,10 +351,10 @@ namespace Lux
 
 				if (ImGui::MenuItem("Create Sphere"))
 				{
-					// TODO:
-					Entity& entity = scene->CreateEntity("Sphere");
-					entity.CreateComponent<MeshComponent>();
-					entity.CreateComponent<MaterialComponent>();
+					//// TODO:
+					//Entity& entity = scene->CreateEntity("Sphere");
+					//entity.CreateComponent<MeshComponent>("");
+					//entity.CreateComponent<MaterialComponent>();
 				}
 
 				ImGui::EndMenu();
@@ -418,7 +422,7 @@ namespace Lux
 				tComponent->SetRotation(glm::degrees(rotation));
 				tComponent->SetScale(scale);
 
-				sceneChanged = true;
+				scene->Changed(Change::TRANSFORM);
 			}
 		}
 		// ImGuizmo End
@@ -469,6 +473,34 @@ namespace Lux
 		hierarchy.Render();
 		//contentBrowser.Render();
 
+		switch (scene->GetChange())
+		{
+		case Change::NONE:
+			break;
+		case Change::TRANSFORM:
+		{
+			TransformComponent* comp = hierarchy.GetSelected()->Get<TransformComponent>();
+			transformsSsbo->ChangeData((void*)glm::value_ptr(comp->GetTransform()), comp->GetID() * sizeof(glm::mat4), sizeof(glm::mat4));
+			scene->Changed(Change::NONE);
+			sceneChanged = true;
+			break;
+		}
+		case Change::MATERIAL:
+		{
+			MaterialInfo info;
+			const std::shared_ptr<Material>& material = hierarchy.GetSelected()->Get<MaterialComponent>()->GetMaterial();
+			info.color = glm::vec4(material->GetColor(), 1.0);
+			info.properties.x = material->GetMetallic();
+			info.properties.y = material->GetRoughness();
+			info.properties.z = material->GetRefractionIndex();
+			materialsSsbo->ChangeData(&info, material->GetID() * sizeof(MaterialInfo), sizeof(MaterialInfo));
+
+			scene->Changed(Change::NONE);
+			sceneChanged = true;
+			break;
+		}
+		}
+
 		ImGui::End();
 	}
 
@@ -481,12 +513,12 @@ namespace Lux
 		Renderer::Clear();
 		accumulateFramebuffer->Unbind();
 
-		scene->CollectInformation();
-		{
-			TextureSpecification spec;
-			spec.format = TextureFormat::FLOAT;
-			transformsTexture = CreateSharedPtr<Texture2D>(scene->GetTransforms().data(), sizeof(glm::mat4) / sizeof(glm::vec4) * scene->GetTransforms().size(), spec);
-		}
+		//scene->CollectInformation();
+		//{
+		//	TextureSpecification spec;
+		//	spec.format = TextureFormat::FLOAT;
+		//	transformsTexture = CreateSharedPtr<Texture2D>(scene->GetTransforms().data(), sizeof(glm::mat4) / sizeof(glm::vec4) * scene->GetTransforms().size(), spec);
+		//}
 		sceneChanged = false;
 		imageSaved = false;
 	}
@@ -526,18 +558,20 @@ namespace Lux
 
 	void EditorLayer::PathTracing()
 	{
-		sceneFramebuffer->Bind();
+		if (samples >= maxSamples)
+			return;
+		//sceneFramebuffer->Bind();
 
-		Renderer::ClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
-		Renderer::Clear();
+		//Renderer::ClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
+		//Renderer::Clear();
 
-		Renderer::BeginScene(camera);
+		//Renderer::BeginScene(camera);
 
-		scene->Update();
+		//scene->Update();
 
-		Renderer::EndScene();
+		//Renderer::EndScene();
 
-		sceneFramebuffer->Unbind();
+		//sceneFramebuffer->Unbind();
 
 		viewportFramebuffer->Bind();
 

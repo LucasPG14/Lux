@@ -71,15 +71,24 @@ namespace Lux
 			{
 				ImGui::Text("Position");
 				ImGui::SameLine();
-				ImGui::DragFloat3("##Position", glm::value_ptr(component->GetModifiedPosition()));
+				if (ImGui::DragFloat3("##Position", glm::value_ptr(component->GetModifiedPosition())))
+				{
+					scene->Changed(Change::TRANSFORM);
+				}
 
 				ImGui::Text("Rotation");
 				ImGui::SameLine();
-				ImGui::DragFloat3("##Rotation", glm::value_ptr(component->GetModifiedRotation()));
+				if (ImGui::DragFloat3("##Rotation", glm::value_ptr(component->GetModifiedRotation())))
+				{
+					scene->Changed(Change::TRANSFORM);
+				}
 
 				ImGui::Text("Scale");
 				ImGui::SameLine();
-				ImGui::DragFloat3("##Scale", glm::value_ptr(component->GetModifiedScale()));
+				if (ImGui::DragFloat3("##Scale", glm::value_ptr(component->GetModifiedScale())))
+				{
+					scene->Changed(Change::TRANSFORM);
+				}
 			}
 		}
 		
@@ -126,7 +135,10 @@ namespace Lux
 				ImGui::SameLine();
 				ImGui::Text("Roughness Map");
 
-				ImGui::ColorPicker3("##color", glm::value_ptr(material.GetColor()));
+				if (ImGui::ColorPicker3("##color", glm::value_ptr(material.GetColor())))
+				{
+					scene->Changed(Change::MATERIAL);
+				}
 			}
 		}
 

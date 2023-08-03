@@ -10,28 +10,34 @@
 
 namespace Lux
 {
+	class Mesh;
+
 	class MeshComponent : public Component
 	{
 	public:
-		MeshComponent();
+		MeshComponent(const std::string& path);
 
 		~MeshComponent();
 
 		void Update() override;
+
+		const std::shared_ptr<Mesh>& GetMesh() { return mesh; }
 
 		const std::shared_ptr<VertexArray>& GetVertexArray() { return vao; }
 
 		std::vector<AABB>& GetAABBGeometry() { return aabbs; }
 		const AABB& GetAABB() { return globalAABB; }
 
-		const std::vector<glm::vec4>& GetPositions() { return positions; }
-		const std::vector<glm::vec4>& GetIndices() { return indices2; }
-		const std::vector<glm::vec4>& GetNormals() { return normals; }
+		const std::vector<glm::vec4>& GetPositions();
+		const std::vector<glm::vec4>& GetIndices();
+		const std::vector<glm::vec4>& GetNormals();
 
 		ComponentType GetType() { return type; }
 		COMPONENT_TYPE(MESH)
 	private:
 		ComponentType type;
+
+		std::shared_ptr<Mesh> mesh;
 
 		std::vector<Vertex> vertices;
 		std::vector<uint32_t> indices;

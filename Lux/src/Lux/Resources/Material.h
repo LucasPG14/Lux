@@ -13,26 +13,35 @@ namespace Lux
 
 		void Bind();
 
-		glm::vec3& GetColor() { return albedoColor; }
+		glm::vec3& GetColor()		{ return albedoColor; }
+		float GetMetallic()			{ return metallic; }
+		float GetRoughness()		{ return roughness; }
+		float GetRefractionIndex()	{ return roughness; }
+
 		int GetType() { return type; }
 
-		uint32_t GetID() { return id; }
+		int GetID() { return id; }
+		void SetID(int newID = -1) { id = newID; }
 
-		const std::shared_ptr<Texture2D>& GetDiffuse() {	return albedo; };
-		const std::shared_ptr<Texture2D>& GetNormalMap() {	return normal; };
-		const std::shared_ptr<Texture2D>& GetMetallic() {	return metallic; };
-		const std::shared_ptr<Texture2D>& GetRoughness() { return roughness; };
+		const std::shared_ptr<Texture2D>& GetDiffuse()		{ return albedo; };
+		const std::shared_ptr<Texture2D>& GetNormalMap()	{ return normal; };
+		const std::shared_ptr<Texture2D>& GetMetallicMap()	{ return metallicMap; };
+		const std::shared_ptr<Texture2D>& GetRoughnessMap() { return roughnessMap; };
 
 	private:
-		uint32_t id;
+		int id;
 
 		std::shared_ptr<Texture2D> albedo;
 		glm::vec3 albedoColor;
 		int type;
 
 		std::shared_ptr<Texture2D> normal;
-		std::shared_ptr<Texture2D> metallic;
-		std::shared_ptr<Texture2D> roughness;
+		std::shared_ptr<Texture2D> metallicMap;
+		std::shared_ptr<Texture2D> roughnessMap;
+
+		float refractionIndex;
+		float metallic;
+		float roughness;
 
 		friend class MaterialComponent;
 	};

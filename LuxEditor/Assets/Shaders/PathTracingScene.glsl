@@ -25,6 +25,19 @@ struct Material
 	vec3 color;
 };
 
+struct MaterialInfo
+{
+	vec4 textureIDs;
+	vec4 color;
+	vec4 properties;
+};
+
+struct Ray
+{
+    vec3 origin;
+    vec3 direction;
+};
+
 struct HitRecord
 {
 	vec3 point;
@@ -33,13 +46,7 @@ struct HitRecord
 
 	vec2 texCoords;
 
-	Material material;
-};
-
-struct Ray
-{
-    vec3 origin;
-    vec3 direction;
+	MaterialInfo material;
 };
 
 uniform vec3 viewPos;
@@ -68,7 +75,12 @@ layout(std430, binding = 3) buffer objectsSSBO
 
 layout(std430, binding = 4) buffer transformsSSBO
 {
-    mat4 transforms[];
+    vec4 meshes[];
+};
+
+layout(std430, binding = 5) buffer materialsSSBO
+{
+    MaterialInfo materials[];
 };
 
 layout(location = 4) uniform sampler2D transformsTex;
@@ -111,10 +123,10 @@ bool RayTriangleHit(Ray ray, inout HitRecord hit, float minT, float maxT)
 	{
 		vec4 object = objects[j];
 
-		vec4 r1 = texelFetch(transformsTex, ivec2(object.w * 4, 0), 0).xyzw;
-		vec4 r2 = texelFetch(transformsTex, ivec2(object.w * 4 + 1, 0), 0).xyzw;
-		vec4 r3 = texelFetch(transformsTex, ivec2(object.w * 4 + 2, 0), 0).xyzw;
-		vec4 r4 = texelFetch(transformsTex, ivec2(object.w * 4 + 3, 0), 0).xyzw;
+		vec4 r1 = texelFetch(transformsTex, ivec2(object.x * 4, 0), 0).xyzw;
+		vec4 r2 = texelFetch(transformsTex, ivec2(object.x * 4 + 1, 0), 0).xyzw;
+		vec4 r3 = texelFetch(transformsTex, ivec2(object.x * 4 + 2, 0), 0).xyzw;
+		vec4 r4 = texelFetch(transformsTex, ivec2(object.x * 4 + 3, 0), 0).xyzw;
 		
 		//vec4 r1 = transforms[j * 4];
 		//vec4 r2 = transforms[j * 4 + 1];
@@ -127,11 +139,14 @@ bool RayTriangleHit(Ray ray, inout HitRecord hit, float minT, float maxT)
 		vec3 origin = vec3(inverse(modelMatrix) * vec4(ray.origin, 1.0));
 		vec3 direction = vec3(inverse(modelMatrix) * vec4(ray.direction, 0.0));
 
-		for (int i = 0; i < 24; ++i)
+		vec4 meshInfo = meshes[int(object.y)];
+		int meshIndices = int(meshInfo.z + meshInfo.w);
+
+		for (int i = int(meshInfo.z); i < meshIndices; ++i)
 		{
-			vec4 v1 = vertices[int(indices[i].x)];
-			vec4 v2 = vertices[int(indices[i].y)];
-			vec4 v3 = vertices[int(indices[i].z)];
+			vec4 v1 = vertices[int(indices[i].x + meshInfo.x)];
+			vec4 v2 = vertices[int(indices[i].y + meshInfo.x)];
+			vec4 v3 = vertices[int(indices[i].z + meshInfo.x)];
 
 			vec3 v1v2 = v2.xyz - v1.xyz;
     		vec3 v1v3 = v3.xyz - v1.xyz;
@@ -166,9 +181,9 @@ bool RayTriangleHit(Ray ray, inout HitRecord hit, float minT, float maxT)
 				hit.point = GetRayAt(ray, t);
 
 				// Extracting normals from the SSBO
-				vec4 normal1 = normalsBO[int(indices[i].x)];
-				vec4 normal2 = normalsBO[int(indices[i].y)];
-				vec4 normal3 = normalsBO[int(indices[i].z)];
+				vec4 normal1 = normalsBO[int(indices[i].x + meshInfo.x)];
+				vec4 normal2 = normalsBO[int(indices[i].y + meshInfo.x)];
+				vec4 normal3 = normalsBO[int(indices[i].z + meshInfo.x)];
 
 				vec2 tC1 = vec2(v1.w, normal1.w);
 				vec2 tC2 = vec2(v2.w, normal2.w);
@@ -176,7 +191,7 @@ bool RayTriangleHit(Ray ray, inout HitRecord hit, float minT, float maxT)
 
 				hit.texCoords = tC1 * (1.0 - u - v) + tC2 * u + tC3 * v;
 
-				hit.material.color = object.xyz;
+				hit.material = materials[int(object.z)];
 
 				hit.normal = normalize(normal1.xyz * (1.0 - u -v) + normal2.xyz * u + normal3.xyz * v);
 				hit.normal = normalize(transpose(inverse(mat3(modelMatrix))) * hit.normal);
@@ -204,9 +219,19 @@ vec3 TracePath(const Ray ray, vec2 uv)
 	if (RayTriangleHit(hitRay, hit, 0.001, tMax))
 	{
 		hitRay.origin = hit.point;
-		hitRay.direction = hit.normal + randomPointInUnitSphere(uv, newSeed);
+
+		vec3 randomDir = randomPointInUnitSphere(uv, newSeed);
+		if (hit.material.properties.x <= 0.0)
+		{
+			hitRay.direction = hit.normal + randomDir;
+		}
+		else
+		{
+			hitRay.direction = reflect(hitRay.direction, hit.normal) + randomDir;
+		}
+
 		tMax = hit.t;
-		color += hit.material.color;
+		color += hit.material.color.xyz;
 		attenuation *= 0.5;
 		newSeed *= 1.456;
 	}

@@ -25,4 +25,14 @@ namespace Lux
 		meshes.push_back(mesh);
 		return mesh;
 	}
+	const std::shared_ptr<Mesh>& ResourceManager::GetMesh(const std::string& path)
+	{
+		for (int i = 0; i < meshes.size(); ++i)
+		{
+			if (meshes[i]->GetOriginalPath() == path)
+				return meshes[i];
+		}
+
+		return nullptr;
+	}
 }

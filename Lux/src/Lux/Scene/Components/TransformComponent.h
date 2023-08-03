@@ -27,6 +27,9 @@ namespace Lux
 			return mat;
 		}
 
+		inline void SetID(int transID = -1) { id = transID; }
+		inline int GetID() { return id; }
+
 		// Setters
 		inline void SetPosition(const glm::vec3& pos) { position = pos; }
 		inline void SetRotation(const glm::vec3& rot) { rotation = rot; }
@@ -50,5 +53,7 @@ namespace Lux
 		glm::vec3 position;
 		glm::vec3 rotation;
 		glm::vec3 scale;
+
+		int id;
 	};
 }

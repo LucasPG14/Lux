@@ -61,7 +61,7 @@ namespace Lux
 			}
 		}
 
-		void ImportFBX2(const std::string& path, const std::string& assetsPath)
+		const std::shared_ptr<Mesh>& ImportFBX2(const std::string& path, const std::string& assetsPath)
 		{
 			Assimp::Importer importer;
 
@@ -70,7 +70,7 @@ namespace Lux
 			if (scene == nullptr)
 			{
 				LUX_CORE_ERROR("Couldn't find the file");
-				return;
+				return nullptr;
 			}
 
 			for (int i = 0; i < scene->mNumMeshes; ++i)
@@ -141,6 +141,8 @@ namespace Lux
 
 				file.write(buffer, size);
 				file.close();
+
+				return resource;
 			}
 		}
 	}

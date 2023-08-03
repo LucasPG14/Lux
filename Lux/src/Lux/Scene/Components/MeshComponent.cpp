@@ -3,15 +3,19 @@
 
 #include "Lux/Utils/Primitives.h"
 #include "Lux/Utils/Importer.h"
+#include "Lux/Resources/ResourceManager.h"
+#include "Lux/Resources/Mesh.h"
 
 #include <imgui.h>
 
 namespace Lux
 {
-	MeshComponent::MeshComponent()
+	MeshComponent::MeshComponent(const std::string& path)
 	{
 		//CreateSphere(vertices, indices);
-		Importer::ImportFBX(vertices, indices, "Assets/Models/Cube.obj");
+		mesh = ResourceManager::GetMesh(path);
+		if (!mesh)
+			mesh = Importer::ImportFBX2(path, "Assets/");
 
 		//glm::vec3 min = glm::vec3(std::numeric_limits<float>().max());
 		//glm::vec3 max = glm::vec3(std::numeric_limits<float>().min());
@@ -54,19 +58,19 @@ namespace Lux
 		//	aabbs.push_back(aabb);
 		//}
 
-		int indSize = indices.size() / 3;
-		for (int i = 0; i < indSize; ++i)
-		{
-			indices2.push_back(glm::vec4(indices[i * 3], indices[(i * 3) + 1], indices[(i * 3) + 2], 0.0f));
-		}
+		//int indSize = indices.size() / 3;
+		//for (int i = 0; i < indSize; ++i)
+		//{
+		//	indices2.push_back(glm::vec4(indices[i * 3], indices[(i * 3) + 1], indices[(i * 3) + 2], 0.0f));
+		//}
 
-		for (int i = 0; i < vertices.size(); ++i)
-		{
-			positions.push_back(glm::vec4(vertices[i].position, vertices[i].texCoords.x));
-			normals.push_back(glm::vec4(vertices[i].normals, vertices[i].texCoords.y));
-		}
+		//for (int i = 0; i < vertices.size(); ++i)
+		//{
+		//	positions.push_back(glm::vec4(vertices[i].position, vertices[i].texCoords.x));
+		//	normals.push_back(glm::vec4(vertices[i].normals, vertices[i].texCoords.y));
+		//}
 
-		vao = CreateSharedPtr<VertexArray>();
+		/*vao = CreateSharedPtr<VertexArray>();
 
 		vbo = CreateSharedPtr<VertexBuffer>(vertices.data(), vertices.size() * sizeof(Vertex));
 		{
@@ -85,7 +89,7 @@ namespace Lux
 		vao->AddVertexBuffer(vbo);
 
 		ebo = CreateSharedPtr<IndexBuffer>(indices.data(), indices.size());
-		vao->AddIndexBuffer(ebo);
+		vao->AddIndexBuffer(ebo);*/
 	}
 	
 	MeshComponent::~MeshComponent()
@@ -94,5 +98,20 @@ namespace Lux
 	
 	void MeshComponent::Update()
 	{
+	}
+	
+	const std::vector<glm::vec4>& MeshComponent::GetPositions()
+	{
+		return mesh->GetPositions();
+	}
+	
+	const std::vector<glm::vec4>& MeshComponent::GetIndices()
+	{
+		return mesh->GetIndicesRT();
+	}
+	
+	const std::vector<glm::vec4>& MeshComponent::GetNormals()
+	{
+		return mesh->GetNormals();
 	}
 }
