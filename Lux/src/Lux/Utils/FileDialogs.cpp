@@ -47,7 +47,7 @@ namespace Lux
 		openFileName.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
 
 		if (GetSaveFileNameA(&openFileName) == TRUE)
-			return openFileName.lpstrFile;
+			return openFileName.lpstrFile + openFileName.nFileExtension;
 
 		return std::string();
 	}

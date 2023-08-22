@@ -10,6 +10,7 @@ namespace Lux
 	class ResourceManager
 	{
 	public:
+		static void LoadFile(const std::filesystem::path& filepath);
 
 		static std::shared_ptr<Material> CreateMaterial();
 

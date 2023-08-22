@@ -70,9 +70,9 @@ uniform vec3 viewPos;
 uniform vec2 canvas;
 uniform mat4 inverseCamera;
 
-//uniform Material materials[5];
-
 uniform int samples;
+
+uniform int numObjects;
 
 layout(std430, binding = 0) buffer verticesSSBO
 {
@@ -126,6 +126,8 @@ float nrand(vec2 n)
     return fract(sin(dot(n.xy, vec2(12.9898, 78.233)))* 43758.5453);
 }
 
+float hash(float n) { return fract(sin(n) * 1e4); }
+
 float trand(vec2 n, float seed)
 {
     return nrand(n * seed * float(samples));
@@ -145,6 +147,19 @@ vec3 randomPointInUnitSphere(vec2 uv, float seed)
     return p;
 }
 
+vec3 randomPointInUnitSphere2(vec2 uv, float seed, float minV, float maxV)
+{
+    vec3 v;
+    do {
+        v.x = minV + (maxV - minV) * hash(seed);
+        v.y = minV + (maxV - minV) * hash(2.333 * seed);
+        v.z = minV + (maxV - minV) * hash(-1.134 * seed);
+		seed *= 1.312;
+    } while(length(v) >= 1.0);
+
+	return v;
+}
+
 vec3 GetRayAt(const Ray ray, float t)
 {
 	return ray.origin + t * ray.direction;
@@ -155,7 +170,7 @@ bool RayTriangleHit(Ray ray, inout HitRecord hit, float minT, float maxT)
 	bool somethingHit = false;
 	float closest = maxT;
 
-	for (int j = 0; j < 7; ++j)
+	for (int j = 0; j < numObjects; ++j)
 	{
 		vec4 object = objects[j];
 
@@ -239,60 +254,68 @@ bool RayTriangleHit(Ray ray, inout HitRecord hit, float minT, float maxT)
 vec3 TracePath(const Ray ray, vec2 uv)
 {
 	vec3 color = vec3(0.0);
-	HitRecord hit;
 	Ray hitRay = ray;
 	float tMax = 1000000.0;
 
 	float newSeed = 1.0;
 	float accum = 1.0;
 
-	vec3 attenuation = vec3(1.0);
+	vec3 throughput = vec3(1.0);
 	
 	int i = 0;
-	for (; i < 2; ++i)
+	for (; i < 8; ++i)
 	{
+		HitRecord hit;
+		hitRay.direction = normalize(hitRay.direction);
 		if (RayTriangleHit(hitRay, hit, 0.001, tMax))
 		{
-			hitRay.origin = hit.point;
+			hitRay.origin = hit.point + (hit.normal * 0.001);
 
+			//vec3 randomDir = randomPointInUnitSphere2(uv, newSeed, -1.0, 1.0);
 			vec3 randomDir = randomPointInUnitSphere(uv, newSeed);
-			//if (hit.material.properties.x <= 0.0)
-			//{
-			//	hitRay.direction = hit.normal + randomDir;
-			//}
-			//else
-			//{
-			//	float indexRef = hit.frontFace ? (1.0 / hit.material.properties.z) : hit.material.properties.z;
-			//
-			//	float cosTheta = min(dot(-hitRay.direction, hit.normal), 1.0);
-			//	float sinTheta = sqrt(1.0 - cosTheta*cosTheta);
-			//
-			//	if (indexRef * sinTheta > 1.0)
-			//	{
-			//		hitRay.direction = reflect(hitRay.direction, hit.normal) + (hit.material.properties.x * randomDir);
-			//	}
-			//	else
-			//	{
-			//		hitRay.direction = refract(hitRay.direction, hit.normal, indexRef) + randomDir;
-			//	}
-			//}
+			if (hit.material.properties.x <= 0.0)
+			{
+				hitRay.direction = hit.normal;
+				throughput *= hit.material.color.xyz;
+			}
+			else
+			{
+				float indexRef = hit.frontFace ? (1.0 / 1.0) : 1.0;
+			
+				float cosTheta = min(dot(-hitRay.direction, hit.normal), 1.0);
+				float sinTheta = sqrt(1.0 - cosTheta*cosTheta);
+			
+				//if (indexRef * sinTheta > 1.0)
+				//{
+					vec3 reflectedDir = reflect(hitRay.direction, hit.normal);
+					//vec3 reflectedDir = refract(hitRay.direction, hit.normal, indexRef);
+					hitRay.direction = reflectedDir;
+					if (dot(hitRay.direction, hit.normal) <= 0.0)
+					{
+						color = vec3(0.0);
+						break;
+					}
+				//}
+				//else
+				//{
+				//	hitRay.direction = refract(hitRay.direction, hit.normal, indexRef);
+				//}
+			}
 
-			hitRay.direction = hit.normal + randomDir;
+			//hitRay.direction = hit.normal + randomDir;
+			//throughput *= hit.material.color.xyz;
 			tMax = hit.t;
-			color += attenuation * hit.material.color.xyz;
-			attenuation *= hit.material.color.xyz;
 			newSeed *= 1.456;
 		}
 		else
 		{
-			float t = 0.5 * (normalize(hitRay.direction).y + 1.0);
-			color += (attenuation * ((1.0 - t) * vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0)));
+			float t = 0.5 * (hitRay.direction.y + 1.0);
+			vec3 background = ((1.0 - t) * vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0));
+			//vec3 background = vec3(0.5);
+			color += throughput * background;
 			break;
 		}
 	}
-
-	if (i > 0)
-		color = sqrt(color / float(i));
 
 	return color;
 }

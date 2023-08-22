@@ -3,6 +3,7 @@
 
 #include "Lux/Core/KeyCodes.h"
 
+#include "Lux/Resources/ResourceManager.h"
 #include "Lux/Utils/Importer.h"
 
 #include <ImGui/imgui.h>
@@ -16,27 +17,32 @@ namespace Lux
 		folder = CreateSharedPtr<Texture2D>("Editor/Textures/folder.png");
 		tex = CreateSharedPtr<Texture2D>("Assets/Textures/bakeHouse.png");
 
-		//// Load Resources
-		//std::stack<std::filesystem::path> resources;
-		//resources.push(assetsDir);
+		for (auto& entry : std::filesystem::directory_iterator("Library"))
+		{
+			ResourceManager::LoadFile(entry.path());
+		}
 
-		//std::string extension = ".bsres";
+		// Load Resources
+		std::stack<std::filesystem::path> resources;
+		resources.push(assetsDir);
 
-		//while (!resources.empty())
-		//{
-		//	std::filesystem::path path = resources.top();
-		//	resources.pop();
+		std::string extension = ".bsres";
 
-		//	for (auto& entry : std::filesystem::directory_iterator(path))
-		//	{
-		//		const std::filesystem::path& filePath = entry.path();
-		//		if (entry.is_directory()) resources.push(entry);
-		//		else if (filePath.extension().string() == extension)
-		//		{
-		//		
-		//		}
-		//	}
-		//}
+		while (!resources.empty())
+		{
+			std::filesystem::path path = resources.top();
+			resources.pop();
+
+			for (auto& entry : std::filesystem::directory_iterator(path))
+			{
+				const std::filesystem::path& filePath = entry.path();
+				if (entry.is_directory()) resources.push(entry);
+				else if (filePath.extension().string() == extension)
+				{
+				
+				}
+			}
+		}
 	}
 	
 	void ContentBrowserWindow::Render()
@@ -94,7 +100,7 @@ namespace Lux
 				if (ImGui::IsMouseDoubleClicked(0))
 				{
 					if (file.is_directory()) currentDir /= path.filename();
-					//else if (path.extension().string() == ".bsscene") OpenScene(path);
+					//else if (path.extension().string() == ".scene") OpenScene(path);
 				}
 				else if (ImGui::IsMouseClicked(0))
 				{
@@ -135,18 +141,11 @@ namespace Lux
 	
 	bool ContentBrowserWindow::FileDropped(WindowDropEvent& e)
 	{
-		/*std::vector<std::string>& paths = e.GetPaths();
-		std::string extension = ".png";
+		std::vector<std::string>& paths = e.GetPaths();
 		for (int i = 0; i < paths.size(); ++i)
 		{
-			std::filesystem::path path = paths[i];
-			if (path.extension() == extension)
-			{
-				Importer::ImportTexture(path, currentDir);
-				continue;
-			}
-			Importer::Import(path, currentDir);
-		}*/
+			std::filesystem::copy(paths[i], assetsDir);
+		}
 
 		return true;
 	}

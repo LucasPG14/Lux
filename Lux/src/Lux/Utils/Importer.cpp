@@ -107,7 +107,7 @@ namespace Lux
 						indices.push_back(face.mIndices[k]);
 				}
 
-				std::filesystem::path resourcePath = assetsPath;
+				std::filesystem::path resourcePath = "Library/";
 				resourcePath += mesh->mName.C_Str();
 				resourcePath += ".rmesh";
 

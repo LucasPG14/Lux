@@ -5,6 +5,11 @@
 #include "Components/MeshComponent.h"
 #include "Components/MaterialComponent.h"
 
+#include "Lux/Resources/ResourceManager.h"
+
+#include "Lux/Resources/Mesh.h"
+#include "Lux/Resources/Material.h"
+
 #include <yaml-cpp/yaml.h>
 
 // YAML functions to deserialize the glm::vec
@@ -91,7 +96,7 @@ namespace Lux
 				// Mesh map begin
 				emitter << YAML::BeginMap;
 
-				
+				emitter << YAML::Key << "MeshPath" << YAML::Value << comp->GetMesh()->GetOriginalPath();
 
 				emitter << YAML::EndMap;
 				// Mesh map end
@@ -103,7 +108,10 @@ namespace Lux
 				// Material map begin
 				emitter << YAML::BeginMap;
 
-				
+				emitter << YAML::Key << "Color" << YAML::Value << comp->GetMaterial()->GetColor();
+				emitter << YAML::Key << "Metallic" << YAML::Value << comp->GetMaterial()->GetMetallic();
+				emitter << YAML::Key << "Roughness" << YAML::Value << comp->GetMaterial()->GetRoughness();
+				emitter << YAML::Key << "IndexRefraction" << YAML::Value << comp->GetMaterial()->GetRefractionIndex();
 
 				emitter << YAML::EndMap;
 				// Material map end
@@ -118,6 +126,7 @@ namespace Lux
 
 		std::ofstream file(path);
 		file << emitter.c_str();
+		file.close();
 	}
 	
 	bool SceneSerializer::Deserialize(const std::filesystem::path& path)
@@ -151,15 +160,14 @@ namespace Lux
 			YAML::Node mesh = yamlEntity["MeshComponent"];
 			if (mesh)
 			{
-				uint64_t uuid = mesh["UUID"].as<uint64_t>();
-				
-			}
-
-			YAML::Node material = yamlEntity["MaterialComponent"];
-			if (material)
-			{
-				uint64_t uuid = material["UUID"].as<uint64_t>();
-				
+				std::string meshPath = mesh["MeshPath"].as<std::string>();
+				entity.CreateComponent<MeshComponent>(meshPath);
+				YAML::Node material = yamlEntity["MaterialComponent"];
+				const std::shared_ptr<Material>& mat = entity.CreateComponent<MaterialComponent>()->GetMaterial();
+				mat->SetColor(material["Color"].as<glm::vec3>());
+				mat->SetMetallic(material["Metallic"].as<float>());
+				mat->SetRoughness(material["Roughness"].as<float>());
+				mat->SetRefractionIndex(material["IndexRefraction"].as<float>());
 			}
 		}
 

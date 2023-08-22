@@ -10,6 +10,8 @@ namespace Lux
 
 		void Bind();
 
+		void Reset(const void* data, uint32_t size);
+
 		uint32_t GetBindingIndex() { return bindingIndex; }
 
 		void ChangeData(void* data, uint32_t offset, uint32_t size);

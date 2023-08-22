@@ -14,9 +14,9 @@ namespace Lux
 		void Bind();
 
 		glm::vec3& GetColor()		{ return albedoColor; }
-		float GetMetallic()			{ return metallic; }
-		float GetRoughness()		{ return roughness; }
-		float GetRefractionIndex()	{ return roughness; }
+		float& GetMetallic()			{ return metallic; }
+		float& GetRoughness()		{ return roughness; }
+		float& GetRefractionIndex()	{ return refractionIndex; }
 
 		int GetType() { return type; }
 
@@ -27,6 +27,11 @@ namespace Lux
 		const std::shared_ptr<Texture2D>& GetNormalMap()	{ return normal; };
 		const std::shared_ptr<Texture2D>& GetMetallicMap()	{ return metallicMap; };
 		const std::shared_ptr<Texture2D>& GetRoughnessMap() { return roughnessMap; };
+
+		void SetColor(const glm::vec3& col) { albedoColor = col; }
+		void SetMetallic(float met) { metallic = met; }
+		void SetRoughness(float rough) { roughness = rough; }
+		void SetRefractionIndex(float idx) { refractionIndex = idx; }
 
 	private:
 		int id;

@@ -15,26 +15,33 @@ namespace Lux
 {
 	Scene::Scene() : change(Change::NONE)
 	{
-		DrawCube("Assets/Models/Cube.obj", { 1.0, 0.0, 0.0 }, { -1.5f, 0.0f, 0.0f }, { 0.1f, 3.0f, 3.0f });
-		DrawCube("Assets/Models/Cube.obj", { 0.0, 1.0, 0.0 }, { 1.5f, 0.0f, 0.0f }, { 0.1f, 3.0f, 3.0f });
-		////DrawCube({ 1.0, 1.0, 1.0 }, { 0.0f, 0.0f, 1.5f }, { 0.1f, 3.0f, 3.0f }, {0.0f, 90.0f, 0.0f});
-		DrawCube("Assets/Models/Cube.obj", { 1.0, 1.0, 1.0 }, { 0.0f, 0.0f, -1.5f }, { 0.1f, 3.0f, 3.0f }, {0.0f, 90.0f, 0.0f});
-		DrawCube("Assets/Models/Cube.obj", { 1.0, 1.0, 1.0 }, { 0.0f, -1.5f, 0.0f }, { 0.1f, 3.0f, 3.0f }, {0.0f, 0.0f, 90.0f});
-		DrawCube("Assets/Models/Cube.obj", {1.0, 1.0, 1.0}, {0.0f, 1.5f, 0.0f}, {0.1f, 3.0f, 3.0f}, {0.0f, 0.0f, 90.0f});
+		//Entity& dirLight = CreateEntity("Directional Light");
+		//TransformComponent* transform = dirLight.Get<TransformComponent>();
+		//transform->SetPosition({ 0.0f, 3.0f, 0.0f });
+		//transform->SetRotation({ 50.0f, -30.0f, -70.0f });
+		//AddLight(transform, dirLight.CreateComponent<LightComponent>(LightType::DIRECTIONAL));
+
+		// Scene ShaderToy
+		//DrawCube("Assets/Models/Cube.obj", { 0.12, 0.45, 0.15 }, { -1.5f, 0.0f, 0.0f }, { 0.1f, 3.0f, 3.0f });
+		//DrawCube("Assets/Models/Cube.obj", { 0.65, 0.05, 0.05 }, { 1.5f, 0.0f, 0.0f }, { 0.1f, 3.0f, 3.0f });
+		//DrawCube("Assets/Models/Cube.obj", { 0.73, 0.73, 0.73 }, { 0.0f, 0.0f, -1.5f }, { 0.1f, 3.0f, 3.0f }, {0.0f, 90.0f, 0.0f});
+		//DrawCube("Assets/Models/Cube.obj", { 0.73, 0.73, 0.73 }, { 0.0f, -1.5f, 0.0f }, { 0.1f, 3.0f, 3.0f }, {0.0f, 0.0f, 90.0f});
+		//DrawCube("Assets/Models/Cube.obj", { 0.73, 0.73, 0.73 }, {0.0f, 1.5f, 0.0f}, {0.1f, 3.0f, 3.0f}, {0.0f, 0.0f, 90.0f});
 		//
+		//DrawCube("Assets/Models/Cube.obj", { 0.73, 0.73, 0.73 }, { -0.5f, -0.75f, -0.75f }, { 0.75f, 1.5f, 0.75f }, { 0.0f, 14.0f, 0.0f });
+		//
+		//DrawCube("Assets/Models/Cube.obj", { 0.05, 0.05, 0.65 }, { -0.15f, -1.35f, 0.5f }, { 0.75f, 0.25f, 0.75f }, { 0.0f, -21.0f, 0.0f });
+		//DrawCube("Assets/Models/model.fbx", { 0.73, 0.73, 0.73 }, { -0.15f, -0.928f, 0.5f }, { 0.3f, 0.3f, 0.3f }, { 0.0f, 0.0f, 0.0f });
+		
 		//DrawCube("Assets/Models/BakerHouse.obj", { 0.9, 0.0, 0.9 }, { 0.0f, -1.0f, 0.0f }, { 1.0f, 1.0f, 1.0f }, {0.0f, 0.0f, 0.0f});
-		DrawCube("Assets/Models/Cube.obj", { 0.95, 0.95, 0.95 }, { 0.0f, -1.0f, 0.0f }, { 1.0f, 1.0f, 1.0f }, {0.0f, 0.0f, 0.0f});
+		//DrawCube("Assets/Models/model.fbx", { 0.95, 0.95, 0.95 }, { 0.0f, -1.15f, 0.0f }, { 0.3f, 0.3f, 0.3f }, {0.0f, 0.0f, 0.0f});
+		//DrawCube("Assets/Models/model.fbx", { 1.0f, 0.0f, 0.0f }, { 0.7f, -1.15f, 0.0f }, { 0.3f, 0.3f, 0.3f }, {0.0f, 21.0f, 0.0f});
+		//DrawCube("Assets/Models/model.fbx", { 0.0f, 0.0f, 1.0f }, { -0.7f, -1.15f, 0.0f }, { 0.3f, 0.3f, 0.3f }, {0.0f, 21.0f, 0.0f});
 
-		shader = CreateSharedPtr<Shader>("Assets/Shaders/Deferred.glsl");
-
-		Entity& dirLight = CreateEntity("Directional Light");
-		TransformComponent* transform = dirLight.Get<TransformComponent>();
-		transform->SetPosition({ 0.0f, 3.0f, 0.0f });
-		transform->SetRotation({ 50.0f, -30.0f, -70.0f });
-		AddLight(transform, dirLight.CreateComponent<LightComponent>(LightType::DIRECTIONAL));
-
-		Entity& pointLight = CreateEntity("Spot Light");
-		AddLight(pointLight.Get<TransformComponent>(), pointLight.CreateComponent<LightComponent>(LightType::SPOT));
+		//shader = CreateSharedPtr<Shader>("Assets/Shaders/Deferred.glsl");
+		//
+		//Entity& pointLight = CreateEntity("Spot Light");
+		//AddLight(pointLight.Get<TransformComponent>(), pointLight.CreateComponent<LightComponent>(LightType::SPOT));
 	}
 	
 	Scene::~Scene()
@@ -156,6 +163,15 @@ namespace Lux
 	Entity& Scene::CreateEntity(const std::string& name)
 	{
 		return CreateEntityWithUUID(UUID(), name);
+	}
+
+	Entity& Scene::CreateEntityWithPath(const std::string& path, const std::string& name)
+	{
+		Entity& entity = CreateEntityWithUUID(UUID(), name);
+		entity.CreateComponent<MeshComponent>(path);
+		entity.CreateComponent<MaterialComponent>();
+
+		return entity;
 	}
 	
 	Entity& Scene::CreateEntityWithUUID(UUID id, const std::string& name)

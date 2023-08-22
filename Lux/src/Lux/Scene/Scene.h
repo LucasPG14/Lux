@@ -46,6 +46,7 @@ namespace Lux
 		inline std::vector<Entity>& GetWorld() { return world; }
 
 		Entity& CreateEntity(const std::string& name = "Entity");
+		Entity& CreateEntityWithPath(const std::string& path, const std::string& name);
 		Entity& CreateEntityWithUUID(UUID id, const std::string& name = "Entity");
 	
 		void AddLight(TransformComponent* transform, LightComponent* light) { lights.emplace_back(transform,light); }

@@ -1,0 +1,112 @@
+Scene: Untitled
+Entities:
+  - UUID: 10445534832012310499
+    Name: Directional Light
+    TransformComponent:
+      Position: [0, 3, 0]
+      Rotation: [50, -30, -70]
+      Scale: [1, 1, 1]
+  - UUID: 1555525043879960109
+    Name: Cube1
+    TransformComponent:
+      Position: [-1.5, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [0.100000001, 3, 3]
+    MeshComponent:
+      MeshPath: Assets/Models/Cube.obj
+    MaterialComponent:
+      Color: [0.119999997, 0.449999988, 0.150000006]
+      Metallic: 0
+      Roughness: 0.5
+      IndexRefraction: 1.5
+  - UUID: 15975887374743313055
+    Name: Cube2
+    TransformComponent:
+      Position: [1.5, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [0.100000001, 3, 3]
+    MeshComponent:
+      MeshPath: Assets/Models/Cube.obj
+    MaterialComponent:
+      Color: [0.649999976, 0.0500000007, 0.0500000007]
+      Metallic: 0
+      Roughness: 0.5
+      IndexRefraction: 1.5
+  - UUID: 11852936902677236838
+    Name: Cube3
+    TransformComponent:
+      Position: [0, 0, -1.5]
+      Rotation: [0, 90, 0]
+      Scale: [0.100000001, 3, 3]
+    MeshComponent:
+      MeshPath: Assets/Models/Cube.obj
+    MaterialComponent:
+      Color: [0.730000019, 0.730000019, 0.730000019]
+      Metallic: 0
+      Roughness: 0.5
+      IndexRefraction: 1.5
+  - UUID: 435356000262842149
+    Name: Cube4
+    TransformComponent:
+      Position: [0, -1.5, 0]
+      Rotation: [0, 0, 90]
+      Scale: [0.100000001, 3, 3]
+    MeshComponent:
+      MeshPath: Assets/Models/Cube.obj
+    MaterialComponent:
+      Color: [0.730000019, 0.730000019, 0.730000019]
+      Metallic: 0
+      Roughness: 0.5
+      IndexRefraction: 1.5
+  - UUID: 7865414844212620516
+    Name: Cube5
+    TransformComponent:
+      Position: [0, 1.5, 0]
+      Rotation: [0, 0, 90]
+      Scale: [0.100000001, 3, 3]
+    MeshComponent:
+      MeshPath: Assets/Models/Cube.obj
+    MaterialComponent:
+      Color: [0.730000019, 0.730000019, 0.730000019]
+      Metallic: 0
+      Roughness: 0.5
+      IndexRefraction: 1.5
+  - UUID: 6629279352800944087
+    Name: Cube6
+    TransformComponent:
+      Position: [-0.5, -0.75, -0.75]
+      Rotation: [0, 14, 0]
+      Scale: [0.75, 1.5, 0.75]
+    MeshComponent:
+      MeshPath: Assets/Models/Cube.obj
+    MaterialComponent:
+      Color: [0.730000019, 0.730000019, 0.730000019]
+      Metallic: 0
+      Roughness: 0.5
+      IndexRefraction: 1.5
+  - UUID: 4760267284466813617
+    Name: Cube7
+    TransformComponent:
+      Position: [-0.150000006, -1.35000002, 0.5]
+      Rotation: [0, -21, 0]
+      Scale: [0.75, 0.25, 0.75]
+    MeshComponent:
+      MeshPath: Assets/Models/Cube.obj
+    MaterialComponent:
+      Color: [0.0500000007, 0.0500000007, 0.649999976]
+      Metallic: 0
+      Roughness: 0.5
+      IndexRefraction: 1.5
+  - UUID: 12449617311822064211
+    Name: Cube8
+    TransformComponent:
+      Position: [-0.150000006, -0.927999973, 0.5]
+      Rotation: [0, 0, 0]
+      Scale: [0.300000012, 0.300000012, 0.300000012]
+    MeshComponent:
+      MeshPath: Assets/Models/model.fbx
+    MaterialComponent:
+      Color: [0.730000019, 0.730000019, 0.730000019]
+      Metallic: 0
+      Roughness: 0.5
+      IndexRefraction: 1.5

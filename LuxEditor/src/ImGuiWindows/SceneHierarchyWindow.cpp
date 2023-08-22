@@ -139,6 +139,11 @@ namespace Lux
 				{
 					scene->Changed(Change::MATERIAL);
 				}
+
+				if (ImGui::DragFloat("Metallic", &material.GetMetallic(), 0.1f, 0.0f, 1.0f))
+				{
+					scene->Changed(Change::MATERIAL);
+				}
 			}
 		}
 

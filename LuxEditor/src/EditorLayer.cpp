@@ -20,6 +20,11 @@ namespace Lux
 		: guizmoState(ImGuizmo::TRANSLATE), samples(0), maxSamples(5), needToUpdate(NeedToUpdate::NONE), sceneChanged(false), startRenderer(false)
 	{
 		scene = CreateSharedPtr<Scene>();
+		SceneSerializer serializer(scene);
+		serializer.Deserialize("Assets/ShaderToy.scene");
+
+		std::filesystem::create_directory("Library");
+		
 		contentBrowser = ContentBrowserWindow();
 		hierarchy = SceneHierarchyWindow(scene);
 
@@ -323,7 +328,12 @@ namespace Lux
 				}
 				if (ImGui::MenuItem("Save scene as...", "Ctrl + Shift + S"))
 				{
-
+					std::string filepath = FileDialog::SaveFile("scene (*.scene)\0*.scene\0");
+					if (!filepath.empty())
+					{
+						SceneSerializer serializer(scene);
+						serializer.Serialize(filepath + ".scene");
+					}
 				}
 
 				ImGui::Separator();
@@ -385,15 +395,20 @@ namespace Lux
 		// DragAndDrop Target
 		if (ImGui::BeginDragDropTarget())
 		{
-			//if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER"))
-			//{
-			//	const wchar_t* path = (const wchar_t*)payload->Data;
-			//	std::filesystem::path realPath = std::filesystem::path(assetsDir) / path;
-			//	if (realPath.has_extension())
-			//	{
-			//		if (realPath.extension().string() == ".bsscene") OpenScene(realPath);
-			//	}
-			//}
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER"))
+			{
+				const wchar_t* path = (const wchar_t*)payload->Data;
+				std::filesystem::path realPath = std::filesystem::path(assetsDir) / path;
+				if (realPath.has_extension())
+				{
+					//if (realPath.extension().string() == ".bsscene") OpenScene(realPath);
+					if (realPath.extension().string() == ".obj" || realPath.extension().string() == ".fbx")
+					{
+						scene->CreateEntityWithPath(realPath.string(), realPath.filename().string());
+						scene->Changed(Change::OBJECT);
+					}
+				}
+			}
 
 			ImGui::EndDragDropTarget();
 		}
@@ -471,7 +486,7 @@ namespace Lux
 		ImGui::End();
 
 		hierarchy.Render();
-		//contentBrowser.Render();
+		contentBrowser.Render();
 
 		switch (scene->GetChange())
 		{
@@ -494,6 +509,30 @@ namespace Lux
 			info.properties.y = material->GetRoughness();
 			info.properties.z = material->GetRefractionIndex();
 			materialsSsbo->ChangeData(&info, material->GetID() * sizeof(MaterialInfo), sizeof(MaterialInfo));
+
+			scene->Changed(Change::NONE);
+			sceneChanged = true;
+			break;
+		}
+		case Change::OBJECT:
+		{
+			scene->CollectInformation();
+
+			//verticesSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetPositions().data(), sizeof(glm::vec4) * scene->GetPositions().size(), 0);
+			//indicesSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetIndices().data(), sizeof(glm::vec4) * scene->GetIndices().size(), 1);
+			//normalsSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetNormals().data(), sizeof(glm::vec4) * scene->GetNormals().size(), 2);
+			//objectsSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetObjectsInfo().data(), sizeof(glm::vec4) * scene->GetObjectsInfo().size(), 3);
+			//meshesSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetMeshesInfo().data(), sizeof(glm::vec4) * scene->GetMeshesInfo().size(), 4);
+			//materialsSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetMaterialsInfo().data(), sizeof(MaterialInfo) * scene->GetMaterialsInfo().size(), 5);
+			//transformsSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetTransforms().data(), sizeof(glm::mat4) * scene->GetTransforms().size(), 6);
+
+			verticesSsbo->Reset(scene->GetPositions().data(), sizeof(glm::vec4) * scene->GetPositions().size());
+			indicesSsbo->Reset(scene->GetIndices().data(), sizeof(glm::vec4) * scene->GetIndices().size());
+			normalsSsbo->Reset(scene->GetNormals().data(), sizeof(glm::vec4) * scene->GetNormals().size());
+			objectsSsbo->Reset(scene->GetObjectsInfo().data(), sizeof(glm::vec4) * scene->GetObjectsInfo().size());
+			meshesSsbo->Reset(scene->GetMeshesInfo().data(), sizeof(glm::vec4) * scene->GetMeshesInfo().size());
+			materialsSsbo->Reset(scene->GetMaterialsInfo().data(), sizeof(MaterialInfo) * scene->GetMaterialsInfo().size());
+			transformsSsbo->Reset(scene->GetTransforms().data(), sizeof(glm::mat4) * scene->GetTransforms().size());
 
 			scene->Changed(Change::NONE);
 			sceneChanged = true;
@@ -541,8 +580,8 @@ namespace Lux
 
 		viewSceneShader->Bind();
 
-		transformsTexture->Bind(4);
-		viewSceneShader->SetUniformInt("transformsTex", 4);
+		//transformsTexture->Bind(4);
+		//viewSceneShader->SetUniformInt("transformsTex", 4);
 
 		viewSceneShader->SetUniformFloat3("viewPos", camera.GetPosition());
 
@@ -592,22 +631,7 @@ namespace Lux
 		transformsTexture->Bind(4);
 		lightingPass->SetUniformInt("transformsTex", 4);
 
-		//textureArray->Bind(5);
-		//lightingPass->SetUniformInt("texturesTex", 5);
-
-		//verticesTexture->Bind(6);
-		//lightingPass->SetUniformInt("verticesTex", 6);
-
-		//indicesTexture->Bind(7);
-		//lightingPass->SetUniformInt("indicesTex", 7);
-
-		//normalsTexture->Bind(8);
-		//lightingPass->SetUniformInt("normalsTex", 8);
-
-		//objectsTexture->Bind(9);
-		//lightingPass->SetUniformInt("objectsTex", 9);
-
-		lightingPass->SetUniformFloat3("viewPos", camera.GetPosition());
+		lightingPass->SetUniformInt("numObjects", scene->GetObjectsInfo().size());
 
 		const auto& lights = scene->GetLights();
 
