@@ -94,6 +94,8 @@ namespace Lux
 	
 	MeshComponent::~MeshComponent()
 	{
+		bool ret = true;
+		ret = false;
 	}
 	
 	void MeshComponent::Update()

@@ -15,7 +15,7 @@ Entities:
     MeshComponent:
       MeshPath: Assets/Models/Cube.obj
     MaterialComponent:
-      Color: [0.119999997, 0.449999988, 0.150000006, 1]
+      Color: [0.119999997, 0.449999988, 0.150000006]
       Metallic: 0
       Roughness: 0.5
       IndexRefraction: 1.5
@@ -28,7 +28,7 @@ Entities:
     MeshComponent:
       MeshPath: Assets/Models/Cube.obj
     MaterialComponent:
-      Color: [0.649999976, 0.0500000007, 0.0500000007, 1]
+      Color: [0.649999976, 0.0500000007, 0.0500000007]
       Metallic: 0
       Roughness: 0.5
       IndexRefraction: 1.5
@@ -41,7 +41,7 @@ Entities:
     MeshComponent:
       MeshPath: Assets/Models/Cube.obj
     MaterialComponent:
-      Color: [0.730000019, 0.730000019, 0.730000019, 1]
+      Color: [0.730000019, 0.730000019, 0.730000019]
       Metallic: 0
       Roughness: 0.5
       IndexRefraction: 1.5
@@ -54,7 +54,7 @@ Entities:
     MeshComponent:
       MeshPath: Assets/Models/Cube.obj
     MaterialComponent:
-      Color: [0.730000019, 0.730000019, 0.730000019, 1]
+      Color: [0.730000019, 0.730000019, 0.730000019]
       Metallic: 0
       Roughness: 0.5
       IndexRefraction: 1.5
@@ -67,7 +67,7 @@ Entities:
     MeshComponent:
       MeshPath: Assets/Models/Cube.obj
     MaterialComponent:
-      Color: [0.730000019, 0.730000019, 0.730000019, 1]
+      Color: [0.730000019, 0.730000019, 0.730000019]
       Metallic: 0
       Roughness: 0.5
       IndexRefraction: 1.5
@@ -80,7 +80,7 @@ Entities:
     MeshComponent:
       MeshPath: Assets/Models/Cube.obj
     MaterialComponent:
-      Color: [0.730000019, 0.730000019, 0.730000019, 1]
+      Color: [0.730000019, 0.730000019, 0.730000019]
       Metallic: 1
       Roughness: 0.5
       IndexRefraction: 1.5
@@ -93,7 +93,7 @@ Entities:
     MeshComponent:
       MeshPath: Assets/Models/Cube.obj
     MaterialComponent:
-      Color: [0.0500000007, 0.0500000007, 0.649999976, 1]
+      Color: [0.0500000007, 0.0500000007, 0.649999976]
       Metallic: 0
       Roughness: 0.5
       IndexRefraction: 1.5
@@ -106,7 +106,7 @@ Entities:
     MeshComponent:
       MeshPath: Assets/Models/model.fbx
     MaterialComponent:
-      Color: [0.730000019, 0.730000019, 0.730000019, 1]
-      Metallic: 0.5
+      Color: [0.730000019, 0.730000019, 0.730000019]
+      Metallic: 0
       Roughness: 0.5
       IndexRefraction: 1.5

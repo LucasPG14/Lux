@@ -16,7 +16,7 @@ namespace Lux
 	{
 	public:
 		Mesh();
-		Mesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& ind, const std::string& p, const std::string& origPath);
+		Mesh(const AABB& aabb, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& ind, const std::string& p, const std::string& origPath);
 		virtual ~Mesh();
 
 		void SetID(int meshID = -1) { id = meshID; }
@@ -25,6 +25,8 @@ namespace Lux
 		const std::string& GetPath() { return path; }
 		const std::string& GetOriginalPath() { return originalPath; }
 		UUID GetUUID() { return uuid; }
+
+		const AABB& GetAABB() { return aabb; }
 		
 		const std::vector<glm::vec4>& GetPositions() { return positions; }
 		const std::vector<glm::vec4>& GetIndicesRT() { return indicesRT; }
@@ -45,6 +47,8 @@ namespace Lux
 
 		std::string path;
 		std::string originalPath;
+
+		AABB aabb;
 
 		int id;
 	};

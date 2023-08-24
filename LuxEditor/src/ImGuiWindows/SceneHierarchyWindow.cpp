@@ -26,20 +26,20 @@ namespace Lux
 		focused = false;
 		if (ImGui::IsWindowFocused()) focused = true;
 
-		std::vector<Entity>& entities = scene->GetWorld();
+		std::vector<Entity*>& entities = scene->GetWorld();
 		for (int i = 0; i < entities.size(); ++i)
 		{
-			Entity& entity = entities[i];
+			Entity* entity = entities[i];
 			ImGui::PushID(i);
 			int flags = ImGuiTreeNodeFlags_Leaf;
-			if (selected == &entity) flags |= ImGuiTreeNodeFlags_Selected;
-			if (ImGui::TreeNodeEx(entity.GetName().c_str(), flags))
+			if (selected == entity) flags |= ImGuiTreeNodeFlags_Selected;
+			if (ImGui::TreeNodeEx(entity->GetName().c_str(), flags))
 			{
 				ImGui::TreePop();
 			}
 
 			if (ImGui::IsItemClicked())
-				selected = &entity;
+				selected = entity;
 
 			ImGui::PopID();
 		}
@@ -135,12 +135,27 @@ namespace Lux
 				ImGui::SameLine();
 				ImGui::Text("Roughness Map");
 
-				if (ImGui::ColorPicker3("##color", glm::value_ptr(material.GetColor())))
+				if (ImGui::ColorPicker4("##color", glm::value_ptr(material.GetColor())))
 				{
 					scene->Changed(Change::MATERIAL);
 				}
 
 				if (ImGui::DragFloat("Metallic", &material.GetMetallic(), 0.1f, 0.0f, 1.0f))
+				{
+					scene->Changed(Change::MATERIAL);
+				}
+
+				if (ImGui::DragFloat("Refraction Index", &material.GetRefractionIndex(), 0.1f, 0.0f))
+				{
+					scene->Changed(Change::MATERIAL);
+				}
+
+				if (ImGui::DragFloat("Roughness", &material.GetRoughness(), 0.1f, 0.0f, 1.0f))
+				{
+					scene->Changed(Change::MATERIAL);
+				}
+
+				if (ImGui::ColorPicker4("##emissive", glm::value_ptr(material.GetEmissive())))
 				{
 					scene->Changed(Change::MATERIAL);
 				}
@@ -153,7 +168,7 @@ namespace Lux
 			{
 				ImGui::ColorPicker3("Light Color", glm::value_ptr(component->GetModifiedColor()));
 				ImGui::DragFloat("Cut Off", &(component->GetModifiedCutOff()), 1.0f, 0.0f, 180.0f);
-				ImGui::DragFloat("Range", &(component->GetModifiedRange()));
+				ImGui::DragFloat("Radius", &(component->GetModifiedRange()), 1.0f, 0.0f);
 			}
 		}
 	}

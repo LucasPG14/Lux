@@ -52,11 +52,10 @@ struct Ray
 
 struct AABB
 {
-    vec3 min;
-    vec3 max;
-	vec3 normal;
+    vec4 min;
+    vec4 max;
 };
-uniform AABB aabbs[100];
+//uniform AABB aabbs[100];
 
 struct BVH
 {
@@ -109,6 +108,11 @@ layout(std430, binding = 6) buffer transformsSSBO
     mat4 transforms[];
 };
 
+layout(std430, binding = 7) buffer aabbsSSBO
+{
+    AABB aabbs[];
+};
+
 layout(location = 0) uniform sampler2D positions;
 layout(location = 1) uniform sampler2D normals;
 layout(location = 2) uniform sampler2D albedoSpecular;
@@ -121,6 +125,8 @@ layout(location = 7) uniform sampler2D indicesTex;
 layout(location = 8) uniform sampler2D normalsTex;
 layout(location = 9) uniform sampler2D objectsTex;
 
+const float PI = 3.14159265;
+
 float nrand(vec2 n)
 {
     return fract(sin(dot(n.xy, vec2(12.9898, 78.233)))* 43758.5453);
@@ -131,6 +137,13 @@ float hash(float n) { return fract(sin(n) * 1e4); }
 float trand(vec2 n, float seed)
 {
     return nrand(n * seed * float(samples));
+}
+
+float schlick(float cosTheta, float refractionIdx)
+{
+	float r0 = (1.0 - refractionIdx) / (1.0 + refractionIdx);
+    r0 = r0 * r0;
+    return r0 + (1.0 - r0) * pow((1.0 - cosTheta), 5.0);
 }
 
 vec3 randomPointInUnitSphere(vec2 uv, float seed)
@@ -165,6 +178,35 @@ vec3 GetRayAt(const Ray ray, float t)
 	return ray.origin + t * ray.direction;
 }
 
+bool HitAABB(vec3 origin, vec3 direction, int aabbID, mat4 modelMatrix)
+{
+	AABB aabb = aabbs[aabbID];
+
+	//vec3 minAABB = vec3(modelMatrix * vec4(aabb.min.xyz, 1.0));
+	//vec3 maxAABB = vec3(modelMatrix * vec4(aabb.max.xyz, 1.0));
+
+	vec3 minAABB = aabb.min.xyz;
+	vec3 maxAABB = aabb.max.xyz;
+	
+	vec3 invDir = 1.0 / direction;
+    vec3 f = (maxAABB - origin) * invDir;
+    vec3 n = (minAABB - origin) * invDir;
+    
+	vec3 tMax = max(f, n);
+    vec3 tMin = min(f, n);
+    
+	float t1 = min(tMax.x, min(tMax.y, tMax.z));
+    float t0 = max(tMin.x, max(tMin.y, tMin.z));
+	
+	if (t1 < t0)
+		return false;
+	
+	if (t0 > 0.0f)
+		return true;
+	
+	return true;
+}
+
 bool RayTriangleHit(Ray ray, inout HitRecord hit, float minT, float maxT)
 {
 	bool somethingHit = false;
@@ -184,6 +226,9 @@ bool RayTriangleHit(Ray ray, inout HitRecord hit, float minT, float maxT)
 
 		vec3 origin = vec3(inverse(modelMatrix) * vec4(ray.origin, 1.0));
 		vec3 direction = vec3(inverse(modelMatrix) * vec4(ray.direction, 0.0));
+
+		if (!HitAABB(origin, direction, int(object.y), modelMatrix))
+			continue;
 
 		vec4 meshInfo = meshes[int(object.y)];
 		int meshIndices = int(meshInfo.z + meshInfo.w);
@@ -251,13 +296,12 @@ bool RayTriangleHit(Ray ray, inout HitRecord hit, float minT, float maxT)
 	return somethingHit;
 }
 
-vec3 TracePath(const Ray ray, vec2 uv)
+vec3 TracePath(const Ray ray, vec2 uv, inout float seed, inout int n)
 {
 	vec3 color = vec3(0.0);
 	Ray hitRay = ray;
 	float tMax = 1000000.0;
 
-	float newSeed = 1.0;
 	float accum = 1.0;
 
 	vec3 throughput = vec3(1.0);
@@ -269,49 +313,77 @@ vec3 TracePath(const Ray ray, vec2 uv)
 		hitRay.direction = normalize(hitRay.direction);
 		if (RayTriangleHit(hitRay, hit, 0.001, tMax))
 		{
-			hitRay.origin = hit.point + (hit.normal * 0.001);
-
-			//vec3 randomDir = randomPointInUnitSphere2(uv, newSeed, -1.0, 1.0);
-			vec3 randomDir = randomPointInUnitSphere(uv, newSeed);
-			if (hit.material.properties.x <= 0.0)
+			n++;
+			if (i == 7)
 			{
-				hitRay.direction = hit.normal;
-				throughput *= hit.material.color.xyz;
+				color = vec3(0.0);
+				return color;
 			}
-			else
+			hitRay.origin = hit.point;
+
+			vec3 randomDir = randomPointInUnitSphere(uv, seed);
+
+			float met = hit.material.properties.x;
+
+			vec3 reflectedDir = reflect(hitRay.direction, hit.normal);
+			if (met == 0.5)
 			{
-				float indexRef = hit.frontFace ? (1.0 / 1.0) : 1.0;
-			
-				float cosTheta = min(dot(-hitRay.direction, hit.normal), 1.0);
-				float sinTheta = sqrt(1.0 - cosTheta*cosTheta);
-			
-				//if (indexRef * sinTheta > 1.0)
-				//{
-					vec3 reflectedDir = reflect(hitRay.direction, hit.normal);
-					//vec3 reflectedDir = refract(hitRay.direction, hit.normal, indexRef);
-					hitRay.direction = reflectedDir;
-					if (dot(hitRay.direction, hit.normal) <= 0.0)
-					{
-						color = vec3(0.0);
-						break;
-					}
-				//}
-				//else
-				//{
-				//	hitRay.direction = refract(hitRay.direction, hit.normal, indexRef);
-				//}
+				float refractionIdx = hit.material.properties.z;
+
+				float indexRef = hit.frontFace ? refractionIdx : 1.0 / refractionIdx;
+
+            	float cosTheta = min(dot(-hitRay.direction, hit.normal), 1.0);
+				float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
+           		if (indexRef * sinTheta > 1.0 || nrand(uv * seed) < schlick(cosTheta, indexRef)) 
+				{
+                	hitRay.direction = reflectedDir;
+            	}
+				else 
+				{
+                	hitRay.direction = refract(hitRay.direction, hit.normal, indexRef);
+            	}
+				throughput = hit.material.color.xyz * hit.material.color.w;
+			}
+			else if (met < 1.0)
+			{
+				hitRay.direction = hit.normal + randomDir;
+				hitRay.direction = mix(hitRay.direction, reflectedDir, met);
+
+				if (met == 1.0)
+				{
+					throughput = hit.material.color.xyz * hit.material.color.w;
+				}
+				else
+				{
+					float cosTheta = dot(hitRay.direction, hit.normal);
+					float p = 1.0 / (2.0 * PI);
+					vec3 BRDF = (hit.material.color.xyz * hit.material.color.w) / PI;
+					throughput = (BRDF * throughput * cosTheta / p);
+				}
+
+			}
+			else if (met >= 1.0)
+			{
+				
+				hitRay.direction = reflectedDir;
+				if (dot(hitRay.direction, hit.normal) <= 0.0)
+				{
+					break;
+				}
+				throughput *= hit.material.color.xyz * hit.material.color.w;
 			}
 
 			//hitRay.direction = hit.normal + randomDir;
 			//throughput *= hit.material.color.xyz;
 			tMax = hit.t;
-			newSeed *= 1.456;
+			seed *= 1.456;
 		}
 		else
 		{
 			float t = 0.5 * (hitRay.direction.y + 1.0);
 			vec3 background = ((1.0 - t) * vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0));
-			//vec3 background = vec3(0.5);
+			//vec3 background = vec3(0.0);
+			n++;
 			color += throughput * background;
 			break;
 		}
@@ -339,12 +411,19 @@ void main()
 	vec2 fragCoord = gl_FragCoord.xy;
 	vec2 uv = fragCoord / canvas;
 
-	float rx = trand(uv, 0.123);
-	float ry = trand(uv, 0.456);
+	int iterator = 0;
+	float seed = 1.0;
 
-    ray.direction = GetRayDirection(ray.origin, fragCoord, rx, ry);
+	for (int i = 0; i < 4; ++i)
+	{
+		float rx = -0.5 + (0.5 + 0.5) * trand(uv, 0.123 * seed);
+		float ry = -0.5 + (0.5 + 0.5) * trand(uv, 0.456 * seed);
 
-	color = TracePath(ray, uv);
+    	ray.direction = GetRayDirection(ray.origin, fragCoord, rx, ry);
+		color += TracePath(ray, uv, seed, iterator);
+	}
+
+	color = sqrt(color / float(iterator));
 
 	// Gamma correction
 	color = pow(color, vec3(1.0 / 2.2));

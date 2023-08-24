@@ -18,6 +18,7 @@ namespace Lux
 	
 	MaterialComponent::~MaterialComponent()
 	{
+		ResourceManager::DestroyMaterial(material);
 	}
 	
 	void MaterialComponent::Update()

@@ -40,6 +40,12 @@ namespace Lux
 	private:
 		bool ShortCuts(KeyPressedEvent& e);
 
+		void NewScene();
+		void OpenScene();
+
+		void SaveSceneAs();
+		void SaveScene(const std::string& path);
+
 		void SaveImage();
 	
 	private:
@@ -82,6 +88,7 @@ namespace Lux
 		std::shared_ptr<ShaderStorageBuffer> meshesSsbo;
 		std::shared_ptr<ShaderStorageBuffer> transformsSsbo;
 		std::shared_ptr<ShaderStorageBuffer> materialsSsbo;
+		std::shared_ptr<ShaderStorageBuffer> aabbsSsbo;
 
 		PerspectiveCamera camera;
 

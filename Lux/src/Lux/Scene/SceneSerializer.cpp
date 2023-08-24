@@ -39,6 +39,33 @@ namespace YAML
 			return true;
 		}
 	};
+
+	template<>
+	struct convert<glm::vec4>
+	{
+		static Node encode(const glm::vec4& rhs)
+		{
+			Node node;
+			node.push_back(rhs.x);
+			node.push_back(rhs.y);
+			node.push_back(rhs.z);
+			node.push_back(rhs.w);
+			node.SetStyle(EmitterStyle::Flow);
+			return node;
+		}
+
+		static bool decode(const Node& node, glm::vec4& rhs)
+		{
+			if (!node.IsSequence() || node.size() != 4)
+				return false;
+
+			rhs.x = node[0].as<float>();
+			rhs.y = node[1].as<float>();
+			rhs.z = node[2].as<float>();
+			rhs.w = node[3].as<float>();
+			return true;
+		}
+	};
 }
 
 namespace Lux
@@ -47,6 +74,13 @@ namespace Lux
 	{
 		emitter << YAML::Flow;
 		emitter << YAML::BeginSeq << vec.x << vec.y << vec.z << YAML::EndSeq;
+		return emitter;
+	}
+
+	YAML::Emitter& operator<<(YAML::Emitter& emitter, const glm::vec4& vec)
+	{
+		emitter << YAML::Flow;
+		emitter << YAML::BeginSeq << vec.x << vec.y << vec.z << vec.w << YAML::EndSeq;
 		return emitter;
 	}
 
@@ -68,15 +102,15 @@ namespace Lux
 
 		for (int i = 0; i < scene->world.size(); ++i)
 		{
-			Entity& entity = scene->world[i];
+			Entity* entity = scene->world[i];
 
 			// Entity map begin
 			emitter << YAML::BeginMap;
 
-			emitter << YAML::Key << "UUID" << YAML::Value << entity.GetUUID();
-			emitter << YAML::Key << "Name" << YAML::Value << entity.GetName();
+			emitter << YAML::Key << "UUID" << YAML::Value << entity->GetUUID();
+			emitter << YAML::Key << "Name" << YAML::Value << entity->GetName();
 
-			if (TransformComponent* comp = entity.Get<TransformComponent>())
+			if (TransformComponent* comp = entity->Get<TransformComponent>())
 			{
 				emitter << YAML::Key << "TransformComponent";
 				// Transform map begin
@@ -90,7 +124,7 @@ namespace Lux
 				// Transform map end
 			}
 
-			if (MeshComponent* comp = entity.Get<MeshComponent>())
+			if (MeshComponent* comp = entity->Get<MeshComponent>())
 			{
 				emitter << YAML::Key << "MeshComponent";
 				// Mesh map begin
@@ -102,7 +136,7 @@ namespace Lux
 				// Mesh map end
 			}
 
-			if (MaterialComponent* comp = entity.Get<MaterialComponent>())
+			if (MaterialComponent* comp = entity->Get<MaterialComponent>())
 			{
 				emitter << YAML::Key << "MaterialComponent";
 				// Material map begin
@@ -112,6 +146,7 @@ namespace Lux
 				emitter << YAML::Key << "Metallic" << YAML::Value << comp->GetMaterial()->GetMetallic();
 				emitter << YAML::Key << "Roughness" << YAML::Value << comp->GetMaterial()->GetRoughness();
 				emitter << YAML::Key << "IndexRefraction" << YAML::Value << comp->GetMaterial()->GetRefractionIndex();
+				//emitter << YAML::Key << "Emissive" << YAML::Value << comp->GetMaterial()->GetEmissive();
 
 				emitter << YAML::EndMap;
 				// Material map end
@@ -131,6 +166,8 @@ namespace Lux
 	
 	bool SceneSerializer::Deserialize(const std::filesystem::path& path)
 	{
+		scene->Reset();
+
 		YAML::Node data = YAML::LoadFile(path.string());
 
 		if (!data["Scene"])
@@ -146,25 +183,25 @@ namespace Lux
 			const std::string& name = yamlEntity["Name"].as<std::string>();
 			uint64_t uuid = yamlEntity["UUID"].as<uint64_t>();
 
-			Entity& entity = scene->CreateEntityWithUUID(uuid, name);
+			Entity* entity = scene->CreateEntityWithUUID(uuid, name);
 
 			YAML::Node transform = yamlEntity["TransformComponent"];
 			if (transform)
 			{
-				TransformComponent& comp = *entity.Get<TransformComponent>();
-				comp.SetPosition(transform["Position"].as<glm::vec3>());
-				comp.SetRotation(transform["Rotation"].as<glm::vec3>());
-				comp.SetScale(transform["Scale"].as<glm::vec3>());
+				TransformComponent* comp = entity->Get<TransformComponent>();
+				comp->SetPosition(transform["Position"].as<glm::vec3>());
+				comp->SetRotation(transform["Rotation"].as<glm::vec3>());
+				comp->SetScale(transform["Scale"].as<glm::vec3>());
 			}
 
 			YAML::Node mesh = yamlEntity["MeshComponent"];
 			if (mesh)
 			{
 				std::string meshPath = mesh["MeshPath"].as<std::string>();
-				entity.CreateComponent<MeshComponent>(meshPath);
+				entity->CreateComponent<MeshComponent>(meshPath);
 				YAML::Node material = yamlEntity["MaterialComponent"];
-				const std::shared_ptr<Material>& mat = entity.CreateComponent<MaterialComponent>()->GetMaterial();
-				mat->SetColor(material["Color"].as<glm::vec3>());
+				const std::shared_ptr<Material>& mat = entity->CreateComponent<MaterialComponent>()->GetMaterial();
+				mat->SetColor(material["Color"].as<glm::vec4>());
 				mat->SetMetallic(material["Metallic"].as<float>());
 				mat->SetRoughness(material["Roughness"].as<float>());
 				mat->SetRefractionIndex(material["IndexRefraction"].as<float>());

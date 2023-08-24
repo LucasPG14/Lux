@@ -75,6 +75,9 @@ namespace Lux
 
 			for (int i = 0; i < scene->mNumMeshes; ++i)
 			{
+				AABB aabb;
+				glm::vec3 min = glm::vec3(std::numeric_limits<float>().max());
+				glm::vec3 max = glm::vec3(std::numeric_limits<float>().min());
 				aiMesh* mesh = scene->mMeshes[i];
 
 				std::vector<Vertex> vertices;
@@ -95,7 +98,12 @@ namespace Lux
 						vertex.tangents = { mesh->mTangents[j].x, mesh->mTangents[j].y, mesh->mTangents[j].z };
 						vertex.bitangents = { mesh->mBitangents[j].x, mesh->mBitangents[j].y, mesh->mBitangents[j].z };
 					}
+
+					min = glm::min(min, vertex.position);
+					max = glm::max(max, vertex.position);
 				}
+				aabb.min = glm::vec4(min, 0.0);
+				aabb.max = glm::vec4(max, 0.0);
 
 				std::vector<uint32_t> indices;
 				indices.reserve(mesh->mNumFaces * 3);
@@ -111,36 +119,7 @@ namespace Lux
 				resourcePath += mesh->mName.C_Str();
 				resourcePath += ".rmesh";
 
-				std::shared_ptr<Mesh> resource = ResourceManager::CreateMesh(vertices, indices, resourcePath.string(), path);
-
-				std::ofstream file;
-				file.open(resourcePath.c_str(), std::ios::out | std::ios::app | std::ios::binary);
-
-				unsigned int header[3] = { vertices.size(), indices.size(), path.size() };
-
-				uint32_t size = sizeof(header) + sizeof(Vertex) * vertices.size() + sizeof(uint32_t) * indices.size() + sizeof(char) * path.size();
-
-				char* buffer = new char[size];
-				char* cursor = buffer;
-
-				uint32_t bytes = sizeof(header);
-				memcpy(cursor, header, bytes);
-				cursor += bytes;
-
-				bytes = sizeof(Vertex) * vertices.size();
-				memcpy(cursor, vertices.data(), bytes);
-				cursor += bytes;
-
-				bytes = sizeof(unsigned int) * indices.size();
-				memcpy(cursor, indices.data(), bytes);
-				cursor += bytes;
-
-				bytes = sizeof(char) * path.size();
-				memcpy(cursor, path.data(), bytes);
-				cursor += bytes;
-
-				file.write(buffer, size);
-				file.close();
+				std::shared_ptr<Mesh> resource = ResourceManager::CreateMesh(aabb, vertices, indices, resourcePath.string(), path);
 
 				return resource;
 			}

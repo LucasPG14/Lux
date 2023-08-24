@@ -17,8 +17,5 @@ namespace Lux
 	{
 		glm::vec4 min;
 		glm::vec4 max;
-		glm::vec4 texCoords;
-		glm::vec4 normal;
-		//glm::vec3 normal;
 	};
 }

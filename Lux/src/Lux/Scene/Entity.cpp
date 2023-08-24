@@ -15,10 +15,17 @@ namespace Lux
 	
 	Entity::~Entity()
 	{
-
 	}
 	
 	void Entity::Update()
 	{
+	}
+	
+	void Entity::Destroy()
+	{
+		for (int i = components.size() - 1; i >= 0; --i)
+		{
+			delete components[i];
+		}
 	}
 }

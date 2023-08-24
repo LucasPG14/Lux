@@ -4,6 +4,8 @@
 #include "Lux/Utils/Math.h"
 #include "Lux/Utils/Primitives.h"
 
+#include "Lux/Scene/Entity.h"
+
 #include <ImGui/imgui.h>
 #include <ImGuizmo/ImGuizmo.h>
 
@@ -17,11 +19,13 @@ namespace Lux
 	extern const std::filesystem::path assetsDir;
 
 	EditorLayer::EditorLayer() 
-		: guizmoState(ImGuizmo::TRANSLATE), samples(0), maxSamples(5), needToUpdate(NeedToUpdate::NONE), sceneChanged(false), startRenderer(false)
+		: guizmoState(ImGuizmo::TRANSLATE), samples(0), maxSamples(2), needToUpdate(NeedToUpdate::NONE), sceneChanged(false), startRenderer(false)
 	{
 		scene = CreateSharedPtr<Scene>();
 		SceneSerializer serializer(scene);
 		serializer.Deserialize("Assets/ShaderToy.scene");
+
+		scene->SetPath("Assets/ShaderToy.scene");
 
 		std::filesystem::create_directory("Library");
 		
@@ -41,9 +45,6 @@ namespace Lux
 			spec.format = TextureFormat::FLOAT;
 
 			transformsTexture = CreateSharedPtr<Texture2D>(scene->GetTransforms().data(), sizeof(glm::mat4) / sizeof(glm::vec4) * scene->GetTransforms().size(), spec);
-			//verticesTexture = CreateSharedPtr<Texture2D>(scene->GetPositions().data(), sizeof(glm::vec4) / sizeof(glm::vec4) * scene->GetPositions().size(), spec);
-			//indicesTexture = CreateSharedPtr<Texture2D>(scene->GetIndices().data(), sizeof(glm::vec4) / sizeof(glm::vec4) * scene->GetIndices().size(), spec);
-			//normalsTexture = CreateSharedPtr<Texture2D>(scene->GetNormals().data(), sizeof(glm::vec4) / sizeof(glm::vec4) * scene->GetNormals().size(), spec);
 		}
 		{
 			TextureSpecification spec;
@@ -60,6 +61,7 @@ namespace Lux
 		meshesSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetMeshesInfo().data(), sizeof(glm::vec4) * scene->GetMeshesInfo().size(), 4);
 		materialsSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetMaterialsInfo().data(), sizeof(MaterialInfo) * scene->GetMaterialsInfo().size(), 5);
 		transformsSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetTransforms().data(), sizeof(glm::mat4) * scene->GetTransforms().size(), 6);
+		aabbsSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetAABBs().data(), sizeof(AABB) * scene->GetAABBs().size(), 7);
 
 		Importer::ImportFBX2("Assets/Models/Cube.obj", assetsDir.string());
 
@@ -74,6 +76,7 @@ namespace Lux
 		viewSceneShader->SetStorageBlock("meshesSSBO", meshesSsbo->GetBindingIndex());
 		viewSceneShader->SetStorageBlock("materialsSSBO", materialsSsbo->GetBindingIndex());
 		viewSceneShader->SetStorageBlock("transformsSSBO", transformsSsbo->GetBindingIndex());
+		viewSceneShader->SetStorageBlock("aabbsSSBO", aabbsSsbo->GetBindingIndex());
 
 		//textureArray->AddTexture("Assets/Textures/rustediron2_normal.png");
 		//textureArray->AddTexture("Assets/Textures/rustediron2_metallic.png");
@@ -313,27 +316,38 @@ namespace Lux
 			{
 				if (ImGui::MenuItem("New scene", "Ctrl + N"))
 				{
-
+					scene->Reset();
+					scene = CreateSharedPtr<Scene>();
+					scene->Changed(Change::OBJECT);
+					hierarchy.SetScene(scene);
 				}
 
 				if (ImGui::MenuItem("Open scene", "Ctrl + O"))
 				{
-
+					std::string filepath = FileDialog::OpenFile("scene (*.scene)\0*.scene\0");
+					if (!filepath.empty())
+					{
+						SceneSerializer serializer(scene);
+						serializer.Deserialize(filepath);
+						scene->Changed(Change::OBJECT);
+					}
 				}
 
 				ImGui::Separator();
 				if (ImGui::MenuItem("Save scene", "Ctrl + S"))
 				{
-					// Still not implemented
+					if (scene->GetPath().empty())
+					{
+						SaveSceneAs();
+					}
+					else
+					{
+						SaveScene(scene->GetPath());
+					}
 				}
 				if (ImGui::MenuItem("Save scene as...", "Ctrl + Shift + S"))
 				{
-					std::string filepath = FileDialog::SaveFile("scene (*.scene)\0*.scene\0");
-					if (!filepath.empty())
-					{
-						SceneSerializer serializer(scene);
-						serializer.Serialize(filepath + ".scene");
-					}
+					SaveSceneAs();
 				}
 
 				ImGui::Separator();
@@ -345,26 +359,11 @@ namespace Lux
 
 			if (ImGui::BeginMenu("Game Object"))
 			{
-				if (ImGui::MenuItem("Create Directional Light"))
-				{
-					Entity& entity = scene->CreateEntity("Directional Light");
-					LightComponent* light = entity.CreateComponent<LightComponent>(LightType::DIRECTIONAL);
-					scene->AddLight(entity.Get<TransformComponent>(), light);
-				}
-
 				if (ImGui::MenuItem("Create Point Light"))
 				{
-					Entity& entity = scene->CreateEntity("Point Light");
-					LightComponent* light = entity.CreateComponent<LightComponent>(LightType::POINT);
-					scene->AddLight(entity.Get<TransformComponent>(), light);
-				}
-
-				if (ImGui::MenuItem("Create Sphere"))
-				{
-					//// TODO:
-					//Entity& entity = scene->CreateEntity("Sphere");
-					//entity.CreateComponent<MeshComponent>("");
-					//entity.CreateComponent<MaterialComponent>();
+					Entity* entity = scene->CreateEntity("Point Light");
+					LightComponent* light = entity->CreateComponent<LightComponent>(LightType::POINT);
+					scene->AddLight(entity->Get<TransformComponent>(), light);
 				}
 
 				ImGui::EndMenu();
@@ -420,7 +419,7 @@ namespace Lux
 			ImGuizmo::SetDrawlist();
 			ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, ImGui::GetWindowWidth(), ImGui::GetWindowHeight());
 		
-			glm::mat4& camView = glm::transpose(camera.GetViewMatrix());
+			const glm::mat4& camView = glm::transpose(camera.GetViewMatrix());
 			const glm::mat4& camProj = glm::transpose(camera.GetProjectionMatrix());
 
 			TransformComponent* tComponent = entitySelected->Get<TransformComponent>();
@@ -504,10 +503,11 @@ namespace Lux
 		{
 			MaterialInfo info;
 			const std::shared_ptr<Material>& material = hierarchy.GetSelected()->Get<MaterialComponent>()->GetMaterial();
-			info.color = glm::vec4(material->GetColor(), 1.0);
+			info.color = material->GetColor();
 			info.properties.x = material->GetMetallic();
 			info.properties.y = material->GetRoughness();
 			info.properties.z = material->GetRefractionIndex();
+			//info.emissive = material->GetEmissive();
 			materialsSsbo->ChangeData(&info, material->GetID() * sizeof(MaterialInfo), sizeof(MaterialInfo));
 
 			scene->Changed(Change::NONE);
@@ -518,14 +518,6 @@ namespace Lux
 		{
 			scene->CollectInformation();
 
-			//verticesSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetPositions().data(), sizeof(glm::vec4) * scene->GetPositions().size(), 0);
-			//indicesSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetIndices().data(), sizeof(glm::vec4) * scene->GetIndices().size(), 1);
-			//normalsSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetNormals().data(), sizeof(glm::vec4) * scene->GetNormals().size(), 2);
-			//objectsSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetObjectsInfo().data(), sizeof(glm::vec4) * scene->GetObjectsInfo().size(), 3);
-			//meshesSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetMeshesInfo().data(), sizeof(glm::vec4) * scene->GetMeshesInfo().size(), 4);
-			//materialsSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetMaterialsInfo().data(), sizeof(MaterialInfo) * scene->GetMaterialsInfo().size(), 5);
-			//transformsSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetTransforms().data(), sizeof(glm::mat4) * scene->GetTransforms().size(), 6);
-
 			verticesSsbo->Reset(scene->GetPositions().data(), sizeof(glm::vec4) * scene->GetPositions().size());
 			indicesSsbo->Reset(scene->GetIndices().data(), sizeof(glm::vec4) * scene->GetIndices().size());
 			normalsSsbo->Reset(scene->GetNormals().data(), sizeof(glm::vec4) * scene->GetNormals().size());
@@ -533,6 +525,7 @@ namespace Lux
 			meshesSsbo->Reset(scene->GetMeshesInfo().data(), sizeof(glm::vec4) * scene->GetMeshesInfo().size());
 			materialsSsbo->Reset(scene->GetMaterialsInfo().data(), sizeof(MaterialInfo) * scene->GetMaterialsInfo().size());
 			transformsSsbo->Reset(scene->GetTransforms().data(), sizeof(glm::mat4) * scene->GetTransforms().size());
+			aabbsSsbo->Reset(scene->GetAABBs().data(), sizeof(AABB) * scene->GetAABBs().size());
 
 			scene->Changed(Change::NONE);
 			sceneChanged = true;
@@ -677,8 +670,8 @@ namespace Lux
 		int offset = 0;
 		for (int i = 0; i < scene->GetWorld().size(); ++i)
 		{
-			Entity& entity = scene->GetWorld()[i];
-			if (MeshComponent* mesh = entity.Get<MeshComponent>())
+			Entity* entity = scene->GetWorld()[i];
+			if (MeshComponent* mesh = entity->Get<MeshComponent>())
 			{
 				// Setting the global AABB of the object
 				lightingPass->SetUniformFloat3("bvhs[" + std::to_string(index) + "].aabb.min", mesh->GetAABB().min);
@@ -687,9 +680,9 @@ namespace Lux
 				lightingPass->SetUniformInt("bvhs[" + std::to_string(index) + "].count", mesh->GetAABBGeometry().size());
 
 				// Setting the transform and the material of the object
-				lightingPass->SetUniformMat4("modelsMatrix[" + std::to_string(index) + "]", entity.Get<TransformComponent>()->GetTransform());
-				lightingPass->SetUniformFloat3("materials[" + std::to_string(index) + "].color", entity.Get<MaterialComponent>()->GetMaterial()->GetColor());
-				lightingPass->SetUniformFloat("materials[" + std::to_string(index) + "].type", entity.Get<MaterialComponent>()->GetMaterial()->GetType());
+				lightingPass->SetUniformMat4("modelsMatrix[" + std::to_string(index) + "]", entity->Get<TransformComponent>()->GetTransform());
+				lightingPass->SetUniformFloat3("materials[" + std::to_string(index) + "].color", entity->Get<MaterialComponent>()->GetMaterial()->GetColor());
+				lightingPass->SetUniformFloat("materials[" + std::to_string(index) + "].type", entity->Get<MaterialComponent>()->GetMaterial()->GetType());
 
 				// Setting the AABB of each triangle of the mesh
 				for (int j = 0; j < mesh->GetAABBGeometry().size(); ++j)
@@ -727,26 +720,29 @@ namespace Lux
 			if (ctrl)
 			{
 				// New Scene
-				
+				NewScene();
 			}
 			break;
 		case Keys::O:
 			if (ctrl)
 			{
 				// Open Scene
-				
+				OpenScene();
 			}
 			break;
 		case Keys::S:
 			if (ctrl)
 			{
-				if (shift)
+				if (shift || scene->GetPath().empty())
 				{
 					// Save Scene As
-					
+					SaveSceneAs();
 					return true;
 				}
-				// Save Current Scene
+				else
+				{
+					SaveScene(scene->GetPath());
+				}
 			}
 			break;
 		case Keys::W:
@@ -758,9 +754,53 @@ namespace Lux
 		case Keys::R:
 			guizmoState = ImGuizmo::SCALE;
 			break;
+		case Keys::DEL:
+			if (hierarchy.GetSelected() != nullptr)
+			{
+				scene->DestroyEntity(hierarchy.GetSelected());
+				hierarchy.SetSelected(nullptr);
+				scene->Changed(Change::OBJECT);
+			}
+			break;
 		}
 
 		return true;
+	}
+
+	void EditorLayer::NewScene()
+	{
+		scene->Reset();
+		scene = CreateSharedPtr<Scene>();
+		scene->Changed(Change::OBJECT);
+		hierarchy.SetScene(scene);
+	}
+
+	void EditorLayer::OpenScene()
+	{
+		std::string filepath = FileDialog::OpenFile("scene (*.scene)\0*.scene\0");
+		if (!filepath.empty())
+		{
+			SceneSerializer serializer(scene);
+			serializer.Deserialize(filepath);
+			scene->Changed(Change::OBJECT);
+		}
+	}
+
+	void EditorLayer::SaveSceneAs()
+	{
+		std::string filepath = FileDialog::SaveFile("scene (*.scene)\0*.scene\0");
+		if (!filepath.empty())
+		{
+			filepath += filepath.find(".") == std::string::npos ? ".scene" : "";
+			SaveScene(filepath);
+			scene->SetPath(filepath);
+		}
+	}
+
+	void EditorLayer::SaveScene(const std::string& path)
+	{
+			SceneSerializer serializer(scene);
+			serializer.Serialize(path);
 	}
 	
 	void EditorLayer::SaveImage()

@@ -44,6 +44,8 @@ namespace Lux
 
 		void AddComponent(Component* component) { components.push_back(component); }
 
+		void Destroy();
+
 		operator bool() const { return name != ""; }
 	private:
 		UUID uuid;

@@ -7,8 +7,8 @@
 
 namespace Lux
 {
-	Mesh::Mesh(const std::vector<Vertex>& vert, const std::vector<uint32_t>& ind, const std::string& p, const std::string& origPath)
-		: vertices(vert), indices(ind), path(p), originalPath(origPath)
+	Mesh::Mesh(const AABB& ab, const std::vector<Vertex>& vert, const std::vector<uint32_t>& ind, const std::string& p, const std::string& origPath)
+		: vertices(vert), indices(ind), path(p), originalPath(origPath), aabb(ab)
 	{
 		vao = CreateSharedPtr<VertexArray>();
 

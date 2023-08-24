@@ -16,6 +16,10 @@ namespace Lux
 	
 	ShaderStorageBuffer::~ShaderStorageBuffer()
 	{
+		if (ssbo >= 0)
+		{
+			glDeleteBuffers(1, &ssbo);
+		}
 	}
 	
 	void ShaderStorageBuffer::Bind()
@@ -42,7 +46,6 @@ namespace Lux
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
 		glBufferSubData(GL_SHADER_STORAGE_BUFFER, offset, size, data);
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, bindingIndex, ssbo);
-		//GLenum error = glGetError();
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 	}
 }

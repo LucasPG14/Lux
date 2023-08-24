@@ -20,6 +20,18 @@ namespace Lux
 		file.open(filepath.c_str(), std::ios::out | std::ios::app | std::ios::binary);
 	}
 
+	void ResourceManager::DestroyMaterial(const std::shared_ptr<Material>& material)
+	{
+		for (auto it = materials.begin(); it < materials.end(); ++it)
+		{
+			if (*it == material)
+			{
+				materials.erase(it);
+				break;
+			}
+		}
+	}
+
 	std::shared_ptr<Material> ResourceManager::CreateMaterial()
 	{
 		std::shared_ptr<Material> material = std::make_shared<Material>(materialsCount++);
@@ -28,9 +40,9 @@ namespace Lux
 		return material;
 	}
 
-	const std::shared_ptr<Mesh>& ResourceManager::CreateMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, const std::string& path, const std::string& origPath)
+	const std::shared_ptr<Mesh>& ResourceManager::CreateMesh(const AABB& aabb, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, const std::string& path, const std::string& origPath)
 	{
-		std::shared_ptr<Mesh> mesh = CreateSharedPtr<Mesh>(vertices, indices, path, origPath);
+		std::shared_ptr<Mesh> mesh = CreateSharedPtr<Mesh>(aabb, vertices, indices, path, origPath);
 		
 		meshes.push_back(mesh);
 		return mesh;
