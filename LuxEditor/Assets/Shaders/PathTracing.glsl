@@ -42,6 +42,8 @@ struct HitRecord
 	vec2 texCoords;
 
 	MaterialInfo material;
+
+	int transformID;
 };
 
 struct Ray
@@ -55,21 +57,38 @@ struct AABB
     vec4 min;
     vec4 max;
 };
-//uniform AABB aabbs[100];
 
-struct BVH
+struct DirLight
 {
-	AABB aabb;
-	int offset;
-	int count;
+	vec3 direction;
+	vec3 radiance;
 };
-uniform BVH bvhs[50];
+uniform DirLight dirLight;
+
+struct PointLight
+{
+	vec3 position;
+	vec3 radiance;
+	float radius;
+};
+uniform PointLight pointLights[20];
+
+struct LightHit
+{
+	vec3 point;
+	vec3 normal;
+	float t;
+	bool frontFace;
+
+	PointLight light;
+};
 
 uniform vec3 viewPos;
 uniform vec2 canvas;
 uniform mat4 inverseCamera;
 
 uniform int samples;
+uniform int numPointLights;
 
 uniform int numObjects;
 
@@ -129,7 +148,7 @@ const float PI = 3.14159265;
 
 float nrand(vec2 n)
 {
-    return fract(sin(dot(n.xy, vec2(12.9898, 78.233)))* 43758.5453);
+    return fract(sin(dot(n.xy, vec2(12.9898, 78.233))) * 43758.5453);
 }
 
 float hash(float n) { return fract(sin(n) * 1e4); }
@@ -137,6 +156,11 @@ float hash(float n) { return fract(sin(n) * 1e4); }
 float trand(vec2 n, float seed)
 {
     return nrand(n * seed * float(samples));
+}
+
+vec2 trand2(vec2 n, float seed)
+{
+    return vec2(nrand(n * seed * float(samples)), nrand(n * hash(seed) * float(samples)));
 }
 
 float schlick(float cosTheta, float refractionIdx)
@@ -178,12 +202,40 @@ vec3 GetRayAt(const Ray ray, float t)
 	return ray.origin + t * ray.direction;
 }
 
-bool HitAABB(vec3 origin, vec3 direction, int aabbID, mat4 modelMatrix)
+bool Hit(PointLight light, const Ray ray, float tMin, float tMax, inout LightHit hit)
+{
+	vec3 oc = ray.origin - light.position;
+    float a = dot(ray.direction, ray.direction);
+    float b = dot(oc, ray.direction);
+    float c = dot(oc, oc) - (light.radius * light.radius);
+    float discriminant = (b * b) - (a * c);
+    
+	if (discriminant < 0.0)
+		return false;
+
+	float sqrtd = sqrt(discriminant);
+
+	float root = (-b - sqrtd) / a;
+    if (root < tMin || tMax < root) 
+	{
+        root = (-b + sqrtd) / a;
+        if (root < tMin || tMax < root)
+            return false;
+    }
+
+	hit.t = root;
+	hit.point = GetRayAt(ray, root);
+	hit.normal = (hit.point - light.position) / light.radius;
+	hit.frontFace = dot(ray.direction, hit.normal) < 0.0;
+	
+	hit.light = light;
+
+	return true;
+}
+
+bool HitAABB(vec3 origin, vec3 direction, int aabbID, float t)
 {
 	AABB aabb = aabbs[aabbID];
-
-	//vec3 minAABB = vec3(modelMatrix * vec4(aabb.min.xyz, 1.0));
-	//vec3 maxAABB = vec3(modelMatrix * vec4(aabb.max.xyz, 1.0));
 
 	vec3 minAABB = aabb.min.xyz;
 	vec3 maxAABB = aabb.max.xyz;
@@ -202,9 +254,14 @@ bool HitAABB(vec3 origin, vec3 direction, int aabbID, mat4 modelMatrix)
 		return false;
 	
 	if (t0 > 0.0f)
-		return true;
+		return t0 < t;
 	
-	return true;
+	return t0 < t && t1 < t;
+}
+
+float fresnel(vec3 normal, vec3 direction, float biasScale, float power)
+{
+	return biasScale + (1.0 - biasScale) * pow(1.0 - dot(-direction, normal), power);
 }
 
 bool RayTriangleHit(Ray ray, inout HitRecord hit, float minT, float maxT)
@@ -216,18 +273,12 @@ bool RayTriangleHit(Ray ray, inout HitRecord hit, float minT, float maxT)
 	{
 		vec4 object = objects[j];
 
-		//vec4 r1 = texelFetch(transformsTex, ivec2(object.x * 4, 0), 0).xyzw;
-		//vec4 r2 = texelFetch(transformsTex, ivec2(object.x * 4 + 1, 0), 0).xyzw;
-		//vec4 r3 = texelFetch(transformsTex, ivec2(object.x * 4 + 2, 0), 0).xyzw;
-		//vec4 r4 = texelFetch(transformsTex, ivec2(object.x * 4 + 3, 0), 0).xyzw;
-
 		mat4 modelMatrix = transforms[int(object.x)];
-		//mat4 modelMatrix = mat4(r1, r2, r3, r4);
 
 		vec3 origin = vec3(inverse(modelMatrix) * vec4(ray.origin, 1.0));
 		vec3 direction = vec3(inverse(modelMatrix) * vec4(ray.direction, 0.0));
 
-		if (!HitAABB(origin, direction, int(object.y), modelMatrix))
+		if (!HitAABB(origin, direction, int(object.y), closest))
 			continue;
 
 		vec4 meshInfo = meshes[int(object.y)];
@@ -289,11 +340,144 @@ bool RayTriangleHit(Ray ray, inout HitRecord hit, float minT, float maxT)
 
 				hit.frontFace = dot(hit.normal, ray.direction) <= 0.0;
 				hit.normal = hit.frontFace ? hit.normal : -hit.normal;
+				hit.transformID = int(object.x);
 			}
 		}
 	}
 
 	return somethingHit;
+}
+
+vec3 GetMaterialColorPointLight(vec3 materialColor, vec3 normal, vec3 viewDir, vec3 lightDir, vec3 lightColor, float attenuation)
+{
+    float ambientStrength = 0.15;
+    vec3 ambient = ambientStrength * lightColor;
+    
+    float diff = max(dot(normal, lightDir), 0.0);
+    vec3 diffuse = diff * lightColor;
+    
+    float specularStrength = 1.0;
+    vec3 reflectDir = reflect(lightDir, normal);  
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
+    vec3 specular = specularStrength * spec * lightColor;
+
+	ambient *= attenuation;
+	diffuse *= attenuation;
+	specular *= attenuation;
+    
+    return (ambient + diffuse) * (specular + materialColor);
+}
+
+vec3 GetMaterialColorDirLight(vec3 materialColor, vec3 normal, vec3 viewDir, vec3 lightDir, vec3 lightColor)
+{
+    float ambientStrength = 0.15;
+    vec3 ambient = ambientStrength * lightColor;
+    
+    float diff = max(dot(normal, lightDir), 0.0);
+    vec3 diffuse = diff * lightColor;
+    
+    float specularStrength = 1.0;
+    vec3 reflectDir = reflect(lightDir, normal);  
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
+    vec3 specular = specularStrength * spec * lightColor;
+    
+    return (ambient + diffuse) * (specular + materialColor);
+}
+
+vec3 CosineSampleHemisphere(vec3 n, vec2 uv, float seed)
+{
+    vec2 rnd = trand2(uv, seed);
+
+    float a = PI * 2.0 * rnd.x;
+    float b = 2.0 * rnd.y - 1.0;
+    
+    vec3 dir = vec3(sqrt(1.0 - b * b) * vec2(cos(a), sin(a)), b);
+    return normalize(n + dir);
+}
+
+vec3 SampleGGXVNDF(vec3 v, float ax, float ay, float r1, float r2)
+{
+    vec3 vh = normalize(vec3(ax * v.x, ay * v.y, v.z));
+
+    float lensq = vh.x * vh.x + vh.y * vh.y;
+    vec3 T1 = lensq > 0.0 ? vec3(-vh.y, vh.x, 0.0) * inversesqrt(lensq) : vec3(1.0, 0.0, 0.0);
+    vec3 T2 = cross(vh, T1);
+
+    float r = sqrt(r1);
+    float phi = 2.0 * PI * r2;
+    float t1 = r * cos(phi);
+    float t2 = r * sin(phi);
+    float s = 0.5 * (1.0 + vh.z);
+    t2 = (1.0 - s) * sqrt(1.0 - t1 * t1) + s * t2;
+
+    vec3 nh = t1 * T1 + t2 * T2 + sqrt(max(0.0, 1.0 - t1 * t1 - t2 * t2)) * vh;
+
+    return normalize(vec3(ax * nh.x, ay * nh.y, max(0.0, nh.z)));
+}
+
+void Basis(in vec3 n, out vec3 b1, out vec3 b2) 
+{
+    if (n.z < 0.0)
+	{
+        float a = 1.0 / (1.0 - n.z);
+        float b = n.x * n.y * a;
+        b1 = vec3(1.0 - n.x * n.x * a, -b, n.x);
+        b2 = vec3(b, n.y * n.y*a - 1.0, -n.y);
+    }
+    else
+	{
+        float a = 1.0 / (1.0 + n.z);
+        float b = -n.x * n.y * a;
+        b1 = vec3(1.0 - n.x * n.x * a, b, -n.x);
+        b2 = vec3(b, 1.0 - n.y * n.y * a, -n.y);
+    }
+}
+
+vec3 ToWorld(vec3 x, vec3 y, vec3 z, vec3 v)
+{
+    return v.x*x + v.y*y + v.z*z;
+}
+
+vec3 ToLocal(vec3 x, vec3 y, vec3 z, vec3 v)
+{
+    return vec3(dot(v, x), dot(v, y), dot(v, z));
+}
+
+vec3 Schlick(vec3 f0, float theta) 
+{
+    return f0 + (1.0 - f0) * pow(1.0 - theta, 5.0);
+}
+
+float Schlick(float f0, float f90, float theta) 
+{
+    return f0 + (f90 - f0) * pow(1.0 - theta, 5.0);
+}
+
+float Fresnel(float n1, float n2, float VoH, float f0, float f90)
+{
+    float r0 = (n1 - n2) / (n1 + n2);
+    r0 *= r0;
+    if (n1 > n2)
+    {
+        float n = n1 / n2;
+        float sinT2 = n * n * (1.0 - VoH * VoH);
+        if (sinT2 > 1.0)
+            return f90;
+        VoH = sqrt(1.0 - sinT2);
+    }
+    float x = 1.0 - VoH;
+    float ret = r0 + (1.0 - r0)*pow(x, 5.0);
+    
+    return mix(f0, f90, ret);
+}
+
+vec3 DisneyDiffuseBRDF(vec3 color, float NoR, float NoD, float RoDR, float roughness) 
+{
+    float FD90 = 0.5 + 2.0 * roughness * pow(RoDR, 2.0);
+    float a = Schlick(1.0, FD90, NoR);
+    float b = Schlick(1.0, FD90, NoD);
+    
+    return color * (a * b / PI);
 }
 
 vec3 TracePath(const Ray ray, vec2 uv, inout float seed, inout int n)
@@ -313,68 +497,83 @@ vec3 TracePath(const Ray ray, vec2 uv, inout float seed, inout int n)
 		hitRay.direction = normalize(hitRay.direction);
 		if (RayTriangleHit(hitRay, hit, 0.001, tMax))
 		{
+			hitRay.origin = hit.point + (hit.normal * 0.001);
+
+			vec3 randomDir = CosineSampleHemisphere(hit.normal, uv, seed);
+			//vec3 randomDir = hit.normal;
+
+			vec3 newDir;
+
+			// Material properties
+			vec3 albedoColor = hit.material.color.xyz;
+			float metallic = hit.material.properties.x;
+			float roughness = hit.material.properties.y;
+			float refractionIndex = hit.material.properties.z;
+			float transmission = hit.material.properties.w;
+
+			vec3 diffuseRay;
+			vec3 specularRay;
+
+			// Calculate microfacet
+			vec3 t;
+			vec3 b;
+
+    		Basis(hit.normal, t, b);
+    		vec3 v = ToLocal(t, b, hit.normal, -hitRay.direction);
+    		vec3 h = SampleGGXVNDF(v, roughness, roughness, nrand(uv), hash(seed));
+    		if (h.z < 0.0)
+        		h = -h;
+    		h = ToWorld(t, b, hit.normal, h);
+
+			// Fresnel
+			float VoH = dot(-hitRay.direction, h);
+    		vec3 f0 = mix(vec3(0.04), albedoColor, metallic);
+    		vec3 F = Schlick(f0, VoH);
+			float dielectricF = Fresnel(1.0, refractionIndex, abs(VoH), 0.0, 1.0);
+
+			float diffuseWeight = (1.0 - transmission) * (1.0 - metallic);
+			float reflectWeight = metallic;
+			float transmissionWeight = (1.0 - metallic) * transmission * (1.0 - dielectricF);
+
+			float invW = 1.0 / (diffuseWeight + reflectWeight + transmissionWeight);
+
+			diffuseWeight *= invW;
+			reflectWeight *= invW;
+			transmissionWeight *= invW;
+
 			n++;
-			if (i == 7)
+			if (diffuseWeight > 0.0)
 			{
-				color = vec3(0.0);
-				return color;
-			}
-			hitRay.origin = hit.point;
-
-			vec3 randomDir = randomPointInUnitSphere(uv, seed);
-
-			float met = hit.material.properties.x;
-
-			vec3 reflectedDir = reflect(hitRay.direction, hit.normal);
-			if (met == 0.5)
-			{
-				float refractionIdx = hit.material.properties.z;
-
-				float indexRef = hit.frontFace ? refractionIdx : 1.0 / refractionIdx;
-
-            	float cosTheta = min(dot(-hitRay.direction, hit.normal), 1.0);
-				float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
-           		if (indexRef * sinTheta > 1.0 || nrand(uv * seed) < schlick(cosTheta, indexRef)) 
-				{
-                	hitRay.direction = reflectedDir;
-            	}
-				else 
-				{
-                	hitRay.direction = refract(hitRay.direction, hit.normal, indexRef);
-            	}
-				throughput = hit.material.color.xyz * hit.material.color.w;
-			}
-			else if (met < 1.0)
-			{
-				hitRay.direction = hit.normal + randomDir;
-				hitRay.direction = mix(hitRay.direction, reflectedDir, met);
-
-				if (met == 1.0)
-				{
-					throughput = hit.material.color.xyz * hit.material.color.w;
+				float NoR = dot(hit.normal, randomDir);
+				float NoD = dot(hit.normal, -hitRay.direction);
+				if ( NoR <= 0.0 || NoD <= 0.0) 
+				{ 
+					newDir = randomDir;
+					hitRay.direction = newDir;
 				}
-				else
-				{
-					float cosTheta = dot(hitRay.direction, hit.normal);
-					float p = 1.0 / (2.0 * PI);
-					vec3 BRDF = (hit.material.color.xyz * hit.material.color.w) / PI;
-					throughput = (BRDF * throughput * cosTheta / p);
-				}
+				float RoDR = dot(randomDir, normalize(randomDir + hitRay.direction));
+        		float pdf = NoR / PI;
 
-			}
-			else if (met >= 1.0)
-			{
-				
-				hitRay.direction = reflectedDir;
-				if (dot(hitRay.direction, hit.normal) <= 0.0)
+				vec3 diffuse = DisneyDiffuseBRDF(albedoColor, NoR, NoD, RoDR, roughness) * (1.0 - F);
+        		
+        		float finalPDF = diffuseWeight * pdf;
+
+				if (finalPDF > 0.0)
 				{
-					break;
+					throughput *= ((diffuse * abs(dot(hit.normal, randomDir))) / pdf);
+					for (int i = 0; i < numPointLights; ++i)
+					{
+						vec3 L = normalize(pointLights[i].position - vec3(transforms[hit.transformID] * vec4(hit.point, 1.0)));
+						float NdotL = max(dot(hit.normal, L), 0.0);
+						if (NdotL > 0.0)
+							throughput *= (pointLights[i].radiance * NdotL);
+					}
 				}
-				throughput *= hit.material.color.xyz * hit.material.color.w;
 			}
 
-			//hitRay.direction = hit.normal + randomDir;
-			//throughput *= hit.material.color.xyz;
+			newDir = randomDir;
+
+			hitRay.direction = newDir;
 			tMax = hit.t;
 			seed *= 1.456;
 		}
@@ -414,14 +613,11 @@ void main()
 	int iterator = 0;
 	float seed = 1.0;
 
-	for (int i = 0; i < 4; ++i)
-	{
-		float rx = -0.5 + (0.5 + 0.5) * trand(uv, 0.123 * seed);
-		float ry = -0.5 + (0.5 + 0.5) * trand(uv, 0.456 * seed);
+	float rx = -0.5 + (0.5 + 0.5) * trand(uv, 0.123 * seed);
+	float ry = -0.5 + (0.5 + 0.5) * trand(uv, 0.456 * seed);
 
-    	ray.direction = GetRayDirection(ray.origin, fragCoord, rx, ry);
-		color += TracePath(ray, uv, seed, iterator);
-	}
+    ray.direction = GetRayDirection(ray.origin, fragCoord, rx, ry);
+	color = TracePath(ray, uv, seed, iterator);
 
 	color = sqrt(color / float(iterator));
 

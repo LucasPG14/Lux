@@ -2,6 +2,9 @@
 #include "SceneHierarchyWindow.h"
 
 #include <Lux.h>
+
+#include "Lux/Resources/ResourceManager.h"
+
 #include <ImGui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -91,7 +94,7 @@ namespace Lux
 				}
 			}
 		}
-		
+
 		// Mesh
 		if (MeshComponent* component = entity.Get<MeshComponent>())
 		{
@@ -104,72 +107,128 @@ namespace Lux
 		// Material
 		if (MaterialComponent* component = entity.Get<MaterialComponent>())
 		{
-			if (ImGui::CollapsingHeader("Material Component"))
+		if (ImGui::CollapsingHeader("Material Component"))
+		{
+			Material& material = *component->GetMaterial();
+			if (material.GetDiffuse() != nullptr)
 			{
-				Material& material = *component->GetMaterial();
-				if (ImGui::Button("##Diffuse Map", { 40.0f, 40.0f }))
-				{
-
-				}
-				ImGui::SameLine();
-				ImGui::Text("Diffuse Map");
-
-				if (ImGui::Button("##Normal Map", { 40.0f, 40.0f }))
-				{
-
-				}
-				ImGui::SameLine();
-				ImGui::Text("Normal Map");
-
-				if (ImGui::Button("##Metallic Map", { 40.0f, 40.0f }))
-				{
-
-				}
-				ImGui::SameLine();
-				ImGui::Text("Metallic Map");
-
-				if (ImGui::Button("##Roughness Map", { 40.0f, 40.0f }))
-				{
-
-				}
-				ImGui::SameLine();
-				ImGui::Text("Roughness Map");
-
-				if (ImGui::ColorPicker4("##color", glm::value_ptr(material.GetColor())))
-				{
-					scene->Changed(Change::MATERIAL);
-				}
-
-				if (ImGui::DragFloat("Metallic", &material.GetMetallic(), 0.1f, 0.0f, 1.0f))
-				{
-					scene->Changed(Change::MATERIAL);
-				}
-
-				if (ImGui::DragFloat("Refraction Index", &material.GetRefractionIndex(), 0.1f, 0.0f))
-				{
-					scene->Changed(Change::MATERIAL);
-				}
-
-				if (ImGui::DragFloat("Roughness", &material.GetRoughness(), 0.1f, 0.0f, 1.0f))
-				{
-					scene->Changed(Change::MATERIAL);
-				}
-
-				if (ImGui::ColorPicker4("##emissive", glm::value_ptr(material.GetEmissive())))
-				{
-					scene->Changed(Change::MATERIAL);
-				}
+				ImGui::ImageButton((ImTextureID)material.GetDiffuse()->GetID(), { 40.0f, 40.0f });
 			}
+			else
+			{
+				ImGui::Image(0, { 40.0f, 40.0f });
+			}
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER"))
+				{
+					const wchar_t* path = (const wchar_t*)payload->Data;
+					std::filesystem::path realPath = std::filesystem::path("Assets") / path;
+					if (realPath.has_extension())
+					{
+						if (realPath.extension().string() == ".png" || realPath.extension().string() == ".jpg")
+						{
+							material.SetDiffuse(ResourceManager::GetTexture(realPath.string()));
+							scene->Changed(Change::OBJECT);
+						}
+					}
+				}
+
+				ImGui::EndDragDropTarget();
+			}
+
+			ImGui::SameLine();
+			ImGui::Text("Diffuse Map");
+
+			if (ImGui::Button("##Normal Map", { 40.0f, 40.0f }))
+			{
+
+			}
+			ImGui::SameLine();
+			ImGui::Text("Normal Map");
+
+			if (ImGui::Button("##Metallic Map", { 40.0f, 40.0f }))
+			{
+
+			}
+			ImGui::SameLine();
+			ImGui::Text("Metallic Map");
+
+			if (ImGui::Button("##Roughness Map", { 40.0f, 40.0f }))
+			{
+
+			}
+			ImGui::SameLine();
+			ImGui::Text("Roughness Map");
+
+			if (ImGui::ColorPicker4("##color", glm::value_ptr(material.GetColor())))
+			{
+				scene->Changed(Change::MATERIAL);
+			}
+
+			if (ImGui::DragFloat("Metallic", &material.GetMetallic(), 0.05f, 0.0f, 1.0f))
+			{
+				scene->Changed(Change::MATERIAL);
+			}
+
+			if (ImGui::DragFloat("Refraction Index", &material.GetRefractionIndex(), 0.05f, 0.0f))
+			{
+				scene->Changed(Change::MATERIAL);
+			}
+
+			if (ImGui::DragFloat("Roughness", &material.GetRoughness(), 0.05f, 0.0f, 1.0f))
+			{
+				scene->Changed(Change::MATERIAL);
+			}
+
+			if (ImGui::DragFloat("Transmission", &material.GetTransmission(), 0.05f, 0.0f, 1.0f))
+			{
+				scene->Changed(Change::MATERIAL);
+			}
+
+			if (ImGui::ColorPicker4("##emissive", glm::value_ptr(material.GetEmissive())))
+			{
+				scene->Changed(Change::MATERIAL);
+			}
+		}
 		}
 
 		if (LightComponent* component = entity.Get<LightComponent>())
 		{
 			if (ImGui::CollapsingHeader("Light Component"))
 			{
-				ImGui::ColorPicker3("Light Color", glm::value_ptr(component->GetModifiedColor()));
-				ImGui::DragFloat("Cut Off", &(component->GetModifiedCutOff()), 1.0f, 0.0f, 180.0f);
-				ImGui::DragFloat("Radius", &(component->GetModifiedRange()), 1.0f, 0.0f);
+				std::string type = component->GetType() == LightType::DIRECTIONAL ? "Directional" : "Point";
+				if (ImGui::BeginCombo("Light Type", type.c_str()))
+				{
+					if (ImGui::Selectable("Directional")) component->SetType(LightType::DIRECTIONAL);
+					if (ImGui::Selectable("Point")) component->SetType(LightType::POINT);
+					scene->Changed(Change::LIGHT);
+					ImGui::EndCombo();
+				}
+				if (ImGui::ColorPicker3("Light Color", glm::value_ptr(component->GetModifiedColor())))
+				{
+					scene->Changed(Change::LIGHT);
+				}
+				//ImGui::DragFloat("Cut Off", &(component->GetModifiedCutOff()), 1.0f, 0.0f, 180.0f);
+				if (ImGui::DragFloat("Radius", &(component->GetModifiedRange()), 1.0f, 0.0f))
+				{
+					scene->Changed(Change::LIGHT);
+				}
 			}
+		}
+
+		if (ImGui::BeginCombo("##", "AddComponent"))
+		{
+			if (!entity.Get<MeshComponent>() && !entity.Get<LightComponent>())
+			{
+				ImGui::Selectable("Mesh Component");
+			}
+			if (entity.Get<LightComponent>() && !entity.Get<MeshComponent>())
+			{
+				ImGui::Selectable("Light Component");
+				scene->Changed(Change::OBJECT);
+			}
+			ImGui::EndCombo();
 		}
 	}
 }

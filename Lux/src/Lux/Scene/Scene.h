@@ -15,7 +15,8 @@ namespace Lux
 		NONE = 0,
 		TRANSFORM = 1,
 		MATERIAL = 2,
-		OBJECT
+		OBJECT = 3,
+		LIGHT
 	};
 
 	struct ObjectInfo

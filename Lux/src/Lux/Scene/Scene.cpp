@@ -146,6 +146,7 @@ namespace Lux
 				matInfo.properties.x = material->GetMetallic();
 				matInfo.properties.y = material->GetRoughness();
 				matInfo.properties.z = material->GetRefractionIndex();
+				matInfo.properties.w = material->GetTransmission();
 
 				materialsInfo.push_back(matInfo);
 			}

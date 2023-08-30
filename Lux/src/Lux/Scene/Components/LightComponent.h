@@ -21,6 +21,10 @@ namespace Lux
 
 		void Update() override;
 
+		void SetType(LightType t) { lightType = t; }
+		void SetColor(glm::vec3 col) { color = col; }
+		void SetRange(float r) { range = r; }
+
 		inline const glm::vec3& GetColor() const { return color; }
 		inline const float GetCutOff() const { return cutOff; }
 		inline const float GetRange() const { return range; }

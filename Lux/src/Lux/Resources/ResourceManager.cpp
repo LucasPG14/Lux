@@ -9,6 +9,7 @@ namespace Lux
 	uint32_t ResourceManager::materialsCount = 0;
 	std::vector<std::shared_ptr<Material>> ResourceManager::materials = {};
 	std::vector<std::shared_ptr<Mesh>> ResourceManager::meshes = {};
+	std::vector<std::shared_ptr<Texture2D>> ResourceManager::textures = {};
 
 	void ResourceManager::LoadFile(const std::filesystem::path& filepath)
 	{
@@ -40,6 +41,18 @@ namespace Lux
 		return material;
 	}
 
+	const std::shared_ptr<Texture2D>& ResourceManager::CreateTexture(const std::string& path)
+	{
+		std::shared_ptr<Texture2D> texture = GetTexture(path);
+		if (texture == nullptr)
+		{
+			texture = CreateSharedPtr<Texture2D>(path);
+			textures.push_back(texture);
+		}
+
+		return texture;
+	}
+
 	const std::shared_ptr<Mesh>& ResourceManager::CreateMesh(const AABB& aabb, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, const std::string& path, const std::string& origPath)
 	{
 		std::shared_ptr<Mesh> mesh = CreateSharedPtr<Mesh>(aabb, vertices, indices, path, origPath);
@@ -54,6 +67,17 @@ namespace Lux
 		{
 			if (meshes[i]->GetOriginalPath() == path)
 				return meshes[i];
+		}
+
+		return nullptr;
+	}
+
+	const std::shared_ptr<Texture2D>& ResourceManager::GetTexture(const std::string& path)
+	{
+		for (int i = 0; i < textures.size(); ++i)
+		{
+			if (textures[i]->GetOriginalPath() == path)
+				return textures[i];
 		}
 
 		return nullptr;

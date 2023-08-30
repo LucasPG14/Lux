@@ -22,6 +22,8 @@ namespace Lux
 		Texture2D(const std::string& path);
 		virtual ~Texture2D();
 
+		const std::string& GetOriginalPath() { return path; }
+
 		uint32_t GetWidth() const { return width; }
 		uint32_t GetHeight() const { return height; }
 
@@ -42,6 +44,8 @@ namespace Lux
 		const void* GetData() { return data; }
 
 	private:
+		std::string path;
+
 		uint32_t width;
 		uint32_t height;
 		uint32_t textureID;

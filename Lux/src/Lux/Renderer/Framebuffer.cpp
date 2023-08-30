@@ -171,7 +171,8 @@ namespace Lux
 
 		stbi_flip_vertically_on_write(1);
 
-		if (!stbi_write_png((path + ".png").c_str(), spec.width, spec.height, 4, data.data(), 0))
+		std::string p = path.find(".png") == std::string::npos ? path + ".png" : path;
+		if (!stbi_write_png(p.c_str(), spec.width, spec.height, 4, data.data(), 0))
 		{
 			LUX_CORE_ERROR("Couldn't save the image");
 		}

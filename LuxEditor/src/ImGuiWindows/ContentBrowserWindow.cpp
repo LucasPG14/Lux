@@ -10,7 +10,7 @@
 
 namespace Lux
 {
-	extern const std::filesystem::path assetsDir = "Assets/";
+	extern const std::filesystem::path assetsDir = "Assets";
 	
 	ContentBrowserWindow::ContentBrowserWindow() : currentDir(assetsDir)
 	{
@@ -22,27 +22,53 @@ namespace Lux
 			ResourceManager::LoadFile(entry.path());
 		}
 
-		// Load Resources
-		std::stack<std::filesystem::path> resources;
-		resources.push(assetsDir);
-
-		std::string extension = ".bsres";
-
-		while (!resources.empty())
+		std::stack<std::string> stack;
+		stack.push("Assets");
+		while (!stack.empty())
 		{
-			std::filesystem::path path = resources.top();
-			resources.pop();
-
+			std::string path = stack.top();
+			stack.pop();
 			for (auto& entry : std::filesystem::directory_iterator(path))
 			{
-				const std::filesystem::path& filePath = entry.path();
-				if (entry.is_directory()) resources.push(entry);
-				else if (filePath.extension().string() == extension)
+				if (entry.is_directory())
 				{
-				
+					stack.push(entry.path().string());
+				}
+				else
+				{
+					//if (entry.path().extension() == ".fbx" || entry.path().extension() == ".obj")
+					//{
+					//	Importer::ImportFBX2()
+					//}
+					if (entry.path().extension() == ".png" || entry.path().extension() == ".jpg")
+					{
+						ResourceManager::CreateTexture(entry.path().string());
+					}
 				}
 			}
 		}
+
+		// Load Resources
+		//std::stack<std::filesystem::path> resources;
+		//resources.push(assetsDir);
+
+		//std::string extension = ".bsres";
+
+		//while (!resources.empty())
+		//{
+		//	std::filesystem::path path = resources.top();
+		//	resources.pop();
+
+		//	for (auto& entry : std::filesystem::directory_iterator(path))
+		//	{
+		//		const std::filesystem::path& filePath = entry.path();
+		//		if (entry.is_directory()) resources.push(entry);
+		//		else if (filePath.extension().string() == extension)
+		//		{
+		//		
+		//		}
+		//	}
+		//}
 	}
 	
 	void ContentBrowserWindow::Render()
@@ -83,7 +109,14 @@ namespace Lux
 			if (fileSelected) ImGui::PushStyleColor(ImGuiCol_Button, { 0.992f, 0.894f, 0.764f, 0.4f });
 
 			if (file.is_directory()) ImGui::ImageButton((ImTextureID)folder->GetID(), { 100, 100 }, { 0, 1 }, { 1, 0 });
-			else ImGui::ImageButton((ImTextureID)tex->GetID(), { 100, 100 }, { 0, 1 }, { 1, 0 });
+			else if (file.path().extension() == ".png" || file.path().extension() == ".jpg")
+			{
+				ImGui::ImageButton((ImTextureID)ResourceManager::GetTexture(file.path().string())->GetID(), {100, 100}, {0, 1}, {1, 0});
+			}
+			else
+			{
+				ImGui::ImageButton((ImTextureID)tex->GetID(), { 100, 100 }, { 0, 1 }, { 1, 0 });
+			}
 			
 			if (fileSelected) ImGui::PopStyleColor();
 

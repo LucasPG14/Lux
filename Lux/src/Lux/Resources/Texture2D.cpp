@@ -94,8 +94,9 @@ namespace Lux
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-	Texture2D::Texture2D(const std::string& path)
+	Texture2D::Texture2D(const std::string& p)
 	{
+		path = p;
 		int w, h, channels;
 		stbi_set_flip_vertically_on_load(1);
 

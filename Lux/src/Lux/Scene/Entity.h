@@ -32,9 +32,6 @@ namespace Lux
 		{
 			for (std::vector<Component*>::iterator i = components.begin(); i != components.end(); ++i)
 			{
-				//component = dynamic_cast<T*>(*i);
-				//if (component != nullptr)
-				//	return component;
 				if ((*i)->GetComponentType() == T::GetStaticType())
 					return (T*)(*i);
 			}

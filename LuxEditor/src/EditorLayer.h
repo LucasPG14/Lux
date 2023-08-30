@@ -94,6 +94,8 @@ namespace Lux
 
 		glm::vec2 viewSize;
 
+		glm::vec2 rendererSize;
+
 		// Rendering options
 		int samples;
 		int maxSamples;

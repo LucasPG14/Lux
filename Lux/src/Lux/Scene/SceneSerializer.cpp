@@ -4,6 +4,7 @@
 #include "Components/TransformComponent.h"
 #include "Components/MeshComponent.h"
 #include "Components/MaterialComponent.h"
+#include "Components/LightComponent.h"
 
 #include "Lux/Resources/ResourceManager.h"
 
@@ -152,6 +153,20 @@ namespace Lux
 				// Material map end
 			}
 
+			if (LightComponent* comp = entity->Get<LightComponent>())
+			{
+				emitter << YAML::Key << "LightComponent";
+				// Material map begin
+				emitter << YAML::BeginMap;
+
+				emitter << YAML::Key << "Light Type" << YAML::Value << int(comp->GetType());
+				emitter << YAML::Key << "Color" << YAML::Value << comp->GetColor();
+				emitter << YAML::Key << "Radius" << YAML::Value << comp->GetRange();
+
+				emitter << YAML::EndMap;
+				// Material map end
+			}
+
 			emitter << YAML::EndMap; // Entity map end
 		}
 
@@ -205,6 +220,15 @@ namespace Lux
 				mat->SetMetallic(material["Metallic"].as<float>());
 				mat->SetRoughness(material["Roughness"].as<float>());
 				mat->SetRefractionIndex(material["IndexRefraction"].as<float>());
+			}
+			
+			YAML::Node light = yamlEntity["LightComponent"];
+			if (light)
+			{
+				LightType type = LightType(light["Light Type"].as<int>());
+				LightComponent* comp = entity->CreateComponent<LightComponent>();
+				comp->SetColor(light["Color"].as<glm::vec3>());
+				comp->SetRange(light["Radius"].as<float>());
 			}
 		}
 

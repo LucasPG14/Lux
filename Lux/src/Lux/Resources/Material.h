@@ -18,6 +18,7 @@ namespace Lux
 		float& GetMetallic()			{ return metallic; }
 		float& GetRoughness()		{ return roughness; }
 		float& GetRefractionIndex()	{ return refractionIndex; }
+		float& GetTransmission()	{ return transmission; }
 
 		int GetType() { return type; }
 
@@ -29,10 +30,16 @@ namespace Lux
 		const std::shared_ptr<Texture2D>& GetMetallicMap()	{ return metallicMap; };
 		const std::shared_ptr<Texture2D>& GetRoughnessMap() { return roughnessMap; };
 
+		void SetDiffuse(const std::shared_ptr<Texture2D>& texture) { albedo = texture; };
+		void SetNormalMap(const std::shared_ptr<Texture2D>& texture) { normal = texture; };
+		void SetMetallicMap(const std::shared_ptr<Texture2D>& texture) { metallicMap = texture; };
+		void SetRoughnessMap(const std::shared_ptr<Texture2D>& texture) { roughnessMap = texture; };
+
 		void SetColor(const glm::vec4& col) { albedoColor = col; }
 		void SetMetallic(float met) { metallic = met; }
 		void SetRoughness(float rough) { roughness = rough; }
 		void SetRefractionIndex(float idx) { refractionIndex = idx; }
+		void SetTransmission(float idx) { transmission = idx; }
 
 	private:
 		int id;
@@ -49,6 +56,7 @@ namespace Lux
 		float refractionIndex;
 		float metallic;
 		float roughness;
+		float transmission;
 
 		friend class MaterialComponent;
 	};

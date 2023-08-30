@@ -19,12 +19,12 @@ namespace Lux
 	extern const std::filesystem::path assetsDir;
 
 	EditorLayer::EditorLayer() 
-		: guizmoState(ImGuizmo::TRANSLATE), samples(0), maxSamples(2), needToUpdate(NeedToUpdate::NONE), sceneChanged(false), startRenderer(false)
+		: guizmoState(ImGuizmo::TRANSLATE), samples(0), maxSamples(2), needToUpdate(NeedToUpdate::NONE), sceneChanged(false), startRenderer(false), rendererSize(1920.0, 1080.0)
 	{
 		scene = CreateSharedPtr<Scene>();
 		SceneSerializer serializer(scene);
 		serializer.Deserialize("Assets/ShaderToy.scene");
-
+		
 		scene->SetPath("Assets/ShaderToy.scene");
 
 		std::filesystem::create_directory("Library");
@@ -217,46 +217,51 @@ namespace Lux
 	{
 		OPTICK_EVENT("Editor Layer Update");
 
-		bool moving = camera.Update(timer);
-
-		sceneChanged = moving == true ? moving : sceneChanged;
-
+		if (!startRenderer)
+		{
+			bool moving = camera.Update(timer);
+			sceneChanged = moving == true ? moving : sceneChanged;
+		}
 		if (sceneChanged)
 			ResetRenderer();
+
+		if (!startRenderer && samples >= 2)
+			return;
+
+		PathTracing();
 		
-		if (!startRenderer)
-			PathTracing();
-		else
-		{
+		//if (!startRenderer)
+		//	PathTracing();
+		//else
+		//{
+		//	PathTracing();
 
-			PathTracingView();
+		//	// Path Tracing with Compute Shader
+		//	//{
+		//	//	computeShader->Bind();
+		//	//	computeShader->SetUniformInt("imgOutput", 0);
 
-			// Path Tracing with Compute Shader
-			//{
-			//	computeShader->Bind();
-			//	computeShader->SetUniformInt("imgOutput", 0);
+		//	//	// Uniforms
+		//	//	computeShader->SetUniformFloat3("viewPos", camera.GetPosition());
+		//	//	computeShader->SetUniformFloat2("canvas", viewSize);
+		//	//	computeShader->SetUniformMat4("inverseCamera", glm::inverse(camera.GetProjectionMatrix()* camera.GetViewMatrix()));
+		//	//	computeShader->SetUniformInt("samples", samples);
 
-			//	// Uniforms
-			//	computeShader->SetUniformFloat3("viewPos", camera.GetPosition());
-			//	computeShader->SetUniformFloat2("canvas", viewSize);
-			//	computeShader->SetUniformMat4("inverseCamera", glm::inverse(camera.GetProjectionMatrix()* camera.GetViewMatrix()));
-			//	computeShader->SetUniformInt("samples", samples);
+		//	//	// Textures
+		//	//	accumulateFramebuffer->BindTextures(1);
+		//	//	computeShader->SetUniformInt("accumulateTexture", 1);
+		//	//	transformsTexture->Bind(4);
+		//	//	computeShader->SetUniformInt("transformsTex", 4);
+		//	//	normalsTexture->Bind(8);
+		//	//	computeShader->SetUniformInt("normalsTex", 8);
 
-			//	// Textures
-			//	accumulateFramebuffer->BindTextures(1);
-			//	computeShader->SetUniformInt("accumulateTexture", 1);
-			//	transformsTexture->Bind(4);
-			//	computeShader->SetUniformInt("transformsTex", 4);
-			//	normalsTexture->Bind(8);
-			//	computeShader->SetUniformInt("normalsTex", 8);
+		//	//	computeShader->DispatchCompute();
+		//	//	computeShader->Unbind();
+		//	//}
+		//	//samples++;
 
-			//	computeShader->DispatchCompute();
-			//	computeShader->Unbind();
-			//}
-			//samples++;
-
-			// Accumulating for path tracing
-		}
+		//	// Accumulating for path tracing
+		//}
 		accumulateFramebuffer->Bind();
 
 		Renderer::ClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
@@ -380,9 +385,10 @@ namespace Lux
 		ImGui::Begin("Viewport", &viewportEnabled, viewportFlags);
 		ImVec2 size = ImGui::GetWindowContentRegionMax();
 		ImGui::Image((void*)accumulateFramebuffer->GetID(), { viewSize.x, viewSize.y }, { 0, 1 }, { 1, 0 });
-		if (size.x != viewSize.x || size.y != viewSize.y)
+		if ((size.x != viewSize.x || size.y != viewSize.y))
 		{
 			viewSize = { size.x, size.y };
+			
 			computeShader->ResizeTexture(viewSize.x, viewSize.y);
 			sceneFramebuffer->Resize(viewSize.x, viewSize.y);
 			viewportFramebuffer->Resize(viewSize.x, viewSize.y);
@@ -441,41 +447,51 @@ namespace Lux
 		}
 		// ImGuizmo End
 
-		// Begin Mouse Picking
-		if (ImGui::IsWindowFocused())
-		{
-			if (Input::IsMouseButtonPressed(Mouse::BUTTON_LEFT))
-			{
-			}
-		}
-
 		// End Mouse Picking
 
 		ImGui::PopStyleVar();
 		ImGui::End();
 		// Viewport End
 
-		ImGui::Begin("Renderer");
-		size = ImGui::GetWindowContentRegionMax();
-		if (startRenderer)
-			ImGui::SetWindowFocus();
-
-		ImGui::Image((void*)accumulateFramebuffer->GetID(), { viewSize.x, viewSize.y }, { 0, 1 }, { 1, 0 });
-		ImGui::End();
-
 		ImGui::Begin("Path Tracing samples");
 		ImGui::Text("Samples: ");
 		ImGui::SameLine();
 		ImGui::Text(std::to_string(samples).c_str());
 		ImGui::DragInt("Max samples", &maxSamples);
+
+		std::string actualValue = rendererSize == glm::vec2(1920.0, 1080.0) ? "1920 x 1080" : "1080 x 720";
+		if (ImGui::BeginCombo("Renderer Size", actualValue.c_str()))
+		{
+			if (ImGui::Selectable("1920 x 1080"))
+			{
+				rendererSize = glm::vec2(1920.0, 1080.0);
+			}
+			if (ImGui::Selectable("1080 x 720"))
+			{
+				rendererSize = glm::vec2(1080.0, 720.0);
+			}
+			ImGui::EndCombo();
+		}
 		if (ImGui::Button("Start Renderer"))
 		{
 			startRenderer = true;
+			viewportFramebuffer->Resize(rendererSize.x, rendererSize.y);
+			accumulateFramebuffer->Resize(rendererSize.x, rendererSize.y);
+			camera.SetDimensions(rendererSize.x, rendererSize.y);
+			ResetRenderer();
+		}
+
+		if (ImGui::Button("Restart"))
+		{
+			startRenderer = false;
+			ResetRenderer();
+			viewportFramebuffer->Resize(viewSize.x, viewSize.y);
+			accumulateFramebuffer->Resize(viewSize.x, viewSize.y);
+			camera.SetDimensions(viewSize.x, viewSize.y);
 		}
 
 		if (samples >= maxSamples)
 		{
-			startRenderer = false;
 			if (ImGui::Button("Save Renderer"))
 			{
 				SaveImage();
@@ -507,6 +523,7 @@ namespace Lux
 			info.properties.x = material->GetMetallic();
 			info.properties.y = material->GetRoughness();
 			info.properties.z = material->GetRefractionIndex();
+			info.properties.w = material->GetTransmission();
 			//info.emissive = material->GetEmissive();
 			materialsSsbo->ChangeData(&info, material->GetID() * sizeof(MaterialInfo), sizeof(MaterialInfo));
 
@@ -531,6 +548,14 @@ namespace Lux
 			sceneChanged = true;
 			break;
 		}
+		case Change::LIGHT:
+		{
+			ResetRenderer();
+
+			scene->Changed(Change::NONE);
+			sceneChanged = true;
+			break;
+		}
 		}
 
 		ImGui::End();
@@ -545,12 +570,6 @@ namespace Lux
 		Renderer::Clear();
 		accumulateFramebuffer->Unbind();
 
-		//scene->CollectInformation();
-		//{
-		//	TextureSpecification spec;
-		//	spec.format = TextureFormat::FLOAT;
-		//	transformsTexture = CreateSharedPtr<Texture2D>(scene->GetTransforms().data(), sizeof(glm::mat4) / sizeof(glm::vec4) * scene->GetTransforms().size(), spec);
-		//}
 		sceneChanged = false;
 		imageSaved = false;
 	}
@@ -648,7 +667,7 @@ namespace Lux
 				lightingPass->SetUniformFloat3("pointLights[" + number + "].position", transform->GetPosition());
 				lightingPass->SetUniformFloat3("pointLights[" + number + "].radiance", light->GetColor());
 
-				lightingPass->SetUniformFloat("pointLights[" + number + "].radius", 5.0f);
+				lightingPass->SetUniformFloat("pointLights[" + number + "].radius", light->GetRange());
 				break;
 			}
 			case LightType::SPOT:
@@ -666,40 +685,9 @@ namespace Lux
 			}
 		}
 
-		int index = 0;
-		int offset = 0;
-		for (int i = 0; i < scene->GetWorld().size(); ++i)
-		{
-			Entity* entity = scene->GetWorld()[i];
-			if (MeshComponent* mesh = entity->Get<MeshComponent>())
-			{
-				// Setting the global AABB of the object
-				lightingPass->SetUniformFloat3("bvhs[" + std::to_string(index) + "].aabb.min", mesh->GetAABB().min);
-				lightingPass->SetUniformFloat3("bvhs[" + std::to_string(index) + "].aabb.max", mesh->GetAABB().max);
-				lightingPass->SetUniformInt("bvhs[" + std::to_string(index) + "].offset", offset);
-				lightingPass->SetUniformInt("bvhs[" + std::to_string(index) + "].count", mesh->GetAABBGeometry().size());
-
-				// Setting the transform and the material of the object
-				lightingPass->SetUniformMat4("modelsMatrix[" + std::to_string(index) + "]", entity->Get<TransformComponent>()->GetTransform());
-				lightingPass->SetUniformFloat3("materials[" + std::to_string(index) + "].color", entity->Get<MaterialComponent>()->GetMaterial()->GetColor());
-				lightingPass->SetUniformFloat("materials[" + std::to_string(index) + "].type", entity->Get<MaterialComponent>()->GetMaterial()->GetType());
-
-				// Setting the AABB of each triangle of the mesh
-				for (int j = 0; j < mesh->GetAABBGeometry().size(); ++j)
-				{
-					lightingPass->SetUniformFloat3("aabbs[" + std::to_string(offset + j) + "].min", mesh->GetAABBGeometry()[j].min);
-					lightingPass->SetUniformFloat3("aabbs[" + std::to_string(offset + j) + "].max", mesh->GetAABBGeometry()[j].max);
-					//lightingPass->SetUniformFloat3("aabbs[" + std::to_string(offset + j) + "].normal", mesh->GetAABBGeometry()[j].normal);
-				}
-
-				// Incrementing the offset and the size
-				offset += mesh->GetAABBGeometry().size();
-				index++;
-			}
-		}
-
 		lightingPass->SetUniformFloat3("viewPos", camera.GetPosition());
-		lightingPass->SetUniformFloat2("canvas", viewSize);
+		lightingPass->SetUniformInt("numPointLights", pointLights);
+		lightingPass->SetUniformFloat2("canvas", startRenderer == true ? rendererSize : viewSize);
 		lightingPass->SetUniformMat4("inverseCamera", glm::inverse(camera.GetProjectionMatrix() * camera.GetViewMatrix()));
 
 		Renderer::DrawFullscreenQuad();
