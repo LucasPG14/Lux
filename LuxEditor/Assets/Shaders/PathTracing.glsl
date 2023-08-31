@@ -46,6 +46,13 @@ struct HitRecord
 	int transformID;
 };
 
+struct RefractionState
+{
+	bool isRefracted;
+	bool wasRefracted;
+	float lastRefr;
+};
+
 struct Ray
 {
     vec3 origin;
@@ -145,6 +152,10 @@ layout(location = 8) uniform sampler2D normalsTex;
 layout(location = 9) uniform sampler2D objectsTex;
 
 const float PI = 3.14159265;
+
+int seed2 = 1;
+int rand(void) { seed2 = seed2*0x343fd+0x269ec3; return (seed2>>16)&32767; }
+float frand() { return float(rand())/32767.0; }
 
 float nrand(vec2 n)
 {
@@ -384,7 +395,7 @@ vec3 GetMaterialColorDirLight(vec3 materialColor, vec3 normal, vec3 viewDir, vec
     return (ambient + diffuse) * (specular + materialColor);
 }
 
-vec3 CosineSampleHemisphere(vec3 n, vec2 uv, float seed)
+vec3 cosineSampleHemisphere(vec3 n, vec2 uv, float seed)
 {
     vec2 rnd = trand2(uv, seed);
 
@@ -395,29 +406,9 @@ vec3 CosineSampleHemisphere(vec3 n, vec2 uv, float seed)
     return normalize(n + dir);
 }
 
-vec3 SampleGGXVNDF(vec3 v, float ax, float ay, float r1, float r2)
+void basis(in vec3 n, out vec3 b1, out vec3 b2) 
 {
-    vec3 vh = normalize(vec3(ax * v.x, ay * v.y, v.z));
-
-    float lensq = vh.x * vh.x + vh.y * vh.y;
-    vec3 T1 = lensq > 0.0 ? vec3(-vh.y, vh.x, 0.0) * inversesqrt(lensq) : vec3(1.0, 0.0, 0.0);
-    vec3 T2 = cross(vh, T1);
-
-    float r = sqrt(r1);
-    float phi = 2.0 * PI * r2;
-    float t1 = r * cos(phi);
-    float t2 = r * sin(phi);
-    float s = 0.5 * (1.0 + vh.z);
-    t2 = (1.0 - s) * sqrt(1.0 - t1 * t1) + s * t2;
-
-    vec3 nh = t1 * T1 + t2 * T2 + sqrt(max(0.0, 1.0 - t1 * t1 - t2 * t2)) * vh;
-
-    return normalize(vec3(ax * nh.x, ay * nh.y, max(0.0, nh.z)));
-}
-
-void Basis(in vec3 n, out vec3 b1, out vec3 b2) 
-{
-    if (n.z < 0.0)
+    if(n.z < 0.0)
 	{
         float a = 1.0 / (1.0 - n.z);
         float b = n.x * n.y * a;
@@ -433,51 +424,233 @@ void Basis(in vec3 n, out vec3 b1, out vec3 b2)
     }
 }
 
-vec3 ToWorld(vec3 x, vec3 y, vec3 z, vec3 v)
+vec3 toWorld(vec3 x, vec3 y, vec3 z, vec3 v)
 {
-    return v.x*x + v.y*y + v.z*z;
+    return v.x * x + v.y * y + v.z * z;
 }
 
-vec3 ToLocal(vec3 x, vec3 y, vec3 z, vec3 v)
+vec3 toLocal(vec3 x, vec3 y, vec3 z, vec3 v)
 {
     return vec3(dot(v, x), dot(v, y), dot(v, z));
 }
 
-vec3 Schlick(vec3 f0, float theta) 
+float luma(vec3 color) 
 {
-    return f0 + (1.0 - f0) * pow(1.0 - theta, 5.0);
+    return dot(color, vec3(0.299, 0.587, 0.114));
 }
 
-float Schlick(float f0, float f90, float theta) 
-{
-    return f0 + (f90 - f0) * pow(1.0 - theta, 5.0);
-}
-
-float Fresnel(float n1, float n2, float VoH, float f0, float f90)
+float Fresnel(float n1, float n2, float VdotH, float f0, float f90)
 {
     float r0 = (n1 - n2) / (n1 + n2);
     r0 *= r0;
     if (n1 > n2)
     {
-        float n = n1 / n2;
-        float sinT2 = n * n * (1.0 - VoH * VoH);
+        float n = n1/n2;
+        float sinT2 = n * n * (1.0 - VdotH * VdotH);
         if (sinT2 > 1.0)
             return f90;
-        VoH = sqrt(1.0 - sinT2);
+        VdotH = sqrt(1.0 - sinT2);
     }
-    float x = 1.0 - VoH;
-    float ret = r0 + (1.0 - r0)*pow(x, 5.0);
+    float x = 1.0 - VdotH;
+    float ret = r0 + (1.0 - r0) * pow(x, 5.0);
     
     return mix(f0, f90, ret);
 }
 
-vec3 DisneyDiffuseBRDF(vec3 color, float NoR, float NoD, float RoDR, float roughness) 
+vec3 FSchlick(vec3 f0, float theta) 
 {
-    float FD90 = 0.5 + 2.0 * roughness * pow(RoDR, 2.0);
-    float a = Schlick(1.0, FD90, NoR);
-    float b = Schlick(1.0, FD90, NoD);
+    return f0 + (1.0 - f0) * pow(1.0 - theta, 5.0);
+}
+
+float FSchlick(float f0, float f90, float theta) 
+{
+    return f0 + (f90 - f0) * pow(1.0 - theta, 5.0);
+}
+
+float DGTR(float roughness, float NdotH, float k) 
+{
+    float a2 = pow(roughness, 2.0);
+    return a2 / (PI * pow((NdotH * NdotH) * (a2 * a2 - 1.0) + 1.0, k));
+}
+
+float SmithG(float NdotV, float roughness2)
+{
+    float a = pow(roughness2, 2.0);
+    float b = pow(NdotV, 2.0);
+    return (2.0 * NdotV) / (NdotV + sqrt(a + b - a * b));
+}
+
+float GeometryTerm(float NdotL, float NdotV, float roughness)
+{
+    float a2 = roughness * roughness;
+    float G1 = SmithG(NdotV, a2);
+    float G2 = SmithG(NdotL, a2);
+    return G1 * G2;
+}
+
+vec3 SampleGGXVNDF(vec3 V, float ax, float ay, float r1, float r2)
+{
+    vec3 Vh = normalize(vec3(ax * V.x, ay * V.y, V.z));
+
+    float lensq = Vh.x * Vh.x + Vh.y * Vh.y;
+    vec3 T1 = lensq > 0.0 ? vec3(-Vh.y, Vh.x, 0.0) * inversesqrt(lensq) : vec3(1.0, 0.0, 0.0);
+    vec3 T2 = cross(Vh, T1);
+
+    float r = sqrt(r1);
+    float phi = 2.0 * PI * r2;
+    float t1 = r * cos(phi);
+    float t2 = r * sin(phi);
+    float s = 0.5 * (1.0 + Vh.z);
+    t2 = (1.0 - s) * sqrt(1.0 - t1 * t1) + s * t2;
+
+    vec3 Nh = t1 * T1 + t2 * T2 + sqrt(max(0.0, 1.0 - t1 * t1 - t2 * t2)) * Vh;
+
+    return normalize(vec3(ax * Nh.x, ay * Nh.y, max(0.0, Nh.z)));
+}
+
+float GGXVNDFPdf(float NdotH, float NdotV, float roughness)
+{
+ 	float D = DGTR(roughness, NdotH, 2.0);
+    float G1 = SmithG(NdotV, roughness * roughness);
+    return (D * G1) / max(0.00001, 4.0f * NdotV);
+}
+
+vec3 DisneyDiffuseBRDF(vec3 color, float NdotL, float NdotV, float LdotH, float roughness) 
+{
+    float FD90 = 0.5 + 2.0 * roughness * pow(LdotH, 2.0);
+    float a = FSchlick(1.0, FD90, NdotL);
+    float b = FSchlick(1.0, FD90, NdotV);
     
     return color * (a * b / PI);
+}
+
+vec3 DisneyReflectionBRDF(float matRoughness, vec3 F, float NdotH, float NdotV, float NdotL) 
+{
+    float roughness = pow(matRoughness, 2.0);
+    float D = DGTR(roughness, NdotH, 2.0);
+    float G = GeometryTerm(NdotL, NdotV, pow(0.5 + matRoughness * 0.5, 2.0));
+
+    vec3 spec = D * F * G / (4.0 * NdotL * NdotV);
+    
+    return spec;
+}
+
+vec4 DisneyRefractionBRDF(vec3 albedo, float F, float NdotH, float NdotV, float NdotL, float VdotH, float LdotH, float refractionRatio, float matRoughness) 
+{
+    float roughness = pow(matRoughness, 2.0);
+    float D = DGTR(roughness, NdotH, 2.0);
+    float G = GeometryTerm(NdotL, NdotV, pow(0.5 + matRoughness * 0.5, 2.0));
+    float denom = pow(LdotH + VdotH * refractionRatio, 2.0);
+
+    float jacobian = abs(LdotH) / denom;
+    float pdf = SmithG(abs(NdotL), roughness * roughness) * max(0.0, VdotH) * D * jacobian / NdotV;
+    
+    vec3 spec = pow(1.0 - albedo, vec3(0.5))  * D * (1.0 - F) * G * abs(VdotH) * jacobian * pow(refractionRatio, 2.0) / abs(NdotL * NdotV);
+    return vec4(spec, pdf);
+}
+
+vec4 CalculateBRDF(vec3 direction, HitRecord hit, inout RefractionState refState, out vec3 L, vec2 uv, float seed)
+{
+	// Material properties
+	vec3 albedo = hit.material.color.xyz;
+	float metallic = hit.material.properties.x;
+	float roughness = hit.material.properties.y;
+	float refractionIdx = hit.material.properties.z;
+	float transmission = hit.material.properties.w;
+
+	float roughness2 = pow(roughness, 2.0);
+
+    // Calculating Microfacet normal
+    vec3 t, b;
+    basis(hit.normal, t, b);
+    vec3 V = toLocal(t, b, hit.normal, direction);
+    vec3 h = SampleGGXVNDF(V, roughness2, roughness2, nrand(uv), hash(seed));
+    if (h.z < 0.0)
+        h = -h;
+	h = toWorld(t, b, hit.normal, h);
+
+    // Fresnel
+    float VdotH = dot(direction, h);
+    vec3 f0 = mix(vec3(0.04), albedo, metallic);
+    vec3 fresnelValue = FSchlick(f0, VdotH);
+    float dielectricFresnel = Fresnel(refState.lastRefr, refractionIdx, abs(VdotH), 0.0, 1.0);
+    
+    // Weight probability
+    float diffuseWeight = (1.0 - metallic) * (1.0 - transmission);
+    float reflectWeight = luma(fresnelValue);
+    float refractWeight = (1.0 - metallic) * (transmission) * (1.0 - dielectricFresnel);
+    float invW = 1.0 / (diffuseWeight + reflectWeight + refractWeight);
+    
+	diffuseWeight *= invW;
+    reflectWeight *= invW;
+    refractWeight *= invW;
+
+	refState.wasRefracted = refState.isRefracted;
+
+	vec4 brdf;
+	seed *= 1.456;
+	float rnd = hash(seed);
+	if (rnd < diffuseWeight)
+	{
+		L = cosineSampleHemisphere(hit.normal, uv, seed);
+        h = normalize(L + direction);
+        
+        float NdotL = dot(hit.normal, L);
+        float NdotV = dot(hit.normal, direction);
+        if (NdotL <= 0.0 || NdotV <= 0.0) 
+		{ 
+			return vec4(0.0); 
+		}
+        
+		float LdotH = dot(L, h);
+        float pdf = NdotL / PI;
+        
+        vec3 diffuse = DisneyDiffuseBRDF(albedo, NdotL, NdotV, LdotH, roughness2) * (1.0 - fresnelValue);
+        brdf.rgb = diffuse;
+        brdf.a = diffuseWeight * pdf;
+	}
+	else if (rnd < diffuseWeight + reflectWeight)
+	{
+		L = reflect(-direction, h);
+        
+        float NdotL = dot(hit.normal, L);
+        float NdotV = dot(hit.normal, direction);
+        if (NdotL <= 0.0 || NdotV <= 0.0) 
+		{ 
+			return vec4(0.0); 
+		}
+        
+		float NdotH = min(0.99, dot(hit.normal, h));
+        float pdf = GGXVNDFPdf(NdotH, NdotV, roughness2);
+        
+        vec3 specular = DisneyReflectionBRDF(roughness, fresnelValue, NdotH, NdotV, NdotL);
+        brdf.rgb = specular;
+        brdf.a = reflectWeight * pdf;
+	}
+	else
+	{
+		refState.isRefracted = !refState.isRefracted;
+		float refractionRatio = refState.lastRefr / refractionIdx;
+        L = refract(-direction, h, refractionRatio);
+        refState.lastRefr = refractionIdx;
+        
+        float NdotL = dot(hit.normal, L);
+        if (NdotL <= 0.0) 
+		{ 
+			return vec4(0.0); 
+		}
+        
+		float NdotV = dot(hit.normal, direction);
+        float NdotH = min(0.99, dot(hit.normal, h));
+        float LdotH = dot(L, h);
+        
+        brdf = DisneyRefractionBRDF(albedo, dielectricFresnel, NdotH, NdotV, NdotL, VdotH, LdotH, refractionRatio, roughness);
+        brdf.a = refractWeight * brdf.a;
+	}
+
+	brdf.rgb *= abs(dot(hit.normal, L));
+
+	return brdf;
 }
 
 vec3 TracePath(const Ray ray, vec2 uv, inout float seed, inout int n)
@@ -489,6 +662,11 @@ vec3 TracePath(const Ray ray, vec2 uv, inout float seed, inout int n)
 	float accum = 1.0;
 
 	vec3 throughput = vec3(1.0);
+
+	RefractionState refState;
+	refState.isRefracted = false;
+	refState.wasRefracted = false;
+	refState.lastRefr = 1.0;
 	
 	int i = 0;
 	for (; i < 8; ++i)
@@ -497,84 +675,56 @@ vec3 TracePath(const Ray ray, vec2 uv, inout float seed, inout int n)
 		hitRay.direction = normalize(hitRay.direction);
 		if (RayTriangleHit(hitRay, hit, 0.001, tMax))
 		{
-			hitRay.origin = hit.point + (hit.normal * 0.001);
-
-			vec3 randomDir = CosineSampleHemisphere(hit.normal, uv, seed);
-			//vec3 randomDir = hit.normal;
+			if (refState.isRefracted) hit.normal = -hit.normal;
 
 			vec3 newDir;
 
-			// Material properties
-			vec3 albedoColor = hit.material.color.xyz;
-			float metallic = hit.material.properties.x;
-			float roughness = hit.material.properties.y;
-			float refractionIndex = hit.material.properties.z;
-			float transmission = hit.material.properties.w;
+			vec4 brdf = CalculateBRDF(-hitRay.direction, hit, refState, newDir, uv, seed);
 
-			vec3 diffuseRay;
-			vec3 specularRay;
+			if (brdf.a > 0.0)
+				throughput *= brdf.rgb / brdf.a;
 
-			// Calculate microfacet
-			vec3 t;
-			vec3 b;
-
-    		Basis(hit.normal, t, b);
-    		vec3 v = ToLocal(t, b, hit.normal, -hitRay.direction);
-    		vec3 h = SampleGGXVNDF(v, roughness, roughness, nrand(uv), hash(seed));
-    		if (h.z < 0.0)
-        		h = -h;
-    		h = ToWorld(t, b, hit.normal, h);
-
-			// Fresnel
-			float VoH = dot(-hitRay.direction, h);
-    		vec3 f0 = mix(vec3(0.04), albedoColor, metallic);
-    		vec3 F = Schlick(f0, VoH);
-			float dielectricF = Fresnel(1.0, refractionIndex, abs(VoH), 0.0, 1.0);
-
-			float diffuseWeight = (1.0 - transmission) * (1.0 - metallic);
-			float reflectWeight = metallic;
-			float transmissionWeight = (1.0 - metallic) * transmission * (1.0 - dielectricF);
-
-			float invW = 1.0 / (diffuseWeight + reflectWeight + transmissionWeight);
-
-			diffuseWeight *= invW;
-			reflectWeight *= invW;
-			transmissionWeight *= invW;
-
-			n++;
-			if (diffuseWeight > 0.0)
+			for (int i = 0; i < numPointLights; ++i)
 			{
-				float NoR = dot(hit.normal, randomDir);
-				float NoD = dot(hit.normal, -hitRay.direction);
-				if ( NoR <= 0.0 || NoD <= 0.0) 
-				{ 
-					newDir = randomDir;
-					hitRay.direction = newDir;
-				}
-				float RoDR = dot(randomDir, normalize(randomDir + hitRay.direction));
-        		float pdf = NoR / PI;
+				vec3 L = normalize(pointLights[i].position - hit.point);
+				float distance = length(pointLights[i].position - hit.point);
+        		float attenuation = 1.0 / (distance * distance);
+        		vec3 radiance = pointLights[i].radiance * attenuation;  
 
-				vec3 diffuse = DisneyDiffuseBRDF(albedoColor, NoR, NoD, RoDR, roughness) * (1.0 - F);
-        		
-        		float finalPDF = diffuseWeight * pdf;
-
-				if (finalPDF > 0.0)
-				{
-					throughput *= ((diffuse * abs(dot(hit.normal, randomDir))) / pdf);
-					for (int i = 0; i < numPointLights; ++i)
-					{
-						vec3 L = normalize(pointLights[i].position - vec3(transforms[hit.transformID] * vec4(hit.point, 1.0)));
-						float NdotL = max(dot(hit.normal, L), 0.0);
-						if (NdotL > 0.0)
-							throughput *= (pointLights[i].radiance * NdotL);
-					}
-				}
+				float NdotL = max(dot(hit.normal, L), 0.0); 
+				throughput += radiance * NdotL;
 			}
 
-			newDir = randomDir;
+			if (refState.wasRefracted) 
+			{
+            	throughput *= exp(-hit.t * ((vec3(1.0) - hit.material.color.xyz) * 0.0));
+        	}
+
+			hitRay.origin = hit.point;
+
+			if (refState.isRefracted) 
+			{
+            	hitRay.origin += -hit.normal * 0.01;
+        	} 
+			else if (refState.wasRefracted && !refState.isRefracted) 
+			{
+            	hitRay.origin += -hit.normal * 0.01;
+            	refState.lastRefr = 1.0;
+        	} 
+			else 
+			{
+            	hitRay.origin += hit.normal * 0.01;
+        	}
 
 			hitRay.direction = newDir;
-			tMax = hit.t;
+
+			float q = max(throughput.r, max(throughput.g, throughput.b));
+			seed *= 1.456;
+            if (hash(seed) > q)
+                break;
+
+            throughput /= q;
+
 			seed *= 1.456;
 		}
 		else
@@ -619,7 +769,7 @@ void main()
     ray.direction = GetRayDirection(ray.origin, fragCoord, rx, ry);
 	color = TracePath(ray, uv, seed, iterator);
 
-	color = sqrt(color / float(iterator));
+	//color = sqrt(color / float(iterator));
 
 	// Gamma correction
 	color = pow(color, vec3(1.0 / 2.2));
