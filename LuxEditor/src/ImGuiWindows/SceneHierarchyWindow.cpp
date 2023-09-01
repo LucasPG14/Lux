@@ -140,23 +140,89 @@ namespace Lux
 			ImGui::SameLine();
 			ImGui::Text("Diffuse Map");
 
-			if (ImGui::Button("##Normal Map", { 40.0f, 40.0f }))
+			if (material.GetNormalMap() != nullptr)
 			{
+				ImGui::ImageButton((ImTextureID)material.GetNormalMap()->GetID(), { 40.0f, 40.0f });
+			}
+			else
+			{
+				ImGui::Image(0, { 40.0f, 40.0f });
+			}
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER"))
+				{
+					const wchar_t* path = (const wchar_t*)payload->Data;
+					std::filesystem::path realPath = std::filesystem::path("Assets") / path;
+					if (realPath.has_extension())
+					{
+						if (realPath.extension().string() == ".png" || realPath.extension().string() == ".jpg")
+						{
+							material.SetNormalMap(ResourceManager::GetTexture(realPath.string()));
+							scene->Changed(Change::OBJECT);
+						}
+					}
+				}
 
+				ImGui::EndDragDropTarget();
 			}
 			ImGui::SameLine();
 			ImGui::Text("Normal Map");
 
-			if (ImGui::Button("##Metallic Map", { 40.0f, 40.0f }))
+			if (material.GetMetallicMap() != nullptr)
 			{
+				ImGui::ImageButton((ImTextureID)material.GetMetallicMap()->GetID(), { 40.0f, 40.0f });
+			}
+			else
+			{
+				ImGui::Image(0, { 40.0f, 40.0f });
+			}
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER"))
+				{
+					const wchar_t* path = (const wchar_t*)payload->Data;
+					std::filesystem::path realPath = std::filesystem::path("Assets") / path;
+					if (realPath.has_extension())
+					{
+						if (realPath.extension().string() == ".png" || realPath.extension().string() == ".jpg")
+						{
+							material.SetMetallicMap(ResourceManager::GetTexture(realPath.string()));
+							scene->Changed(Change::OBJECT);
+						}
+					}
+				}
 
+				ImGui::EndDragDropTarget();
 			}
 			ImGui::SameLine();
 			ImGui::Text("Metallic Map");
 
-			if (ImGui::Button("##Roughness Map", { 40.0f, 40.0f }))
+			if (material.GetRoughnessMap() != nullptr)
 			{
+				ImGui::ImageButton((ImTextureID)material.GetRoughnessMap()->GetID(), { 40.0f, 40.0f });
+			}
+			else
+			{
+				ImGui::Image(0, { 40.0f, 40.0f });
+			}
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER"))
+				{
+					const wchar_t* path = (const wchar_t*)payload->Data;
+					std::filesystem::path realPath = std::filesystem::path("Assets") / path;
+					if (realPath.has_extension())
+					{
+						if (realPath.extension().string() == ".png" || realPath.extension().string() == ".jpg")
+						{
+							material.SetRoughnessMap(ResourceManager::GetTexture(realPath.string()));
+							scene->Changed(Change::OBJECT);
+						}
+					}
+				}
 
+				ImGui::EndDragDropTarget();
 			}
 			ImGui::SameLine();
 			ImGui::Text("Roughness Map");

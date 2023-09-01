@@ -23,14 +23,17 @@ namespace Lux
 		int GetType() { return type; }
 
 		int GetID() { return id; }
-		void SetID(int newID = -1) { id = newID; }
+		void SetID(int newID = -1);
 
-		const std::shared_ptr<Texture2D>& GetDiffuse()		{ return albedo; };
+		void ResetIDTextures(int newID = -1);
+		void SetIDTextures(std::vector<char>& textures, int newID);
+
+		const std::shared_ptr<Texture2D>& GetDiffuse()		{ return diffuse; };
 		const std::shared_ptr<Texture2D>& GetNormalMap()	{ return normal; };
 		const std::shared_ptr<Texture2D>& GetMetallicMap()	{ return metallicMap; };
 		const std::shared_ptr<Texture2D>& GetRoughnessMap() { return roughnessMap; };
 
-		void SetDiffuse(const std::shared_ptr<Texture2D>& texture) { albedo = texture; };
+		void SetDiffuse(const std::shared_ptr<Texture2D>& texture) { diffuse = texture; };
 		void SetNormalMap(const std::shared_ptr<Texture2D>& texture) { normal = texture; };
 		void SetMetallicMap(const std::shared_ptr<Texture2D>& texture) { metallicMap = texture; };
 		void SetRoughnessMap(const std::shared_ptr<Texture2D>& texture) { roughnessMap = texture; };
@@ -44,7 +47,7 @@ namespace Lux
 	private:
 		int id;
 
-		std::shared_ptr<Texture2D> albedo;
+		std::shared_ptr<Texture2D> diffuse;
 		glm::vec4 albedoColor;
 		glm::vec4 emissive;
 		int type;

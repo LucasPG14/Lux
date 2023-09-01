@@ -2,6 +2,7 @@
 #include "Texture2D.h"
 
 #include <stb_image.h>
+#include <stb_image_resize.h>
 #include <glad/glad.h>
 
 namespace Lux
@@ -59,7 +60,7 @@ namespace Lux
 	}
 
 	// Texture 2D
-	Texture2D::Texture2D(void* d, int w, int h) : width(w), height(h), data(d)
+	Texture2D::Texture2D(void* d, int w, int h) : width(w), height(h), data(d), id(-1)
 	{
 		glCreateTextures(GL_TEXTURE_2D, 1, &textureID);
 		glBindTexture(GL_TEXTURE_2D, textureID);
@@ -72,7 +73,7 @@ namespace Lux
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-	Texture2D::Texture2D(int w, int h) : width(w), height(h)
+	Texture2D::Texture2D(int w, int h) : width(w), height(h), id(-1)
 	{
 		glCreateTextures(GL_TEXTURE_2D, 1, &textureID);
 		glBindTexture(GL_TEXTURE_2D, textureID);
@@ -84,7 +85,7 @@ namespace Lux
 		glBindImageTexture(0, textureID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
 	}
 
-	Texture2D::Texture2D(const void* data, int w, const TextureSpecification& spec) : width(w), height(1)
+	Texture2D::Texture2D(const void* data, int w, const TextureSpecification& spec) : width(w), height(1), id(-1)
 	{
 		glCreateTextures(GL_TEXTURE_2D, 1, &textureID);
 		glBindTexture(GL_TEXTURE_2D, textureID);
@@ -94,16 +95,30 @@ namespace Lux
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-	Texture2D::Texture2D(const std::string& p)
+	Texture2D::Texture2D(const std::string& p) : id(-1)
 	{
 		path = p;
 		int w, h, channels;
 		stbi_set_flip_vertically_on_load(1);
 
-		uint8_t* data = stbi_load(path.c_str(), &w, &h, &channels, 0);
-		LUX_CORE_ASSERT(data, "Couldn't load the image!");
+		uint8_t* data = stbi_load(path.c_str(), &w, &h, &channels, 4);
+
+		unsigned char* resizedTex = new unsigned char[1024 * 1024 * 4];
+		if (w != 1024 || h != 1024 || channels != 4)
+		{
+			stbir_resize_uint8(data, w, h, 0, resizedTex, 1024, 1024, 0, 4);
+			channels = 4;
+			w = 1024;
+			h = 1024;
+		}
+		else
+		{
+			resizedTex = data;
+		}
+
+		LUX_CORE_ASSERT(resizedTex, "Couldn't load the image!");
 		width = w;
-		height = h;
+		height = w;
 
 		GLenum internalFormat = 0;
 		GLenum dataFormat = 0;
@@ -117,7 +132,7 @@ namespace Lux
 		glTextureParameteri(textureID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTextureParameteri(textureID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		glTextureSubImage2D(textureID, 0, 0, 0, width, height, dataFormat, GL_UNSIGNED_BYTE, data);
+		glTextureSubImage2D(textureID, 0, 0, 0, width, height, dataFormat, GL_UNSIGNED_BYTE, resizedTex);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		stbi_image_free(data);
@@ -164,6 +179,20 @@ namespace Lux
 		glBindImageTexture(0, textureID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
 	}
 	
+	void Texture2D::Add(std::vector<char>& textures)
+	{
+		int size = 1024 * 1024 * 4;
+		std::vector<char> dataImage(1024 * 1024 * 4);
+		glBindTexture(GL_TEXTURE_2D, textureID);
+
+		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, dataImage.data());
+
+		textures.reserve(size + textures.size());
+		textures.insert(textures.end(), dataImage.begin(), dataImage.end());
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
 	void Texture2D::SaveToFile()
 	{
 		//GLuint* data = new GLuint[width * height * 4 * 4];

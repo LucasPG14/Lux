@@ -41,6 +41,16 @@ namespace Lux
 		glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 	}
 
+	Texture2DArray::Texture2DArray(uint32_t size, void* data)
+	{
+		glGenTextures(1, &textureID);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, textureID);
+		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA8, 1024, 1024, size, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+	}
+
 	Texture2DArray::~Texture2DArray()
 	{
 	}

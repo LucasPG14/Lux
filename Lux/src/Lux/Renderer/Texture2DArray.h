@@ -9,6 +9,7 @@ namespace Lux
 	public:
 		Texture2DArray(const std::shared_ptr<Material>& material);
 		Texture2DArray(const std::string& filename);
+		Texture2DArray(uint32_t size, void* data);
 		~Texture2DArray();
 
 		void AddMaterial(const std::shared_ptr<Material>& material);

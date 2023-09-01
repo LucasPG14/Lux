@@ -38,12 +38,20 @@ namespace Lux
 		void Resize(int w, int h);
 
 		void AddData(const void* data, int s);
+		
+		void Add(std::vector<char>& textures);
 
 		void SaveToFile();
+
+		int GetImageID() { return id; }
+
+		void SetID(int newID = -1) { id = newID; }
 
 		const void* GetData() { return data; }
 
 	private:
+		int id;
+
 		std::string path;
 
 		uint32_t width;

@@ -52,7 +52,7 @@ namespace Lux
 
 			//objectsTexture = CreateSharedPtr<Texture2D>(scene->GetObjectsInfo().data(), /*sizeof(ObjectInfo) / sizeof(glm::vec4) **/ scene->GetObjectsInfo().size(), spec);
 		}
-		textureArray = CreateSharedPtr<Texture2DArray>("Assets/Textures/bakeHouse.png");
+		textureArray = CreateSharedPtr<Texture2DArray>(scene->GetTextures().size(), (void*)scene->GetTextures().data());
 
 		verticesSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetPositions().data(), sizeof(glm::vec4) * scene->GetPositions().size(), 0);
 		indicesSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetIndices().data(), sizeof(glm::vec4) * scene->GetIndices().size(), 1);
@@ -640,8 +640,8 @@ namespace Lux
 		lightingPass->SetUniformInt("accumulateTexture", 3);
 		lightingPass->SetUniformInt("samples", samples++);
 
-		transformsTexture->Bind(4);
-		lightingPass->SetUniformInt("transformsTex", 4);
+		textureArray->Bind(5);
+		lightingPass->SetUniformInt("texturesTex", 5);
 
 		lightingPass->SetUniformInt("numObjects", scene->GetObjectsInfo().size());
 
@@ -689,6 +689,8 @@ namespace Lux
 		lightingPass->SetUniformInt("numPointLights", pointLights);
 		lightingPass->SetUniformFloat2("canvas", startRenderer == true ? rendererSize : viewSize);
 		lightingPass->SetUniformMat4("inverseCamera", glm::inverse(camera.GetProjectionMatrix() * camera.GetViewMatrix()));
+
+		lightingPass->SetUniformInt("seed3", UUID());
 
 		Renderer::DrawFullscreenQuad();
 		//Renderer::DrawSkybox(vao, skybox, skyboxShader, camera.GetViewMatrix(), camera.GetProjectionMatrix());

@@ -98,7 +98,9 @@ namespace Lux
 			if (MeshComponent* comp = entity->Get<MeshComponent>())
 			{
 				comp->GetMesh()->SetID();
-				entity->Get<MaterialComponent>()->GetMaterial()->SetID();
+				const std::shared_ptr<Material>& mat = entity->Get<MaterialComponent>()->GetMaterial();
+				mat->SetID();
+				mat->ResetIDTextures();
 			}
 		}
 
@@ -140,13 +142,18 @@ namespace Lux
 
 				const std::shared_ptr<Material>& material = entity->Get<MaterialComponent>()->GetMaterial();
 				material->SetID(materialsInfo.size());
+				material->SetIDTextures(textures, textures.size() / (1024 * 1024 * 4));
 				MaterialInfo matInfo;
+				matInfo.textureIDs.x = material->GetDiffuse() ? material->GetDiffuse()->GetImageID() : -1.0;
+				matInfo.textureIDs.y = material->GetNormalMap() ? material->GetNormalMap()->GetImageID() : -1.0;
+				matInfo.textureIDs.z = material->GetMetallicMap() ? material->GetMetallicMap()->GetImageID() : -1.0;
+				matInfo.textureIDs.w = material->GetRoughnessMap() ? material->GetRoughnessMap()->GetImageID() : -1.0;
 				matInfo.color = material->GetColor();
-				//matInfo.emissive = material->GetEmissive();
 				matInfo.properties.x = material->GetMetallic();
 				matInfo.properties.y = material->GetRoughness();
 				matInfo.properties.z = material->GetRefractionIndex();
 				matInfo.properties.w = material->GetTransmission();
+				//matInfo.emissive = material->GetEmissive();
 
 				materialsInfo.push_back(matInfo);
 			}
