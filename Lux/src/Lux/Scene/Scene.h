@@ -29,7 +29,7 @@ namespace Lux
 		glm::vec4 textureIDs;
 		glm::vec4 color;
 		glm::vec4 properties;
-		//glm::vec4 emissive;
+		glm::vec4 emissive;
 	};
 
 	class Scene

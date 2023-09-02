@@ -88,6 +88,7 @@ namespace Lux
 		meshesInfo.clear();
 		objectsInfo.clear();
 		aabbs.clear();
+		textures.clear();
 
 		float transformsCount = 0.0f;
 
@@ -153,7 +154,7 @@ namespace Lux
 				matInfo.properties.y = material->GetRoughness();
 				matInfo.properties.z = material->GetRefractionIndex();
 				matInfo.properties.w = material->GetTransmission();
-				//matInfo.emissive = material->GetEmissive();
+				matInfo.emissive = glm::vec4(material->GetEmissive(), material->GetEmission());
 
 				materialsInfo.push_back(matInfo);
 			}

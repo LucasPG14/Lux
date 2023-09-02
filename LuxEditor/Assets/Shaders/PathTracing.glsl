@@ -30,6 +30,7 @@ struct MaterialInfo
 	vec4 textureIDs;
 	vec4 color;
 	vec4 properties;
+	vec4 emissive;
 };
 
 struct HitRecord
@@ -312,7 +313,7 @@ bool RayTriangleHit(Ray ray, inout HitRecord hit, float minT, float maxT)
 
 				hit.material = materials[int(object.z)];
 
-				hit.normal = normalize(normal1.xyz * (1.0 - u -v) + normal2.xyz * u + normal3.xyz * v);
+				hit.normal = normalize(normal1.xyz * (1.0 - u - v) + normal2.xyz * u + normal3.xyz * v);
 				hit.normal = normalize(transpose(inverse(mat3(modelMatrix))) * hit.normal);
 
 				hit.frontFace = dot(hit.normal, ray.direction) <= 0.0;
@@ -483,9 +484,17 @@ vec4 CalculateBRDF(vec3 direction, HitRecord hit, inout RefractionState refState
 	vec3 albedo = hit.material.color.xyz;
 	if (hit.material.textureIDs.x != -1) albedo *= texture(texturesTex, vec3(hit.texCoords, hit.material.textureIDs.x)).xyz;
 	float metallic = hit.material.properties.x;
+	if (hit.material.textureIDs.z != -1) metallic *= texture(texturesTex, vec3(hit.texCoords, hit.material.textureIDs.z)).x;
 	float roughness = hit.material.properties.y;
+	if (hit.material.textureIDs.w != -1) roughness *= texture(texturesTex, vec3(hit.texCoords, hit.material.textureIDs.w)).x;
 	float refractionIdx = hit.material.properties.z;
 	float transmission = hit.material.properties.w;
+
+	if (hit.material.textureIDs.y != -1) 
+	{
+		hit.normal = normalize(texture(texturesTex, vec3(hit.texCoords, hit.material.textureIDs.y)).xyz * 2.0 - 1.0);
+		if (hit.frontFace) hit.normal = -hit.normal;
+	}
 
 	float roughness2 = pow(roughness, 2.0);
 
@@ -575,7 +584,7 @@ vec4 CalculateBRDF(vec3 direction, HitRecord hit, inout RefractionState refState
         brdf.a = refractWeight * brdf.a;
 	}
 
-	brdf.rgb *= abs(dot(hit.normal, L));
+	//brdf.rgb *= abs(dot(hit.normal, L));
 
 	return brdf;
 }
@@ -595,32 +604,35 @@ vec3 TracePath(const Ray ray, vec2 uv, inout float seed, inout int n)
 	refState.wasRefracted = false;
 	
 	int i = 0;
-	for (; i < 8; ++i)
+	for (; i < 4; ++i)
 	{
 		HitRecord hit;
 		hitRay.direction = normalize(hitRay.direction);
 		if (RayTriangleHit(hitRay, hit, 0.001, tMax))
 		{
 			n++;
-			//if (refState.isRefracted) hit.normal = -hit.normal;
-
 			vec3 newDir;
 
 			vec4 brdf = CalculateBRDF(-hitRay.direction, hit, refState, newDir);
 
-			if (brdf.a > 0.0)
-				throughput *= brdf.rgb / brdf.a;
+			if (hit.material.emissive.w == 1.0)
+				color += hit.material.emissive.xyz * throughput;
 
 			for (int i = 0; i < numPointLights; ++i)
 			{
 				vec3 L = normalize(pointLights[i].position - hit.point);
+    			vec3 H = normalize(hitRay.direction + L);
 				float distance = length(pointLights[i].position - hit.point);
-        		float attenuation = 1.0 / (distance * distance);
-        		vec3 radiance = pointLights[i].radiance * attenuation;  
+    			float attenuation = 1.0 / (distance * distance);
+    			vec3 radiance = pointLights[i].radiance * attenuation;
 
-				float NdotL = max(dot(hit.normal, L), 0.0); 
-				throughput += radiance * NdotL;
+				float NdotL = max(dot(hit.normal, L), 0.0);
+
+				color += radiance * throughput * NdotL;
 			}
+
+			if (brdf.a > 0.0)
+				throughput *= brdf.rgb / brdf.a;
 
 			if (refState.wasRefracted) 
 			{
@@ -657,7 +669,6 @@ vec3 TracePath(const Ray ray, vec2 uv, inout float seed, inout int n)
 		{
 			float t = 0.5 * (hitRay.direction.y + 1.0);
 			vec3 background = ((1.0 - t) * vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0));
-			//vec3 background = vec3(0.0);
 			n++;
 			color += throughput * background;
 			break;
@@ -688,7 +699,7 @@ void main()
 	vec2 fragCoord = gl_FragCoord.xy;
 	vec2 uv = fragCoord / canvas;
 	
-	seed2 *= int(fragCoord.x * fragCoord.y);
+	seed2 *= int(fragCoord.x * fragCoord.y + fragCoord.x * samples);
 
 	int iterator = 0;
 	float seed = 1.0;
@@ -699,19 +710,14 @@ void main()
     ray.direction = GetRayDirection(ray.origin, fragCoord, rx, ry);
 	color = TracePath(ray, uv, seed, iterator);
 
-	color = sqrt(color / float(iterator));
+	//color = sqrt(color / float(iterator));
 
-	color = min(color.rgb,vec3(10.0));
+	//color = min(color.rgb, vec3(10.0));
 
 	// Gamma correction
 	color = pow(color, vec3(1.0 / 2.2));
 
 	color = mix(prev, color, 1.0 / float(samples + 1));
-
-	//if (prev != vec3(0.0, 0.0, 0.0))
-	//{
-	//	color = (float(samples - 1) * prev + color) / float(samples);
-	//}
 
     fragColor = vec4(color, 1.0);
 }

@@ -15,6 +15,8 @@ namespace Lux
 		void AddMaterial(const std::shared_ptr<Material>& material);
 		void AddTexture(const std::string& filename);
 
+		void Reset(void* data, uint32_t size);
+
 		void Bind(uint32_t slot);
 
 	private:

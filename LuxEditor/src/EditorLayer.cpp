@@ -520,11 +520,15 @@ namespace Lux
 			MaterialInfo info;
 			const std::shared_ptr<Material>& material = hierarchy.GetSelected()->Get<MaterialComponent>()->GetMaterial();
 			info.color = material->GetColor();
+			info.textureIDs.x = material->GetDiffuse() ? material->GetDiffuse()->GetImageID() : -1.0;
+			info.textureIDs.y = material->GetNormalMap() ? material->GetNormalMap()->GetImageID() : -1.0;
+			info.textureIDs.z = material->GetMetallicMap() ? material->GetMetallicMap()->GetImageID() : -1.0;
+			info.textureIDs.w = material->GetRoughnessMap() ? material->GetRoughnessMap()->GetImageID() : -1.0;
 			info.properties.x = material->GetMetallic();
 			info.properties.y = material->GetRoughness();
 			info.properties.z = material->GetRefractionIndex();
 			info.properties.w = material->GetTransmission();
-			//info.emissive = material->GetEmissive();
+			info.emissive = glm::vec4(material->GetEmissive(), material->GetEmission());
 			materialsSsbo->ChangeData(&info, material->GetID() * sizeof(MaterialInfo), sizeof(MaterialInfo));
 
 			scene->Changed(Change::NONE);
@@ -543,6 +547,7 @@ namespace Lux
 			materialsSsbo->Reset(scene->GetMaterialsInfo().data(), sizeof(MaterialInfo) * scene->GetMaterialsInfo().size());
 			transformsSsbo->Reset(scene->GetTransforms().data(), sizeof(glm::mat4) * scene->GetTransforms().size());
 			aabbsSsbo->Reset(scene->GetAABBs().data(), sizeof(AABB) * scene->GetAABBs().size());
+			textureArray->Reset((void*)scene->GetTextures().data(), (scene->GetAABBs().size() / (1024 * 1024 * 4)) + 1);
 
 			scene->Changed(Change::NONE);
 			sceneChanged = true;

@@ -107,156 +107,178 @@ namespace Lux
 		// Material
 		if (MaterialComponent* component = entity.Get<MaterialComponent>())
 		{
-		if (ImGui::CollapsingHeader("Material Component"))
-		{
-			Material& material = *component->GetMaterial();
-			if (material.GetDiffuse() != nullptr)
+			if (ImGui::CollapsingHeader("Material Component"))
 			{
-				ImGui::ImageButton((ImTextureID)material.GetDiffuse()->GetID(), { 40.0f, 40.0f });
-			}
-			else
-			{
-				ImGui::Image(0, { 40.0f, 40.0f });
-			}
-			if (ImGui::BeginDragDropTarget())
-			{
-				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER"))
+				Material& material = *component->GetMaterial();
+				if (material.GetDiffuse() != nullptr)
 				{
-					const wchar_t* path = (const wchar_t*)payload->Data;
-					std::filesystem::path realPath = std::filesystem::path("Assets") / path;
-					if (realPath.has_extension())
+					ImGui::ImageButton((ImTextureID)material.GetDiffuse()->GetID(), { 20.0f, 20.0f });
+				}
+				else
+				{
+					ImGui::Image(0, { 20.0f, 20.0f });
+				}
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER"))
 					{
-						if (realPath.extension().string() == ".png" || realPath.extension().string() == ".jpg")
+						const wchar_t* path = (const wchar_t*)payload->Data;
+						std::filesystem::path realPath = std::filesystem::path("Assets") / path;
+						if (realPath.has_extension())
 						{
-							material.SetDiffuse(ResourceManager::GetTexture(realPath.string()));
-							scene->Changed(Change::OBJECT);
+							if (realPath.extension().string() == ".png" || realPath.extension().string() == ".jpg")
+							{
+								material.SetDiffuse(ResourceManager::GetTexture(realPath.string()));
+								scene->Changed(Change::OBJECT);
+							}
 						}
 					}
+
+					ImGui::EndDragDropTarget();
 				}
+				ImGui::SameLine();
+				ImGui::Text("Diffuse Map");
 
-				ImGui::EndDragDropTarget();
-			}
-
-			ImGui::SameLine();
-			ImGui::Text("Diffuse Map");
-
-			if (material.GetNormalMap() != nullptr)
-			{
-				ImGui::ImageButton((ImTextureID)material.GetNormalMap()->GetID(), { 40.0f, 40.0f });
-			}
-			else
-			{
-				ImGui::Image(0, { 40.0f, 40.0f });
-			}
-			if (ImGui::BeginDragDropTarget())
-			{
-				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER"))
+				ImGui::Text("Diffuse");
+				ImGui::SameLine();
+				if (ImGui::ColorEdit3("##Diffuse", glm::value_ptr(material.GetColor())))
 				{
-					const wchar_t* path = (const wchar_t*)payload->Data;
-					std::filesystem::path realPath = std::filesystem::path("Assets") / path;
-					if (realPath.has_extension())
+					scene->Changed(Change::MATERIAL);
+				}
+				ImGui::Separator();
+
+				if (material.GetNormalMap() != nullptr)
+				{
+					ImGui::ImageButton((ImTextureID)material.GetNormalMap()->GetID(), { 20.0f, 20.0f });
+				}
+				else
+				{
+					ImGui::Image(0, { 20.0f, 20.0f });
+				}
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER"))
 					{
-						if (realPath.extension().string() == ".png" || realPath.extension().string() == ".jpg")
+						const wchar_t* path = (const wchar_t*)payload->Data;
+						std::filesystem::path realPath = std::filesystem::path("Assets") / path;
+						if (realPath.has_extension())
 						{
-							material.SetNormalMap(ResourceManager::GetTexture(realPath.string()));
-							scene->Changed(Change::OBJECT);
+							if (realPath.extension().string() == ".png" || realPath.extension().string() == ".jpg")
+							{
+								material.SetNormalMap(ResourceManager::GetTexture(realPath.string()));
+								scene->Changed(Change::OBJECT);
+							}
 						}
 					}
+
+					ImGui::EndDragDropTarget();
 				}
+				ImGui::SameLine();
+				ImGui::Text("Normal Map");
 
-				ImGui::EndDragDropTarget();
-			}
-			ImGui::SameLine();
-			ImGui::Text("Normal Map");
+				ImGui::Separator();
 
-			if (material.GetMetallicMap() != nullptr)
-			{
-				ImGui::ImageButton((ImTextureID)material.GetMetallicMap()->GetID(), { 40.0f, 40.0f });
-			}
-			else
-			{
-				ImGui::Image(0, { 40.0f, 40.0f });
-			}
-			if (ImGui::BeginDragDropTarget())
-			{
-				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER"))
+				if (material.GetMetallicMap() != nullptr)
 				{
-					const wchar_t* path = (const wchar_t*)payload->Data;
-					std::filesystem::path realPath = std::filesystem::path("Assets") / path;
-					if (realPath.has_extension())
+					ImGui::ImageButton((ImTextureID)material.GetMetallicMap()->GetID(), { 20.0f, 20.0f });
+				}
+				else
+				{
+					ImGui::Image(0, { 20.0f, 20.0f });
+				}
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER"))
 					{
-						if (realPath.extension().string() == ".png" || realPath.extension().string() == ".jpg")
+						const wchar_t* path = (const wchar_t*)payload->Data;
+						std::filesystem::path realPath = std::filesystem::path("Assets") / path;
+						if (realPath.has_extension())
 						{
-							material.SetMetallicMap(ResourceManager::GetTexture(realPath.string()));
-							scene->Changed(Change::OBJECT);
+							if (realPath.extension().string() == ".png" || realPath.extension().string() == ".jpg")
+							{
+								material.SetMetallicMap(ResourceManager::GetTexture(realPath.string()));
+								scene->Changed(Change::OBJECT);
+							}
 						}
 					}
+
+					ImGui::EndDragDropTarget();
 				}
+				ImGui::SameLine();
+				ImGui::Text("Metallic Map");
 
-				ImGui::EndDragDropTarget();
-			}
-			ImGui::SameLine();
-			ImGui::Text("Metallic Map");
-
-			if (material.GetRoughnessMap() != nullptr)
-			{
-				ImGui::ImageButton((ImTextureID)material.GetRoughnessMap()->GetID(), { 40.0f, 40.0f });
-			}
-			else
-			{
-				ImGui::Image(0, { 40.0f, 40.0f });
-			}
-			if (ImGui::BeginDragDropTarget())
-			{
-				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER"))
+				ImGui::Text("Metallic");
+				ImGui::SameLine();
+				if (ImGui::DragFloat("##Metallic", &material.GetMetallic(), 0.01f, 0.0f, 1.0f))
 				{
-					const wchar_t* path = (const wchar_t*)payload->Data;
-					std::filesystem::path realPath = std::filesystem::path("Assets") / path;
-					if (realPath.has_extension())
+					scene->Changed(Change::MATERIAL);
+				}
+				ImGui::Separator();
+
+				if (material.GetRoughnessMap() != nullptr)
+				{
+					ImGui::ImageButton((ImTextureID)material.GetRoughnessMap()->GetID(), { 20.0f, 20.0f });
+				}
+				else
+				{
+					ImGui::Image(0, { 20.0f, 20.0f });
+				}
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER"))
 					{
-						if (realPath.extension().string() == ".png" || realPath.extension().string() == ".jpg")
+						const wchar_t* path = (const wchar_t*)payload->Data;
+						std::filesystem::path realPath = std::filesystem::path("Assets") / path;
+						if (realPath.has_extension())
 						{
-							material.SetRoughnessMap(ResourceManager::GetTexture(realPath.string()));
-							scene->Changed(Change::OBJECT);
+							if (realPath.extension().string() == ".png" || realPath.extension().string() == ".jpg")
+							{
+								material.SetRoughnessMap(ResourceManager::GetTexture(realPath.string()));
+								scene->Changed(Change::OBJECT);
+							}
 						}
 					}
+
+					ImGui::EndDragDropTarget();
+				}
+				ImGui::SameLine();
+				ImGui::Text("Roughness Map");
+
+				ImGui::Text("Roughness");
+				ImGui::SameLine();
+				if (ImGui::DragFloat("##Roughness", &material.GetRoughness(), 0.01f, 0.0f, 1.0f))
+				{
+					scene->Changed(Change::MATERIAL);
 				}
 
-				ImGui::EndDragDropTarget();
-			}
-			ImGui::SameLine();
-			ImGui::Text("Roughness Map");
+				ImGui::Separator();
 
-			if (ImGui::ColorPicker4("##color", glm::value_ptr(material.GetColor())))
-			{
-				scene->Changed(Change::MATERIAL);
-			}
+				ImGui::Text("Refraction Index");
+				ImGui::SameLine();
+				if (ImGui::DragFloat("Refraction Index", &material.GetRefractionIndex(), 0.01f, 1.1f, 2.5f))
+				{
+					scene->Changed(Change::MATERIAL);
+				}
 
-			if (ImGui::DragFloat("Metallic", &material.GetMetallic(), 0.05f, 0.0f, 1.0f))
-			{
-				scene->Changed(Change::MATERIAL);
-			}
+				ImGui::Text("Transmission");
+				ImGui::SameLine();
+				if (ImGui::DragFloat("Transmission", &material.GetTransmission(), 0.01f, 0.0f, 1.0f))
+				{
+					scene->Changed(Change::MATERIAL);
+				}
 
-			if (ImGui::DragFloat("Refraction Index", &material.GetRefractionIndex(), 0.05f, 0.0f))
-			{
-				scene->Changed(Change::MATERIAL);
+				if (ImGui::ColorEdit3("##emissive", glm::value_ptr(material.GetEmissive()), ImGuiColorEditFlags_NoInputs))
+				{
+					scene->Changed(Change::MATERIAL);
+				}
+				ImGui::SameLine();
+				ImGui::Text("Emission");
+				ImGui::SameLine();
+				if (ImGui::Checkbox("##Emission", &material.GetEmission()))
+				{
+					scene->Changed(Change::MATERIAL);
+				}
 			}
-
-			if (ImGui::DragFloat("Roughness", &material.GetRoughness(), 0.05f, 0.0f, 1.0f))
-			{
-				scene->Changed(Change::MATERIAL);
-			}
-
-			if (ImGui::DragFloat("Transmission", &material.GetTransmission(), 0.05f, 0.0f, 1.0f))
-			{
-				scene->Changed(Change::MATERIAL);
-			}
-
-			if (ImGui::ColorPicker4("##emissive", glm::value_ptr(material.GetEmissive())))
-			{
-				scene->Changed(Change::MATERIAL);
-			}
-		}
 		}
 
 		if (LightComponent* component = entity.Get<LightComponent>())
@@ -264,24 +286,26 @@ namespace Lux
 			if (ImGui::CollapsingHeader("Light Component"))
 			{
 				std::string type = component->GetType() == LightType::DIRECTIONAL ? "Directional" : "Point";
-				if (ImGui::BeginCombo("Light Type", type.c_str()))
-				{
-					if (ImGui::Selectable("Directional")) component->SetType(LightType::DIRECTIONAL);
-					if (ImGui::Selectable("Point")) component->SetType(LightType::POINT);
-					scene->Changed(Change::LIGHT);
-					ImGui::EndCombo();
-				}
-				if (ImGui::ColorPicker3("Light Color", glm::value_ptr(component->GetModifiedColor())))
+				//if (ImGui::BeginCombo("Light Type", type.c_str()))
+				//{
+				//	if (ImGui::Selectable("Directional")) component->SetType(LightType::DIRECTIONAL);
+				//	if (ImGui::Selectable("Point")) component->SetType(LightType::POINT);
+				//	scene->Changed(Change::LIGHT);
+				//	ImGui::EndCombo();
+				//}
+				if (ImGui::ColorEdit3("Light Color", glm::value_ptr(component->GetModifiedColor()), ImGuiColorEditFlags_NoInputs))
 				{
 					scene->Changed(Change::LIGHT);
 				}
 				//ImGui::DragFloat("Cut Off", &(component->GetModifiedCutOff()), 1.0f, 0.0f, 180.0f);
-				if (ImGui::DragFloat("Radius", &(component->GetModifiedRange()), 1.0f, 0.0f))
+				if (ImGui::DragFloat("Radius", &(component->GetModifiedRange()), 1.0f, 0.1f))
 				{
 					scene->Changed(Change::LIGHT);
 				}
 			}
 		}
+
+		ImGui::Separator();
 
 		if (ImGui::BeginCombo("##", "AddComponent"))
 		{

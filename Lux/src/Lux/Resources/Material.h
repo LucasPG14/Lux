@@ -14,11 +14,12 @@ namespace Lux
 		void Bind();
 
 		glm::vec4& GetColor()		{ return albedoColor; }
-		glm::vec4& GetEmissive()		{ return emissive; }
+		glm::vec3& GetEmissive()		{ return emissive; }
 		float& GetMetallic()			{ return metallic; }
 		float& GetRoughness()		{ return roughness; }
 		float& GetRefractionIndex()	{ return refractionIndex; }
 		float& GetTransmission()	{ return transmission; }
+		bool& GetEmission()	{ return emission; }
 
 		int GetType() { return type; }
 
@@ -49,7 +50,7 @@ namespace Lux
 
 		std::shared_ptr<Texture2D> diffuse;
 		glm::vec4 albedoColor;
-		glm::vec4 emissive;
+		glm::vec3 emissive;
 		int type;
 
 		std::shared_ptr<Texture2D> normal;
@@ -60,6 +61,8 @@ namespace Lux
 		float metallic;
 		float roughness;
 		float transmission;
+
+		bool emission;
 
 		friend class MaterialComponent;
 	};

@@ -53,6 +53,10 @@ namespace Lux
 
 	Texture2DArray::~Texture2DArray()
 	{
+		if (textureID >= 0)
+		{
+			glDeleteTextures(1, &textureID);
+		}
 	}
 	
 	void Texture2DArray::AddMaterial(const std::shared_ptr<Material>& material)
@@ -84,5 +88,20 @@ namespace Lux
 	{
 		glActiveTexture(GL_TEXTURE0 + slot);
 		glBindTexture(GL_TEXTURE_2D_ARRAY, textureID);
+	}
+
+	void Texture2DArray::Reset(void* data, uint32_t size)
+	{
+		if (textureID >= 0)
+		{
+			glDeleteTextures(1, &textureID);
+		}
+
+		glGenTextures(1, &textureID);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, textureID);
+		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA8, 1024, 1024, size, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 	}
 }
