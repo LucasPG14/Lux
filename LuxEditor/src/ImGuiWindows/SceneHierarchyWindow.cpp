@@ -311,7 +311,7 @@ namespace Lux
 					scene->Changed(Change::MATERIAL);
 				}
 
-				if (ImGui::ColorEdit3("##emissive", glm::value_ptr(material.GetEmissive()), ImGuiColorEditFlags_NoInputs))
+				if (ImGui::ColorEdit3("##Emissive", glm::value_ptr(material.GetEmissive()), ImGuiColorEditFlags_NoInputs))
 				{
 					scene->Changed(Change::MATERIAL);
 				}

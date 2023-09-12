@@ -13,7 +13,7 @@
 
 namespace Lux
 {
-	Scene::Scene() : change(Change::NONE)
+	Scene::Scene() : change(Change::NONE), numTextures(0)
 	{
 		Entity* dirLight = CreateEntity("Directional Light");
 		TransformComponent* transform = dirLight->Get<TransformComponent>();
@@ -28,15 +28,15 @@ namespace Lux
 		//DrawCube("Assets/Models/Cube.obj", { 0.73, 0.73, 0.73, 1.0f }, { 0.0f, -1.5f, 0.0f }, { 0.1f, 3.0f, 3.0f }, {0.0f, 0.0f, 90.0f});
 		//DrawCube("Assets/Models/Cube.obj", { 0.73, 0.73, 0.73, 1.0f }, {0.0f, 1.5f, 0.0f}, {0.1f, 3.0f, 3.0f}, {0.0f, 0.0f, 90.0f});
 		//
-		//DrawCube("Assets/Models/Cube.obj", { 0.73, 0.73, 0.73, 1.0f }, { -0.5f, -0.75f, -0.75f }, { 0.75f, 1.5f, 0.75f }, { 0.0f, 14.0f, 0.0f });
+		DrawCube("Assets/Models/Cube.obj", { 0.73, 0.73, 0.73, 1.0f }, { -0.5f, -0.75f, -0.75f }, { 0.75f, 1.5f, 0.75f }, { 0.0f, 14.0f, 0.0f });
 		//
 		//DrawCube("Assets/Models/Cube.obj", { 0.05, 0.05, 0.65, 1.0f }, { -0.15f, -1.35f, 0.5f }, { 0.75f, 0.25f, 0.75f }, { 0.0f, -21.0f, 0.0f });
 		//DrawCube("Assets/Models/model.fbx", { 0.73, 0.73, 0.73, 1.0f }, { -0.15f, -0.928f, 0.5f }, { 0.3f, 0.3f, 0.3f }, { 0.0f, 0.0f, 0.0f });
 		
 		//DrawCube("Assets/Models/BakerHouse.obj", { 0.9, 0.0, 0.9 }, { 0.0f, -1.0f, 0.0f }, { 1.0f, 1.0f, 1.0f }, {0.0f, 0.0f, 0.0f});
-		//DrawCube("Assets/Models/model.fbx", { 0.95, 0.95, 0.95, 1.0f }, { 0.0f, -1.15f, 0.0f }, { 0.3f, 0.3f, 0.3f }, {0.0f, 0.0f, 0.0f});
-		//DrawCube("Assets/Models/model.fbx", { 1.0f, 0.0f, 0.0f, 1.0f }, { 0.7f, -1.15f, 0.0f }, { 0.3f, 0.3f, 0.3f }, {0.0f, 21.0f, 0.0f});
-		//DrawCube("Assets/Models/model.fbx", { 0.0f, 0.0f, 1.0f, 1.0f }, { -0.7f, -1.15f, 0.0f }, { 0.3f, 0.3f, 0.3f }, {0.0f, 21.0f, 0.0f});
+		DrawCube("Assets/Models/model.fbx", { 0.95, 0.95, 0.95, 1.0f }, { 0.0f, -1.15f, 0.0f }, { 0.3f, 0.3f, 0.3f }, {0.0f, 0.0f, 0.0f});
+		DrawCube("Assets/Models/model.fbx", { 1.0f, 0.0f, 0.0f, 1.0f }, { 0.7f, -1.15f, 0.0f }, { 0.3f, 0.3f, 0.3f }, {0.0f, 21.0f, 0.0f});
+		DrawCube("Assets/Models/model.fbx", { 0.0f, 0.0f, 1.0f, 1.0f }, { -0.7f, -1.15f, 0.0f }, { 0.3f, 0.3f, 0.3f }, {0.0f, 21.0f, 0.0f});
 
 		//
 		//Entity& pointLight = CreateEntity("Spot Light");
@@ -108,6 +108,7 @@ namespace Lux
 			}
 		}
 
+		numTextures = 0;
 		for (int i = 0; i < world.size(); ++i)
 		{
 			Entity* entity = world[i];
@@ -115,7 +116,7 @@ namespace Lux
 			{
 				entity->Get<TransformComponent>()->SetID(transforms.size());
 				transforms.push_back(entity->Get<TransformComponent>()->GetTransform());
-				const std::shared_ptr<Mesh>& mesh = comp->GetMesh();
+				std::shared_ptr<Mesh> mesh = comp->GetMesh();
 				if (mesh && mesh->GetID() == -1)
 				{
 					mesh->SetID(meshesInfo.size());
@@ -142,11 +143,12 @@ namespace Lux
 				info.info.x = transforms.size() - 1;
 				info.info.y = mesh->GetID();
 				info.info.z = materialsInfo.size();
+				info.info.w = 0.0f;
 				objectsInfo.push_back(info);
 
-				const std::shared_ptr<Material>& material = entity->Get<MaterialComponent>()->GetMaterial();
+				std::shared_ptr<Material> material = entity->Get<MaterialComponent>()->GetMaterial();
 				material->SetID(materialsInfo.size());
-				material->SetIDTextures(textures, textures.size() / (1024 * 1024 * 4));
+				material->SetIDTextures(textures, numTextures);
 				MaterialInfo matInfo;
 				matInfo.textureIDs.x = material->GetDiffuse() ? material->GetDiffuse()->GetImageID() : -1.0f;
 				matInfo.textureIDs.y = material->GetNormalMap() ? material->GetNormalMap()->GetImageID() : -1.0f;
@@ -201,7 +203,7 @@ namespace Lux
 	
 	void Scene::DrawCube(const std::string& path, const glm::vec4& color, const glm::vec3& pos, const glm::vec3& scale, const glm::vec3& rot)
 	{
-		Entity* ent1 = CreateEntity("Cube" + std::to_string(world.size()));
+		Entity* ent1 = CreateEntity("Entity" + std::to_string(world.size()));
 		ent1->CreateComponent<MeshComponent>(path);
 		ent1->CreateComponent<MaterialComponent>();
 

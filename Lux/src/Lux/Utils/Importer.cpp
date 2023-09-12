@@ -61,7 +61,7 @@ namespace Lux
 			}
 		}
 
-		const std::shared_ptr<Mesh>& ImportFBX2(const std::string& path, const std::string& assetsPath)
+		std::shared_ptr<Mesh> ImportFBX2(const std::string& path, const std::string& assetsPath)
 		{
 			Assimp::Importer importer;
 
@@ -119,9 +119,7 @@ namespace Lux
 				resourcePath += mesh->mName.C_Str();
 				resourcePath += ".rmesh";
 
-				std::shared_ptr<Mesh> resource = ResourceManager::CreateMesh(aabb, vertices, indices, resourcePath.string(), path);
-
-				return resource;
+				return ResourceManager::CreateMesh(aabb, vertices, indices, resourcePath.string(), path);
 			}
 		}
 	}

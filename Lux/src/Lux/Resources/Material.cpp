@@ -37,7 +37,7 @@ namespace Lux
 		if (roughnessMap) roughnessMap->SetID(newID);
 	}
 	
-	void Material::SetIDTextures(std::vector<char>& textures, int newID)
+	void Material::SetIDTextures(std::vector<char>& textures, int& newID)
 	{
 		if (diffuse && diffuse->GetImageID() == -1)
 		{

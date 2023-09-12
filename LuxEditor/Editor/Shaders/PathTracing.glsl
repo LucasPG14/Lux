@@ -285,7 +285,7 @@ bool RayTriangleHit(Ray ray, inout HitRecord hit, float minT, float maxT)
 
 				hit.material = materials[int(object.z)];
 
-				hit.normal = normalize(normal1.xyz * (1.0 - u - v) + normal2.xyz * u + normal3.xyz * v);
+				hit.normal = normal1.xyz * (1.0 - u - v) + normal2.xyz * u + normal3.xyz * v;
 				hit.normal = normalize(transpose(inverse(mat3(modelMatrix))) * hit.normal);
 
 				hit.frontFace = dot(hit.normal, ray.direction) <= 0.0;

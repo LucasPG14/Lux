@@ -52,6 +52,8 @@ namespace Lux
 		const std::string& GetPath() { return path; }
 		void SetPath(const std::string& p) { path = p; }
 
+		int GetNumTextures() { return numTextures; }
+
 		Entity* CreateEntity(const std::string& name = "Entity");
 		Entity* CreateEntityWithPath(const std::string& path, const std::string& name);
 		Entity* CreateEntityWithUUID(UUID id, const std::string& name = "Entity");
@@ -95,6 +97,8 @@ namespace Lux
 		std::shared_ptr<Shader> shader;
 
 		std::string path;
+
+		int numTextures;
 
 		friend class SceneSerializer;
 		friend class SceneRenderer;

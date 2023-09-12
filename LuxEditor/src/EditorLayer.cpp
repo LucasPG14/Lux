@@ -524,7 +524,7 @@ namespace Lux
 			materialsSsbo->Reset(scene->GetMaterialsInfo().data(), sizeof(MaterialInfo) * scene->GetMaterialsInfo().size());
 			transformsSsbo->Reset(scene->GetTransforms().data(), sizeof(glm::mat4) * scene->GetTransforms().size());
 			aabbsSsbo->Reset(scene->GetAABBs().data(), sizeof(AABB) * scene->GetAABBs().size());
-			textureArray->Reset((void*)scene->GetTextures().data(), (scene->GetAABBs().size() / (1024 * 1024 * 4)) + 1);
+			textureArray->Reset((void*)scene->GetTextures().data(), scene->GetNumTextures());
 
 			scene->Changed(Change::NONE);
 			sceneChanged = true;
@@ -721,8 +721,8 @@ namespace Lux
 
 	void EditorLayer::SaveScene(const std::string& path)
 	{
-			SceneSerializer serializer(scene);
-			serializer.Serialize(path);
+		SceneSerializer serializer(scene);
+		serializer.Serialize(path);
 	}
 	
 	void EditorLayer::SaveImage()

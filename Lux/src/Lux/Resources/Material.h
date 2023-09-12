@@ -28,7 +28,7 @@ namespace Lux
 		void SetID(int newID = -1);
 
 		void ResetIDTextures(int newID = -1);
-		void SetIDTextures(std::vector<char>& textures, int newID);
+		void SetIDTextures(std::vector<char>& textures, int& newID);
 
 		const std::shared_ptr<Texture2D>& GetDiffuse()		{ return diffuse; };
 		const std::shared_ptr<Texture2D>& GetNormalMap()	{ return normal; };

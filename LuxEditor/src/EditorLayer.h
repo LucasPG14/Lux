@@ -32,8 +32,6 @@ namespace Lux
 		void ResetRenderer();
 
 		void OnEvent(Event& e) override;
-
-		void PathTracingView();
 		
 		void PathTracing();
 
