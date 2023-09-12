@@ -1,18 +1,33 @@
 # Lux
 
-Lux is a rendering engine created from scratch using OpenGL and C++ for my final degree project at the UPC-CITM. In this engine, we find implementations of different Global Illumination techniques.
+Lux is a rendering engine created from scratch using OpenGL and C++ for my final degree project at the UPC-CITM. In this engine, we find an implementation of a path tracing.
 
-The basis of this project was made following [TheCherno's](https://www.youtube.com/c/TheChernoProject) [Game Engine Series](https://www.youtube.com/playlist?list=PLlrATfBNZ98dC-V-N3m0Go4deliWHPFwT) playlist.
+The aim of this project is to implement a path tracing renderer where you can import models, modify the materials and make a render of that scene you created. Finally, when the render its over, you can save this render into an image in png format.
 
-## Goal
+The basis of this project was made following [TheCherno's](https://www.youtube.com/c/TheChernoProject) [Game Engine Series](https://www.youtube.com/playlist?list=PLlrATfBNZ98dC-V-N3m0Go4deliWHPFwT) playlist. All the stuff related to the core engine is from this playlist, but all the renderer related things are made by myself.
 
-The aim of this project is to implement some of the different Global Illumination software techniques that currently exist and to carry out a study between them, analysing performance and memory consumption.
+## Controls
 
-Another goal of this project is to improve my knowledge of graphics programming, creating an optimal and efficient rendering engine.
+To move the camera:
+
+- W: Moves forward
+- A: Moves to the left
+- S: Moves backwards
+- D: Moves to the right
+
+If you do this using SHIFT, the camera will move faster.
+
+- CTRL + S: Saves the scene
+- CTRL + SHIFT + S: Saves the scene as a new one
+- CTRL + N: Creates a new scene
+- CTRL + O: Opens a file dialog to open a scene
+- ALT + F4: Closes the app
+- DEL: Will delete the entity its selected
 
 ## How to use Lux
 
-In order to use Lux, you must download the repository and run the file called Generate.bat to generate the projects and the Visual Studio solution.
+There are some scene examples but the user can create new ones. When you open the app, the scene only have a directional light. You can import your models by dropping them into the content browser. Then from there, you can add them to the scene by dropping them into the viewport. You can select your objects and modify their materials properties in order to create a beatiful scene.
+When you have finished your scene, you can choose the number of samples do you want the render to have and also the number of rays bounces, which is limited to 8 due to performance reasons. Once the render is finished, you can save it as a png image.
 
 ## Dependencies
 
