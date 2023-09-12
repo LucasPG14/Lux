@@ -41,12 +41,14 @@ namespace Lux
 		bool ShortCuts(KeyPressedEvent& e);
 
 		void NewScene();
-		void OpenScene();
+		void OpenScene(std::string& filepath);
 
 		void SaveSceneAs();
 		void SaveScene(const std::string& path);
 
 		void SaveImage();
+
+		void Restart();
 	
 	private:
 		SceneHierarchyWindow hierarchy;
@@ -60,24 +62,13 @@ namespace Lux
 		std::shared_ptr<Framebuffer> viewportFramebuffer;
 		std::shared_ptr<Framebuffer> accumulateFramebuffer;
 		std::shared_ptr<Shader> lightingPass;
-		std::shared_ptr<Shader> viewSceneShader;
 		std::shared_ptr<Shader> defaultShader;
 
 		std::shared_ptr<TextureCube> skybox;
-		std::shared_ptr<Shader> skyboxShader;
 
 		std::shared_ptr<VertexArray> vao;
 		std::shared_ptr<VertexBuffer> vbo;
 		std::shared_ptr<IndexBuffer> ebo;
-
-		std::shared_ptr<Shader> outputShader;
-		std::shared_ptr<ComputeShader> computeShader;
-
-		std::shared_ptr<Texture2D> transformsTexture;
-		std::shared_ptr<Texture2D> verticesTexture;
-		std::shared_ptr<Texture2D> indicesTexture;
-		std::shared_ptr<Texture2D> normalsTexture;
-		std::shared_ptr<Texture2D> objectsTexture;
 		
 		std::shared_ptr<Texture2DArray> textureArray;
 
@@ -99,6 +90,7 @@ namespace Lux
 		// Rendering options
 		int samples;
 		int maxSamples;
+		int maxBounces;
 
 		NeedToUpdate needToUpdate;
 		bool sceneChanged;

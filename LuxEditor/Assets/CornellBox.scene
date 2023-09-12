@@ -1,6 +1,6 @@
 Scene: Untitled
 Entities:
-  - UUID: 4737388511234578697
+  - UUID: 3623412166621201974
     Name: Directional Light
     TransformComponent:
       Position: [0, 3, 0]
@@ -9,8 +9,8 @@ Entities:
     LightComponent:
       Light Type: 0
       Color: [1, 1, 1]
-      Radius: 5
-  - UUID: 12112183795875143911
+      Intensity: 0.100000001
+  - UUID: 914276846100853990
     Name: Cube1
     TransformComponent:
       Position: [-1.5, 0, 0]
@@ -27,7 +27,7 @@ Entities:
       Emissive: [1, 1, 1]
       Emission: false
       Absorption: 0
-  - UUID: 4950314700465213092
+  - UUID: 5057059725016166316
     Name: Cube2
     TransformComponent:
       Position: [1.5, 0, 0]
@@ -44,7 +44,7 @@ Entities:
       Emissive: [1, 1, 1]
       Emission: false
       Absorption: 0
-  - UUID: 17036186330054416890
+  - UUID: 17966326471127193344
     Name: Cube3
     TransformComponent:
       Position: [0, 0, -1.5]
@@ -61,7 +61,7 @@ Entities:
       Emissive: [1, 1, 1]
       Emission: false
       Absorption: 0
-  - UUID: 15857330053516371984
+  - UUID: 3277480948526655959
     Name: Cube4
     TransformComponent:
       Position: [0, -1.5, 0]
@@ -78,7 +78,7 @@ Entities:
       Emissive: [1, 1, 1]
       Emission: false
       Absorption: 0
-  - UUID: 14297119827868081401
+  - UUID: 13826550688575402598
     Name: Cube5
     TransformComponent:
       Position: [0, 1.5, 0]
@@ -95,11 +95,11 @@ Entities:
       Emissive: [1, 1, 1]
       Emission: false
       Absorption: 0
-  - UUID: 14243153579408228556
+  - UUID: 14994097052079294065
     Name: Cube6
     TransformComponent:
       Position: [-0.5, -0.75, -0.75]
-      Rotation: [0, 24, 0]
+      Rotation: [0, 26.7000008, 0]
       Scale: [0.75, 1.5, 0.75]
     MeshComponent:
       MeshPath: Assets/Models/Cube.obj
@@ -112,7 +112,7 @@ Entities:
       Emissive: [1, 1, 1]
       Emission: false
       Absorption: 0
-  - UUID: 15193418347898179768
+  - UUID: 9523786925624661985
     Name: Cube7
     TransformComponent:
       Position: [-0.150000006, -1.35000002, 0.5]
@@ -123,13 +123,13 @@ Entities:
     MaterialComponent:
       Color: [0.0500000007, 0.0500000007, 0.649999976]
       Metallic: 0
-      Roughness: 0.5
+      Roughness: 0
       IndexRefraction: 1.5
       Transmission: 0
-      Emissive: [1, 1, 1]
-      Emission: false
+      Emissive: [0.0882353783, 1, 0]
+      Emission: true
       Absorption: 0
-  - UUID: 1008369128259471731
+  - UUID: 3196813362330997194
     Name: Cube8
     TransformComponent:
       Position: [-0.150000006, -0.927999973, 0.5]
@@ -140,19 +140,19 @@ Entities:
     MaterialComponent:
       Color: [0.730000019, 0.730000019, 0.730000019]
       Metallic: 0
-      Roughness: 0.5
-      IndexRefraction: 1.5
-      Transmission: 0
+      Roughness: 0
+      IndexRefraction: 1
+      Transmission: 1
       Emissive: [1, 1, 1]
       Emission: false
       Absorption: 0
-  - UUID: 3718508773671220994
+  - UUID: 17409129708771449389
     Name: Point Light
     TransformComponent:
-      Position: [-0.101409912, 0.514556885, 0]
-      Rotation: [0, -0, 0]
+      Position: [0, 0.5, 0]
+      Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     LightComponent:
       Light Type: 1
       Color: [1, 1, 1]
-      Radius: 5
+      Intensity: 0.600000024

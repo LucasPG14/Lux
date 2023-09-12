@@ -20,8 +20,8 @@ namespace Lux
 		transform->SetPosition({ 0.0f, 3.0f, 0.0f });
 		transform->SetRotation({ 50.0f, -30.0f, -70.0f });
 		AddLight(transform, dirLight->CreateComponent<LightComponent>(LightType::DIRECTIONAL));
-
-		// Scene ShaderToy
+		
+		//// Scene ShaderToy
 		//DrawCube("Assets/Models/Cube.obj", { 0.12, 0.45, 0.15, 1.0f }, { -1.5f, 0.0f, 0.0f }, { 0.1f, 3.0f, 3.0f });
 		//DrawCube("Assets/Models/Cube.obj", { 0.65, 0.05, 0.05, 1.0f }, { 1.5f, 0.0f, 0.0f }, { 0.1f, 3.0f, 3.0f });
 		//DrawCube("Assets/Models/Cube.obj", { 0.73, 0.73, 0.73, 1.0f }, { 0.0f, 0.0f, -1.5f }, { 0.1f, 3.0f, 3.0f }, {0.0f, 90.0f, 0.0f});
@@ -34,11 +34,10 @@ namespace Lux
 		//DrawCube("Assets/Models/model.fbx", { 0.73, 0.73, 0.73, 1.0f }, { -0.15f, -0.928f, 0.5f }, { 0.3f, 0.3f, 0.3f }, { 0.0f, 0.0f, 0.0f });
 		
 		//DrawCube("Assets/Models/BakerHouse.obj", { 0.9, 0.0, 0.9 }, { 0.0f, -1.0f, 0.0f }, { 1.0f, 1.0f, 1.0f }, {0.0f, 0.0f, 0.0f});
-		//DrawCube("Assets/Models/model.fbx", { 0.95, 0.95, 0.95 }, { 0.0f, -1.15f, 0.0f }, { 0.3f, 0.3f, 0.3f }, {0.0f, 0.0f, 0.0f});
-		//DrawCube("Assets/Models/model.fbx", { 1.0f, 0.0f, 0.0f }, { 0.7f, -1.15f, 0.0f }, { 0.3f, 0.3f, 0.3f }, {0.0f, 21.0f, 0.0f});
-		//DrawCube("Assets/Models/model.fbx", { 0.0f, 0.0f, 1.0f }, { -0.7f, -1.15f, 0.0f }, { 0.3f, 0.3f, 0.3f }, {0.0f, 21.0f, 0.0f});
+		//DrawCube("Assets/Models/model.fbx", { 0.95, 0.95, 0.95, 1.0f }, { 0.0f, -1.15f, 0.0f }, { 0.3f, 0.3f, 0.3f }, {0.0f, 0.0f, 0.0f});
+		//DrawCube("Assets/Models/model.fbx", { 1.0f, 0.0f, 0.0f, 1.0f }, { 0.7f, -1.15f, 0.0f }, { 0.3f, 0.3f, 0.3f }, {0.0f, 21.0f, 0.0f});
+		//DrawCube("Assets/Models/model.fbx", { 0.0f, 0.0f, 1.0f, 1.0f }, { -0.7f, -1.15f, 0.0f }, { 0.3f, 0.3f, 0.3f }, {0.0f, 21.0f, 0.0f});
 
-		//shader = CreateSharedPtr<Shader>("Assets/Shaders/Deferred.glsl");
 		//
 		//Entity& pointLight = CreateEntity("Spot Light");
 		//AddLight(pointLight.Get<TransformComponent>(), pointLight.CreateComponent<LightComponent>(LightType::SPOT));
@@ -96,9 +95,13 @@ namespace Lux
 		{
 			Entity* entity = world[i];
 			entity->Get<TransformComponent>()->SetID();
-			if (MeshComponent* comp = entity->Get<MeshComponent>())
+			MeshComponent* comp = entity->Get<MeshComponent>();
+			if (comp != nullptr)
 			{
-				comp->GetMesh()->SetID();
+				if (comp->GetMesh() != nullptr)
+				{
+					comp->GetMesh()->SetID();
+				}
 				const std::shared_ptr<Material>& mat = entity->Get<MaterialComponent>()->GetMaterial();
 				mat->SetID();
 				mat->ResetIDTextures();
@@ -145,11 +148,11 @@ namespace Lux
 				material->SetID(materialsInfo.size());
 				material->SetIDTextures(textures, textures.size() / (1024 * 1024 * 4));
 				MaterialInfo matInfo;
-				matInfo.textureIDs.x = material->GetDiffuse() ? material->GetDiffuse()->GetImageID() : -1.0;
-				matInfo.textureIDs.y = material->GetNormalMap() ? material->GetNormalMap()->GetImageID() : -1.0;
-				matInfo.textureIDs.z = material->GetMetallicMap() ? material->GetMetallicMap()->GetImageID() : -1.0;
-				matInfo.textureIDs.w = material->GetRoughnessMap() ? material->GetRoughnessMap()->GetImageID() : -1.0;
-				matInfo.color = material->GetColor();
+				matInfo.textureIDs.x = material->GetDiffuse() ? material->GetDiffuse()->GetImageID() : -1.0f;
+				matInfo.textureIDs.y = material->GetNormalMap() ? material->GetNormalMap()->GetImageID() : -1.0f;
+				matInfo.textureIDs.z = material->GetMetallicMap() ? material->GetMetallicMap()->GetImageID() : -1.0f;
+				matInfo.textureIDs.w = material->GetRoughnessMap() ? material->GetRoughnessMap()->GetImageID() : -1.0f;
+				matInfo.color = glm::vec4(material->GetColor(), material->GetAbsorption());
 				matInfo.properties.x = material->GetMetallic();
 				matInfo.properties.y = material->GetRoughness();
 				matInfo.properties.z = material->GetRefractionIndex();

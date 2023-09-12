@@ -33,7 +33,7 @@ namespace Lux
 		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_DEPTH_TEST);
 
-		std::shared_ptr<Shader> shader = CreateSharedPtr<Shader>("Assets/Shaders/Texture.glsl");
+		std::shared_ptr<Shader> shader = CreateSharedPtr<Shader>("Editor/Shaders/Texture.glsl");
 		shaderLibrary->Add(shader);
 
 		float quad[] =

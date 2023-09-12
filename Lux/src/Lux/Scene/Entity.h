@@ -30,13 +30,16 @@ namespace Lux
 		template<typename T>
 		T* Get()
 		{
-			for (std::vector<Component*>::iterator i = components.begin(); i != components.end(); ++i)
+			T* component = nullptr;
+
+			for (std::vector<Component*>::iterator i = components.begin(); i < components.end(); ++i)
 			{
-				if ((*i)->GetComponentType() == T::GetStaticType())
-					return (T*)(*i);
+				component = dynamic_cast<T*>(*i);
+				if (component != nullptr)
+					return component;
 			}
 
-			return nullptr;
+			return component;
 		}
 
 		void AddComponent(Component* component) { components.push_back(component); }

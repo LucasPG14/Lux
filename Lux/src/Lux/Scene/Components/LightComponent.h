@@ -23,15 +23,15 @@ namespace Lux
 
 		void SetType(LightType t) { lightType = t; }
 		void SetColor(glm::vec3 col) { color = col; }
-		void SetRange(float r) { range = r; }
+		void SetIntensity(float r) { intensity = r; }
 
 		inline const glm::vec3& GetColor() const { return color; }
 		inline const float GetCutOff() const { return cutOff; }
-		inline const float GetRange() const { return range; }
+		inline const float GetIntensity() const { return intensity; }
 
 		inline glm::vec3& GetModifiedColor() { return color; }
 		inline float& GetModifiedCutOff() { return cutOff; }
-		inline float& GetModifiedRange() { return range; }
+		inline float& GetModifiedIntensity() { return intensity; }
 
 		inline const LightType& GetType() const { return lightType; }
 
@@ -42,7 +42,7 @@ namespace Lux
 		glm::vec3 color;
 
 		float cutOff;
-		float range;
+		float intensity;
 
 		LightType lightType;
 	};

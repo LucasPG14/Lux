@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Lux/Scene/Scene.h"
+#include "Lux/Resources/Texture2D.h"
 
 namespace Lux
 {
@@ -24,6 +25,7 @@ namespace Lux
 		bool focused;
 
 		std::shared_ptr<Scene> scene;
+		std::shared_ptr<Texture2D> removeTex;
 		Entity* selected;
 	};
 }

@@ -13,12 +13,13 @@ namespace Lux
 
 		void Bind();
 
-		glm::vec4& GetColor()		{ return albedoColor; }
+		glm::vec3& GetColor()		{ return albedoColor; }
 		glm::vec3& GetEmissive()		{ return emissive; }
 		float& GetMetallic()			{ return metallic; }
 		float& GetRoughness()		{ return roughness; }
 		float& GetRefractionIndex()	{ return refractionIndex; }
 		float& GetTransmission()	{ return transmission; }
+		float& GetAbsorption()	{ return absorption; }
 		bool& GetEmission()	{ return emission; }
 
 		int GetType() { return type; }
@@ -39,17 +40,20 @@ namespace Lux
 		void SetMetallicMap(const std::shared_ptr<Texture2D>& texture) { metallicMap = texture; };
 		void SetRoughnessMap(const std::shared_ptr<Texture2D>& texture) { roughnessMap = texture; };
 
-		void SetColor(const glm::vec4& col) { albedoColor = col; }
+		void SetColor(const glm::vec3& col) { albedoColor = col; }
 		void SetMetallic(float met) { metallic = met; }
 		void SetRoughness(float rough) { roughness = rough; }
 		void SetRefractionIndex(float idx) { refractionIndex = idx; }
 		void SetTransmission(float idx) { transmission = idx; }
+		void SetEmissive(bool emiss) { emission = emiss; }
+		void SetEmissiveColor(glm::vec3 em) { emissive = em; }
+		void SetAbsorption(float a) { absorption = a; }
 
 	private:
 		int id;
 
 		std::shared_ptr<Texture2D> diffuse;
-		glm::vec4 albedoColor;
+		glm::vec3 albedoColor;
 		glm::vec3 emissive;
 		int type;
 
@@ -61,6 +65,7 @@ namespace Lux
 		float metallic;
 		float roughness;
 		float transmission;
+		float absorption;
 
 		bool emission;
 

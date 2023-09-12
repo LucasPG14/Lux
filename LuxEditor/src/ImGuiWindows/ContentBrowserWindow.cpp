@@ -15,7 +15,8 @@ namespace Lux
 	ContentBrowserWindow::ContentBrowserWindow() : currentDir(assetsDir)
 	{
 		folder = CreateSharedPtr<Texture2D>("Editor/Textures/folder.png");
-		tex = CreateSharedPtr<Texture2D>("Assets/Textures/bakeHouse.png");
+		sceneIcon = CreateSharedPtr<Texture2D>("Editor/Textures/sceneIcon.png");
+		modelsIcon = CreateSharedPtr<Texture2D>("Editor/Textures/modelsIcon.png");
 
 		for (auto& entry : std::filesystem::directory_iterator("Library"))
 		{
@@ -36,10 +37,6 @@ namespace Lux
 				}
 				else
 				{
-					//if (entry.path().extension() == ".fbx" || entry.path().extension() == ".obj")
-					//{
-					//	Importer::ImportFBX2()
-					//}
 					if (entry.path().extension() == ".png" || entry.path().extension() == ".jpg")
 					{
 						ResourceManager::CreateTexture(entry.path().string());
@@ -47,39 +44,22 @@ namespace Lux
 				}
 			}
 		}
-
-		// Load Resources
-		//std::stack<std::filesystem::path> resources;
-		//resources.push(assetsDir);
-
-		//std::string extension = ".bsres";
-
-		//while (!resources.empty())
-		//{
-		//	std::filesystem::path path = resources.top();
-		//	resources.pop();
-
-		//	for (auto& entry : std::filesystem::directory_iterator(path))
-		//	{
-		//		const std::filesystem::path& filePath = entry.path();
-		//		if (entry.is_directory()) resources.push(entry);
-		//		else if (filePath.extension().string() == extension)
-		//		{
-		//		
-		//		}
-		//	}
-		//}
 	}
 	
 	void ContentBrowserWindow::Render()
 	{
 		// Content Browser begin
 		static bool ret = true;
-		ImGui::Begin("Content Browser", &ret, ImGuiWindowFlags_MenuBar);
+		ImGui::Begin("Content Browser", &ret);
 
-		ImGui::BeginMenuBar();
-
-		ImGui::EndMenuBar();
+		if (currentDir.has_parent_path())
+		{
+			if (ImGui::Button("<-", { 20, 20 }))
+			{
+				currentDir = currentDir.parent_path();
+				selected = "";
+			}
+		}
 
 		focused = false;
 		if (ImGui::IsWindowFocused()) focused = true;
@@ -87,7 +67,7 @@ namespace Lux
 		// Setting the number of columns
 		float cell = 128;
 
-		float width = ImGui::GetContentRegionAvail().x;
+		float width = ImGui::GetContentRegionMax().x;
 		int columns = (int)(width / cell);
 
 		if (columns < 1)
@@ -113,9 +93,17 @@ namespace Lux
 			{
 				ImGui::ImageButton((ImTextureID)ResourceManager::GetTexture(file.path().string())->GetID(), {100, 100}, {0, 1}, {1, 0});
 			}
+			else if (file.path().extension() == ".fbx" || file.path().extension() == ".obj")
+			{
+				ImGui::ImageButton((ImTextureID)modelsIcon->GetID(), { 100, 100 }, { 0, 1 }, { 1, 0 });
+			}
+			else if (file.path().extension() == ".scene")
+			{
+				ImGui::ImageButton((ImTextureID)sceneIcon->GetID(), { 100, 100 }, { 0, 1 }, { 1, 0 });
+			}
 			else
 			{
-				ImGui::ImageButton((ImTextureID)tex->GetID(), { 100, 100 }, { 0, 1 }, { 1, 0 });
+				ImGui::ColorButton("##Image", {0.1f, 0.1f, 0.1f, 1.0f}, 0,{ 100, 100 });
 			}
 			
 			if (fileSelected) ImGui::PopStyleColor();

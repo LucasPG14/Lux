@@ -86,7 +86,7 @@ namespace Lux
 					Utilities::AttachColorTexture(colorAttachments[i], GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, spec.width, spec.height, i);
 					break;
 				case FramebufferTextureFormat::RGBA16:
-					Utilities::AttachColorTexture(colorAttachments[i], GL_RGBA16F, GL_RGBA, GL_FLOAT, spec.width, spec.height, i);
+					Utilities::AttachColorTexture(colorAttachments[i], GL_RGBA32F, GL_RGBA, GL_FLOAT, spec.width, spec.height, i);
 					break;
 				}
 			}

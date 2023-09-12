@@ -29,7 +29,8 @@ namespace Lux
 		std::filesystem::path currentDir;
 		std::filesystem::path selected;
 
-		std::shared_ptr<Texture2D> tex;
 		std::shared_ptr<Texture2D> folder;
+		std::shared_ptr<Texture2D> sceneIcon;
+		std::shared_ptr<Texture2D> modelsIcon;
 	};
 }

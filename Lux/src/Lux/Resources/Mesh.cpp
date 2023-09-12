@@ -10,27 +10,6 @@ namespace Lux
 	Mesh::Mesh(const AABB& ab, const std::vector<Vertex>& vert, const std::vector<uint32_t>& ind, const std::string& p, const std::string& origPath)
 		: vertices(vert), indices(ind), path(p), originalPath(origPath), aabb(ab)
 	{
-		vao = CreateSharedPtr<VertexArray>();
-
-		vbo = CreateSharedPtr<VertexBuffer>(vertices.data(), vertices.size() * sizeof(Vertex));
-		{
-			BufferLayout layout =
-			{
-				{ShaderDataType::FLOAT3, "position"},
-				{ShaderDataType::FLOAT3, "normals"},
-				{ShaderDataType::FLOAT2, "texCoords"},
-				{ShaderDataType::FLOAT3, "tangents"},
-				{ShaderDataType::FLOAT3, "bitangents"}
-			};
-
-			vbo->SetLayout(layout);
-		}
-
-		vao->AddVertexBuffer(vbo);
-
-		ebo = CreateSharedPtr<IndexBuffer>(indices.data(), indices.size());
-		vao->AddIndexBuffer(ebo);
-
 		for (int i = 0; i < vert.size(); ++i)
 		{
 			positions.push_back(glm::vec4(vertices[i].position, vertices[i].texCoords.x));

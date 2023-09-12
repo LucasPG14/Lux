@@ -19,12 +19,6 @@ out vec4 fragColor;
 
 in vec2 texCoord;
 
-struct Material
-{
-	int type;
-	vec3 color;
-};
-
 struct MaterialInfo
 {
 	vec4 textureIDs;
@@ -69,6 +63,7 @@ struct DirLight
 {
 	vec3 direction;
 	vec3 radiance;
+	float intensity;
 };
 uniform DirLight dirLight;
 
@@ -76,25 +71,16 @@ struct PointLight
 {
 	vec3 position;
 	vec3 radiance;
-	float radius;
+	float intensity;
 };
-uniform PointLight pointLights[20];
-
-struct LightHit
-{
-	vec3 point;
-	vec3 normal;
-	float t;
-	bool frontFace;
-
-	PointLight light;
-};
+uniform PointLight pointLights[100];
 
 uniform vec3 viewPos;
 uniform vec2 canvas;
 uniform mat4 inverseCamera;
 
 uniform int samples;
+uniform int maxBounces;
 uniform int numPointLights;
 
 uniform int numObjects;
@@ -155,59 +141,45 @@ const float PI = 3.14159265;
 
 uniform int seed3;
 int seed2 = 1;
-int rand(void) { seed2 = seed2*0x343fd+0x269ec3; return (seed2>>16)&32767; }
-float frand() { return float(rand())/32767.0; }
-vec2 frand2() { return vec2(frand(), frand()); }
+int rand() 
+{ 
+	seed2 = seed2 * 0x343fd+0x269ec3; 
+	return (seed2 >> 16)&32767; 
+}
+
+float frand() 
+{ 
+	return float(rand()) / 32767.0; 
+}
+vec2 frand2() 
+{ 
+	return vec2(frand(), frand()); 
+}
+
+float hash(float n) { return fract(sin(n) * 1e4); }
 
 float nrand(vec2 n)
 {
     return fract(sin(dot(n.xy, vec2(12.9898, 78.233))) * 43758.5453);
 }
 
-float hash(float n) { return fract(sin(n) * 1e4); }
-
 float trand(vec2 n, float seed)
 {
     return nrand(n * seed * float(samples));
 }
 
-vec2 trand2(vec2 n, float seed)
+void srand(ivec2 p, int frameCount)
 {
-    return vec2(nrand(n * seed * float(samples)), nrand(n * hash(seed) * float(samples)));
-}
-
-float schlick(float cosTheta, float refractionIdx)
-{
-	float r0 = (1.0 - refractionIdx) / (1.0 + refractionIdx);
-    r0 = r0 * r0;
-    return r0 + (1.0 - r0) * pow((1.0 - cosTheta), 5.0);
-}
-
-vec3 randomPointInUnitSphere(vec2 uv, float seed)
-{
-    // this is doing rejection sampling, which is simple but not super
-    // efficient
-    vec3 p;
-    do {
-        p = vec3(trand(uv, seed),
-                 trand(uv, 2.333 * seed),
-                 trand(uv, -1.134 * seed));
-        seed *= 1.312;
-    } while (dot(p, p) >= 1.0);
-    return p;
-}
-
-vec3 randomPointInUnitSphere2(vec2 uv, float seed, float minV, float maxV)
-{
-    vec3 v;
-    do {
-        v.x = minV + (maxV - minV) * hash(seed);
-        v.y = minV + (maxV - minV) * hash(2.333 * seed);
-        v.z = minV + (maxV - minV) * hash(-1.134 * seed);
-		seed *= 1.312;
-    } while(length(v) >= 1.0);
-
-	return v;
+    int n = frameCount;
+    n = (n << 13) ^ n; 
+	n = n * (n * n * 15731 + 789221) + 1376312589;
+    n += p.y;
+    n = (n << 13) ^ n; 
+	n = n * (n * n * 15731 + 789221) + 1376312589;
+    n += p.x;
+    n = (n << 13) ^ n; 
+	n = n * (n * n * 15731 + 789221) + 1376312589;
+    seed2 = n;
 }
 
 vec3 GetRayAt(const Ray ray, float t)
@@ -340,7 +312,7 @@ vec3 cosineSampleHemisphere(vec3 n)
     return normalize(n + dir);
 }
 
-void basis(in vec3 n, out vec3 b1, out vec3 b2) 
+void TangentAndBitangent(in vec3 n, out vec3 b1, out vec3 b2) 
 {
     if(n.z < 0.0)
 	{
@@ -478,7 +450,7 @@ vec4 DisneyRefractionBRDF(vec3 albedo, float F, float NdotH, float NdotV, float 
     return vec4(spec, pdf);
 }
 
-vec4 CalculateBRDF(vec3 direction, HitRecord hit, inout RefractionState refState, out vec3 L)
+void CalculateBRDF(vec3 direction, HitRecord hit, inout RefractionState refState, out vec3 L, out vec4 brdf)
 {
 	// Material properties
 	vec3 albedo = hit.material.color.xyz;
@@ -490,22 +462,21 @@ vec4 CalculateBRDF(vec3 direction, HitRecord hit, inout RefractionState refState
 	float refractionIdx = hit.material.properties.z;
 	float transmission = hit.material.properties.w;
 
-	if (hit.material.textureIDs.y != -1) 
-	{
-		hit.normal = normalize(texture(texturesTex, vec3(hit.texCoords, hit.material.textureIDs.y)).xyz * 2.0 - 1.0);
-		if (hit.frontFace) hit.normal = -hit.normal;
-	}
-
 	float roughness2 = pow(roughness, 2.0);
 
     // Calculating Microfacet normal
     vec3 t, b;
-    basis(hit.normal, t, b);
-    vec3 V = toLocal(t, b, hit.normal, direction);
+    TangentAndBitangent(hit.normal, t, b);
+	vec3 V = toLocal(t, b, hit.normal, direction);
     vec3 h = SampleGGXVNDF(V, roughness2, roughness2, frand(), frand());
     if (h.z < 0.0)
         h = -h;
 	h = toWorld(t, b, hit.normal, h);
+
+	//if (hit.material.textureIDs.y != -1)
+	//{
+	//	vec3 n = texture(texturesTex, vec3(hit.texCoords, hit.material.textureIDs.y)).xyz;
+	//}
 
     // Fresnel
     float VdotH = dot(direction, h);
@@ -525,7 +496,6 @@ vec4 CalculateBRDF(vec3 direction, HitRecord hit, inout RefractionState refState
 
 	refState.wasRefracted = refState.isRefracted;
 
-	vec4 brdf;
 	float rnd = frand();
 	if (rnd < diffuseWeight)
 	{
@@ -536,7 +506,7 @@ vec4 CalculateBRDF(vec3 direction, HitRecord hit, inout RefractionState refState
         float NdotV = dot(hit.normal, direction);
         if (NdotL <= 0.0 || NdotV <= 0.0) 
 		{ 
-			return vec4(0.0); 
+			return; 
 		}
         
 		float LdotH = dot(L, h);
@@ -554,7 +524,7 @@ vec4 CalculateBRDF(vec3 direction, HitRecord hit, inout RefractionState refState
         float NdotV = dot(hit.normal, direction);
         if (NdotL <= 0.0 || NdotV <= 0.0) 
 		{ 
-			return vec4(0.0); 
+			return; 
 		}
         
 		float NdotH = min(0.99, dot(hit.normal, h));
@@ -573,7 +543,7 @@ vec4 CalculateBRDF(vec3 direction, HitRecord hit, inout RefractionState refState
         float NdotL = dot(hit.normal, L);
         if (NdotL <= 0.0) 
 		{ 
-			return vec4(0.0); 
+			return; 
 		}
         
 		float NdotV = dot(hit.normal, direction);
@@ -584,12 +554,10 @@ vec4 CalculateBRDF(vec3 direction, HitRecord hit, inout RefractionState refState
         brdf.a = refractWeight * brdf.a;
 	}
 
-	//brdf.rgb *= abs(dot(hit.normal, L));
-
-	return brdf;
+	brdf.rgb *= abs(dot(hit.normal, L));
 }
 
-vec3 TracePath(const Ray ray, vec2 uv, inout float seed, inout int n)
+vec3 TracePath(const Ray ray, vec2 uv)
 {
 	vec3 color = vec3(0.0);
 	Ray hitRay = ray;
@@ -604,16 +572,16 @@ vec3 TracePath(const Ray ray, vec2 uv, inout float seed, inout int n)
 	refState.wasRefracted = false;
 	
 	int i = 0;
-	for (; i < 4; ++i)
+	for (; i < maxBounces; ++i)
 	{
 		HitRecord hit;
 		hitRay.direction = normalize(hitRay.direction);
 		if (RayTriangleHit(hitRay, hit, 0.001, tMax))
 		{
-			n++;
 			vec3 newDir;
+			vec4 brdf = vec4(0.0);
 
-			vec4 brdf = CalculateBRDF(-hitRay.direction, hit, refState, newDir);
+			CalculateBRDF(-hitRay.direction, hit, refState, newDir, brdf);
 
 			if (hit.material.emissive.w == 1.0)
 				color += hit.material.emissive.xyz * throughput;
@@ -623,20 +591,26 @@ vec3 TracePath(const Ray ray, vec2 uv, inout float seed, inout int n)
 				vec3 L = normalize(pointLights[i].position - hit.point);
     			vec3 H = normalize(hitRay.direction + L);
 				float distance = length(pointLights[i].position - hit.point);
-    			float attenuation = 1.0 / (distance * distance);
-    			vec3 radiance = pointLights[i].radiance * attenuation;
-
+			
+    			float attenuation = 1.0 / distance;
+    			vec3 radiance = pointLights[i].radiance * attenuation * pointLights[i].intensity;
+			
 				float NdotL = max(dot(hit.normal, L), 0.0);
-
-				color += radiance * throughput * NdotL;
+				
+				color += radiance * NdotL * throughput;
 			}
+
+			float directionLight = max(dot(hit.normal, normalize(-dirLight.direction)), 0.0);
+
+			color += dirLight.radiance * directionLight * throughput * dirLight.intensity;
 
 			if (brdf.a > 0.0)
 				throughput *= brdf.rgb / brdf.a;
 
-			if (refState.wasRefracted) 
+			if (refState.wasRefracted)
 			{
-            	throughput *= exp(-hit.t * ((vec3(1.0) - hit.material.color.xyz) * 0.0));
+				vec4 col = hit.material.color;
+            	throughput *= exp(-hit.t * ((vec3(1.0) - col.xyz) * col.w));
         	}
 
 			hitRay.origin = hit.point;
@@ -657,19 +631,20 @@ vec3 TracePath(const Ray ray, vec2 uv, inout float seed, inout int n)
 			hitRay.direction = newDir;
 
 			float q = max(throughput.r, max(throughput.g, throughput.b));
-			seed *= 1.456;
             if (frand() > q)
                 break;
 
             throughput /= q;
 
-			seed *= 1.456;
+			if (i == maxBounces - 1)
+			{
+				color = throughput;
+			}
 		}
 		else
 		{
 			float t = 0.5 * (hitRay.direction.y + 1.0);
 			vec3 background = ((1.0 - t) * vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0));
-			n++;
 			color += throughput * background;
 			break;
 		}
@@ -688,8 +663,6 @@ vec3 GetRayDirection(const vec3 pos, const vec2 fragCoord, float rx, float ry)
 
 void main()
 {
-	seed2 = seed3;
-
     Ray ray;
     ray.origin = viewPos;
 
@@ -699,25 +672,21 @@ void main()
 	vec2 fragCoord = gl_FragCoord.xy;
 	vec2 uv = fragCoord / canvas;
 	
-	seed2 *= int(fragCoord.x * fragCoord.y + fragCoord.x * samples);
+	srand(ivec2(fragCoord), samples);
 
-	int iterator = 0;
-	float seed = 1.0;
-
-	float rx = -0.5 + (0.5 + 0.5) * trand(uv, 0.123 * seed);
-	float ry = -0.5 + (0.5 + 0.5) * trand(uv, 0.456 * seed);
+	float rx = -0.5 + (0.5 + 0.5) * trand(uv, 0.123 * frand());
+	float ry = -0.5 + (0.5 + 0.5) * trand(uv, 0.456 * frand());
 
     ray.direction = GetRayDirection(ray.origin, fragCoord, rx, ry);
-	color = TracePath(ray, uv, seed, iterator);
+	color = TracePath(ray, uv);
 
-	//color = sqrt(color / float(iterator));
+	color = min(color.rgb, vec3(10.0));
 
-	//color = min(color.rgb, vec3(10.0));
+	// Gamma correction and tonemapping
+	//color = color / (color + vec3(1.0));
+	//color = pow(color, vec3(1.0 / 2.2));
 
-	// Gamma correction
-	color = pow(color, vec3(1.0 / 2.2));
-
-	color = mix(prev, color, 1.0 / float(samples + 1));
+	color = (float(samples) * prev + color) / float(samples + 1);
 
     fragColor = vec4(color, 1.0);
 }

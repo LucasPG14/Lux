@@ -147,7 +147,10 @@ namespace Lux
 				emitter << YAML::Key << "Metallic" << YAML::Value << comp->GetMaterial()->GetMetallic();
 				emitter << YAML::Key << "Roughness" << YAML::Value << comp->GetMaterial()->GetRoughness();
 				emitter << YAML::Key << "IndexRefraction" << YAML::Value << comp->GetMaterial()->GetRefractionIndex();
-				//emitter << YAML::Key << "Emissive" << YAML::Value << comp->GetMaterial()->GetEmissive();
+				emitter << YAML::Key << "Transmission" << YAML::Value << comp->GetMaterial()->GetTransmission();
+				emitter << YAML::Key << "Emissive" << YAML::Value << comp->GetMaterial()->GetEmissive();
+				emitter << YAML::Key << "Emission" << YAML::Value << comp->GetMaterial()->GetEmission();
+				emitter << YAML::Key << "Absorption" << YAML::Value << comp->GetMaterial()->GetAbsorption();
 
 				emitter << YAML::EndMap;
 				// Material map end
@@ -161,7 +164,7 @@ namespace Lux
 
 				emitter << YAML::Key << "Light Type" << YAML::Value << int(comp->GetType());
 				emitter << YAML::Key << "Color" << YAML::Value << comp->GetColor();
-				emitter << YAML::Key << "Radius" << YAML::Value << comp->GetRange();
+				emitter << YAML::Key << "Intensity" << YAML::Value << comp->GetIntensity();
 
 				emitter << YAML::EndMap;
 				// Material map end
@@ -216,21 +219,34 @@ namespace Lux
 				entity->CreateComponent<MeshComponent>(meshPath);
 				YAML::Node material = yamlEntity["MaterialComponent"];
 				const std::shared_ptr<Material>& mat = entity->CreateComponent<MaterialComponent>()->GetMaterial();
-				mat->SetColor(material["Color"].as<glm::vec4>());
+				mat->SetColor(material["Color"].as<glm::vec3>());
 				mat->SetMetallic(material["Metallic"].as<float>());
 				mat->SetRoughness(material["Roughness"].as<float>());
 				mat->SetRefractionIndex(material["IndexRefraction"].as<float>());
+				mat->SetTransmission(material["Transmission"].as<float>());
+				mat->SetEmissive(material["Emission"].as<bool>());
+				mat->SetEmissiveColor(material["Emissive"].as<glm::vec3>());
+				mat->SetAbsorption(material["Absorption"].as<float>());
+
+				mat->SetDiffuse(nullptr);
+				mat->SetNormalMap(nullptr);
+				mat->SetMetallicMap(nullptr);
+				mat->SetRoughnessMap(nullptr);
 			}
 			
 			YAML::Node light = yamlEntity["LightComponent"];
 			if (light)
 			{
 				LightType type = LightType(light["Light Type"].as<int>());
-				LightComponent* comp = entity->CreateComponent<LightComponent>();
+				LightComponent* comp = entity->CreateComponent<LightComponent>(type);
 				comp->SetColor(light["Color"].as<glm::vec3>());
-				comp->SetRange(light["Radius"].as<float>());
+				comp->SetIntensity(light["Intensity"].as<float>());
+
+				scene->AddLight(entity->Get<TransformComponent>(), comp);
 			}
 		}
+
+		scene->SetPath(path.string());
 
 		return true;
 	}

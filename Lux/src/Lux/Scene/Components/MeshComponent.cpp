@@ -10,7 +10,7 @@
 
 namespace Lux
 {
-	MeshComponent::MeshComponent(const std::string& path)
+	MeshComponent::MeshComponent(const std::string& path) : type(ComponentType::MESH), mesh(nullptr)
 	{
 		//CreateSphere(vertices, indices);
 		mesh = ResourceManager::GetMesh(path);

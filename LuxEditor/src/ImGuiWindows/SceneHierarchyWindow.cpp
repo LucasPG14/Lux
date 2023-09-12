@@ -16,9 +16,9 @@ namespace Lux
 			mousePos.y > windowPos.y && mousePos.y < windowPos.y + size.y;
 	}
 
-	SceneHierarchyWindow::SceneHierarchyWindow(const std::shared_ptr<Scene>& currScene) : scene(currScene), selected(nullptr)
+	SceneHierarchyWindow::SceneHierarchyWindow(const std::shared_ptr<Scene>& currScene) : focused(false), scene(currScene), selected(nullptr)
 	{
-
+		removeTex = CreateSharedPtr<Texture2D>("Editor/Textures/trashlogo.png");
 	}
 	
 	void SceneHierarchyWindow::Render()
@@ -67,6 +67,7 @@ namespace Lux
 	{
 		ImGui::InputText("##name", entity.GetModifiedName().data(), 128);
 
+		ImGui::PushID(&entity);
 		// Transform
 		if (TransformComponent* component = entity.Get<TransformComponent>())
 		{
@@ -74,21 +75,21 @@ namespace Lux
 			{
 				ImGui::Text("Position");
 				ImGui::SameLine();
-				if (ImGui::DragFloat3("##Position", glm::value_ptr(component->GetModifiedPosition())))
+				if (ImGui::DragFloat3("##Position", glm::value_ptr(component->GetModifiedPosition()), 0.1f))
 				{
 					scene->Changed(Change::TRANSFORM);
 				}
 
 				ImGui::Text("Rotation");
 				ImGui::SameLine();
-				if (ImGui::DragFloat3("##Rotation", glm::value_ptr(component->GetModifiedRotation())))
+				if (ImGui::DragFloat3("##Rotation", glm::value_ptr(component->GetModifiedRotation()), 0.1f))
 				{
 					scene->Changed(Change::TRANSFORM);
 				}
 
 				ImGui::Text("Scale");
 				ImGui::SameLine();
-				if (ImGui::DragFloat3("##Scale", glm::value_ptr(component->GetModifiedScale())))
+				if (ImGui::DragFloat3("##Scale", glm::value_ptr(component->GetModifiedScale()), 0.1f))
 				{
 					scene->Changed(Change::TRANSFORM);
 				}
@@ -112,7 +113,7 @@ namespace Lux
 				Material& material = *component->GetMaterial();
 				if (material.GetDiffuse() != nullptr)
 				{
-					ImGui::ImageButton((ImTextureID)material.GetDiffuse()->GetID(), { 20.0f, 20.0f });
+					ImGui::ImageButton((ImTextureID)material.GetDiffuse()->GetID(), { 20.0f, 20.0f }, { 0, 1 }, { 1, 0 });
 				}
 				else
 				{
@@ -138,6 +139,15 @@ namespace Lux
 				}
 				ImGui::SameLine();
 				ImGui::Text("Diffuse Map");
+				if (material.GetDiffuse() != nullptr)
+				{
+					ImGui::SameLine();
+					if (ImGui::ImageButton((ImTextureID)removeTex->GetID(), { 20.0f, 20.0f }, { 0, 1 }, { 1, 0 }))
+					{
+						material.SetDiffuse(nullptr);
+						scene->Changed(Change::OBJECT);
+					}
+				}
 
 				ImGui::Text("Diffuse");
 				ImGui::SameLine();
@@ -149,7 +159,7 @@ namespace Lux
 
 				if (material.GetNormalMap() != nullptr)
 				{
-					ImGui::ImageButton((ImTextureID)material.GetNormalMap()->GetID(), { 20.0f, 20.0f });
+					ImGui::ImageButton((ImTextureID)material.GetNormalMap()->GetID(), { 20.0f, 20.0f }, { 0, 1 }, { 1, 0 });
 				}
 				else
 				{
@@ -175,12 +185,21 @@ namespace Lux
 				}
 				ImGui::SameLine();
 				ImGui::Text("Normal Map");
+				if (material.GetNormalMap() != nullptr)
+				{
+					ImGui::SameLine();
+					if (ImGui::ImageButton((ImTextureID)removeTex->GetID(), { 20.0f, 20.0f }, { 0, 1 }, { 1, 0 }))
+					{
+						material.SetNormalMap(nullptr);
+						scene->Changed(Change::OBJECT);
+					}
+				}
 
 				ImGui::Separator();
 
 				if (material.GetMetallicMap() != nullptr)
 				{
-					ImGui::ImageButton((ImTextureID)material.GetMetallicMap()->GetID(), { 20.0f, 20.0f });
+					ImGui::ImageButton((ImTextureID)material.GetMetallicMap()->GetID(), { 20.0f, 20.0f }, { 0, 1 }, { 1, 0 });
 				}
 				else
 				{
@@ -206,6 +225,15 @@ namespace Lux
 				}
 				ImGui::SameLine();
 				ImGui::Text("Metallic Map");
+				if (material.GetMetallicMap() != nullptr)
+				{
+					ImGui::SameLine();
+					if (ImGui::ImageButton((ImTextureID)removeTex->GetID(), { 20.0f, 20.0f }, { 0, 1 }, { 1, 0 }))
+					{
+						material.SetMetallicMap(nullptr);
+						scene->Changed(Change::OBJECT);
+					}
+				}
 
 				ImGui::Text("Metallic");
 				ImGui::SameLine();
@@ -217,7 +245,7 @@ namespace Lux
 
 				if (material.GetRoughnessMap() != nullptr)
 				{
-					ImGui::ImageButton((ImTextureID)material.GetRoughnessMap()->GetID(), { 20.0f, 20.0f });
+					ImGui::ImageButton((ImTextureID)material.GetRoughnessMap()->GetID(), { 20.0f, 20.0f }, { 0, 1 }, { 1, 0 });
 				}
 				else
 				{
@@ -243,6 +271,15 @@ namespace Lux
 				}
 				ImGui::SameLine();
 				ImGui::Text("Roughness Map");
+				if (material.GetRoughnessMap() != nullptr)
+				{
+					ImGui::SameLine();
+					if (ImGui::ImageButton((ImTextureID)removeTex->GetID(), { 20.0f, 20.0f }, { 0, 1 }, { 1, 0 }))
+					{
+						material.SetRoughnessMap(nullptr);
+						scene->Changed(Change::OBJECT);
+					}
+				}
 
 				ImGui::Text("Roughness");
 				ImGui::SameLine();
@@ -255,14 +292,21 @@ namespace Lux
 
 				ImGui::Text("Refraction Index");
 				ImGui::SameLine();
-				if (ImGui::DragFloat("Refraction Index", &material.GetRefractionIndex(), 0.01f, 1.1f, 2.5f))
+				if (ImGui::DragFloat("##Refraction Index", &material.GetRefractionIndex(), 0.01f, 1.1f))
 				{
 					scene->Changed(Change::MATERIAL);
 				}
 
 				ImGui::Text("Transmission");
 				ImGui::SameLine();
-				if (ImGui::DragFloat("Transmission", &material.GetTransmission(), 0.01f, 0.0f, 1.0f))
+				if (ImGui::DragFloat("##Transmission", &material.GetTransmission(), 0.01f, 0.0f, 1.0f))
+				{
+					scene->Changed(Change::MATERIAL);
+				}
+
+				ImGui::Text("Absorption");
+				ImGui::SameLine();
+				if (ImGui::DragFloat("##Absorption", &material.GetAbsorption(), 0.1f))
 				{
 					scene->Changed(Change::MATERIAL);
 				}
@@ -285,20 +329,15 @@ namespace Lux
 		{
 			if (ImGui::CollapsingHeader("Light Component"))
 			{
-				std::string type = component->GetType() == LightType::DIRECTIONAL ? "Directional" : "Point";
-				//if (ImGui::BeginCombo("Light Type", type.c_str()))
-				//{
-				//	if (ImGui::Selectable("Directional")) component->SetType(LightType::DIRECTIONAL);
-				//	if (ImGui::Selectable("Point")) component->SetType(LightType::POINT);
-				//	scene->Changed(Change::LIGHT);
-				//	ImGui::EndCombo();
-				//}
-				if (ImGui::ColorEdit3("Light Color", glm::value_ptr(component->GetModifiedColor()), ImGuiColorEditFlags_NoInputs))
+				ImGui::Text("Light Color");
+				ImGui::SameLine();
+				if (ImGui::ColorEdit3("##Light Color", glm::value_ptr(component->GetModifiedColor()), ImGuiColorEditFlags_NoInputs))
 				{
 					scene->Changed(Change::LIGHT);
 				}
-				//ImGui::DragFloat("Cut Off", &(component->GetModifiedCutOff()), 1.0f, 0.0f, 180.0f);
-				if (ImGui::DragFloat("Radius", &(component->GetModifiedRange()), 1.0f, 0.1f))
+				ImGui::Text("Intensity");
+				ImGui::SameLine();
+				if (ImGui::DragFloat("##Intensity", &(component->GetModifiedIntensity()), 0.1f, 0.1f, 100000.0f))
 				{
 					scene->Changed(Change::LIGHT);
 				}
@@ -320,5 +359,6 @@ namespace Lux
 			}
 			ImGui::EndCombo();
 		}
+		ImGui::PopID();
 	}
 }

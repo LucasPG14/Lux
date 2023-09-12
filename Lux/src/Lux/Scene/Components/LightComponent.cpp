@@ -6,7 +6,7 @@
 
 namespace Lux
 {
-	LightComponent::LightComponent(LightType t) : color(1.0f, 1.0f, 1.0f), lightType(t), cutOff(12.5f), range(5.0f)
+	LightComponent::LightComponent(LightType t) : color(1.0f, 1.0f, 1.0f), lightType(t), cutOff(12.5f), intensity(1.0f)
 	{
 	}
 	

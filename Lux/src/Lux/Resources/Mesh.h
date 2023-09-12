@@ -41,10 +41,6 @@ namespace Lux
 		std::vector<glm::vec4> normals;
 		std::vector<glm::vec4> indicesRT;
 
-		std::shared_ptr<VertexArray> vao;
-		std::shared_ptr<VertexBuffer> vbo;
-		std::shared_ptr<IndexBuffer> ebo;
-
 		std::string path;
 		std::string originalPath;
 

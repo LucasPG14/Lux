@@ -19,39 +19,19 @@ namespace Lux
 	extern const std::filesystem::path assetsDir;
 
 	EditorLayer::EditorLayer() 
-		: guizmoState(ImGuizmo::TRANSLATE), samples(0), maxSamples(2), needToUpdate(NeedToUpdate::NONE), sceneChanged(false), startRenderer(false), rendererSize(1920.0, 1080.0)
+		: guizmoState(ImGuizmo::TRANSLATE), imageSaved(false), maxBounces(2), samples(0), maxSamples(1), needToUpdate(NeedToUpdate::NONE), sceneChanged(false), startRenderer(false), rendererSize(1920.0, 1080.0)
 	{
 		scene = CreateSharedPtr<Scene>();
-		SceneSerializer serializer(scene);
-		serializer.Deserialize("Assets/ShaderToy.scene");
-		
-		scene->SetPath("Assets/ShaderToy.scene");
 
 		std::filesystem::create_directory("Library");
 		
 		contentBrowser = ContentBrowserWindow();
 		hierarchy = SceneHierarchyWindow(scene);
 
-		lightingPass = CreateSharedPtr<Shader>("Assets/Shaders/PathTracing.glsl");
-		viewSceneShader = CreateSharedPtr<Shader>("Assets/Shaders/PathTracingScene.glsl");
-		skyboxShader = CreateSharedPtr<Shader>("Assets/Shaders/Skybox.glsl");
-		
-		defaultShader = CreateSharedPtr<Shader>("Assets/Shaders/Default.glsl");
-		computeShader = CreateSharedPtr<ComputeShader>("Assets/Shaders/ComputeShader.glsl");
+		lightingPass = CreateSharedPtr<Shader>("Editor/Shaders/PathTracing.glsl");
+		defaultShader = CreateSharedPtr<Shader>("Editor/Shaders/Default.glsl");
 
 		scene->CollectInformation();
-		{
-			TextureSpecification spec;
-			spec.format = TextureFormat::FLOAT;
-
-			transformsTexture = CreateSharedPtr<Texture2D>(scene->GetTransforms().data(), sizeof(glm::mat4) / sizeof(glm::vec4) * scene->GetTransforms().size(), spec);
-		}
-		{
-			TextureSpecification spec;
-			spec.format = TextureFormat::FLOAT;
-
-			//objectsTexture = CreateSharedPtr<Texture2D>(scene->GetObjectsInfo().data(), /*sizeof(ObjectInfo) / sizeof(glm::vec4) **/ scene->GetObjectsInfo().size(), spec);
-		}
 		textureArray = CreateSharedPtr<Texture2DArray>(scene->GetTextures().size(), (void*)scene->GetTextures().data());
 
 		verticesSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetPositions().data(), sizeof(glm::vec4) * scene->GetPositions().size(), 0);
@@ -62,28 +42,15 @@ namespace Lux
 		materialsSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetMaterialsInfo().data(), sizeof(MaterialInfo) * scene->GetMaterialsInfo().size(), 5);
 		transformsSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetTransforms().data(), sizeof(glm::mat4) * scene->GetTransforms().size(), 6);
 		aabbsSsbo = CreateSharedPtr<ShaderStorageBuffer>(scene->GetAABBs().data(), sizeof(AABB) * scene->GetAABBs().size(), 7);
-
-		Importer::ImportFBX2("Assets/Models/Cube.obj", assetsDir.string());
-
-/*		lightingPass->SetStorageBlock("verticesSSBO", verticesSsbo->GetBindingIndex());
-		lightingPass->SetStorageBlock("indicesSSBO", indicesSsbo->GetBindingIndex());
-		lightingPass->SetStorageBlock("objectsSSBO", objectsSsbo->GetBindingIndex());	*/	
 		
-		viewSceneShader->SetStorageBlock("verticesSSBO", verticesSsbo->GetBindingIndex());
-		viewSceneShader->SetStorageBlock("indicesSSBO", indicesSsbo->GetBindingIndex());
-		viewSceneShader->SetStorageBlock("normalsSSBO", normalsSsbo->GetBindingIndex());
-		viewSceneShader->SetStorageBlock("objectsSSBO", objectsSsbo->GetBindingIndex());
-		viewSceneShader->SetStorageBlock("meshesSSBO", meshesSsbo->GetBindingIndex());
-		viewSceneShader->SetStorageBlock("materialsSSBO", materialsSsbo->GetBindingIndex());
-		viewSceneShader->SetStorageBlock("transformsSSBO", transformsSsbo->GetBindingIndex());
-		viewSceneShader->SetStorageBlock("aabbsSSBO", aabbsSsbo->GetBindingIndex());
-
-		//textureArray->AddTexture("Assets/Textures/rustediron2_normal.png");
-		//textureArray->AddTexture("Assets/Textures/rustediron2_metallic.png");
-		//textureArray = CreateSharedPtr<Texture2DArray>(scene->GetWorld()[0].Get<MaterialComponent>()->GetMaterial());
-
-		//textureArray->AddMaterial(scene->GetWorld()[0].Get<MaterialComponent>()->GetMaterial());
-		//textureArray->AddTexture("Assets/Textures/rustediron2_basecolor.png");
+		lightingPass->SetStorageBlock("verticesSSBO", verticesSsbo->GetBindingIndex());
+		lightingPass->SetStorageBlock("indicesSSBO", indicesSsbo->GetBindingIndex());
+		lightingPass->SetStorageBlock("normalsSSBO", normalsSsbo->GetBindingIndex());
+		lightingPass->SetStorageBlock("objectsSSBO", objectsSsbo->GetBindingIndex());
+		lightingPass->SetStorageBlock("meshesSSBO", meshesSsbo->GetBindingIndex());
+		lightingPass->SetStorageBlock("materialsSSBO", materialsSsbo->GetBindingIndex());
+		lightingPass->SetStorageBlock("transformsSSBO", transformsSsbo->GetBindingIndex());
+		lightingPass->SetStorageBlock("aabbsSSBO", aabbsSsbo->GetBindingIndex());
 
 		std::vector<float> vertices =
 		{
@@ -225,7 +192,7 @@ namespace Lux
 		if (sceneChanged)
 			ResetRenderer();
 
-		if (!startRenderer && samples >= 2)
+		if (!startRenderer && samples >= 1)
 			return;
 
 		PathTracing();
@@ -330,12 +297,7 @@ namespace Lux
 				if (ImGui::MenuItem("Open scene", "Ctrl + O"))
 				{
 					std::string filepath = FileDialog::OpenFile("scene (*.scene)\0*.scene\0");
-					if (!filepath.empty())
-					{
-						SceneSerializer serializer(scene);
-						serializer.Deserialize(filepath);
-						scene->Changed(Change::OBJECT);
-					}
+					OpenScene(filepath);
 				}
 
 				ImGui::Separator();
@@ -369,6 +331,7 @@ namespace Lux
 					Entity* entity = scene->CreateEntity("Point Light");
 					LightComponent* light = entity->CreateComponent<LightComponent>(LightType::POINT);
 					scene->AddLight(entity->Get<TransformComponent>(), light);
+					scene->Changed(Change::LIGHT);
 				}
 
 				ImGui::EndMenu();
@@ -389,12 +352,14 @@ namespace Lux
 		{
 			viewSize = { size.x, size.y };
 			
-			computeShader->ResizeTexture(viewSize.x, viewSize.y);
-			sceneFramebuffer->Resize(viewSize.x, viewSize.y);
-			viewportFramebuffer->Resize(viewSize.x, viewSize.y);
-			accumulateFramebuffer->Resize(viewSize.x, viewSize.y);
-			camera.SetDimensions(viewSize.x, viewSize.y);
-			sceneChanged = true;
+			if (!startRenderer)
+			{
+				sceneFramebuffer->Resize(viewSize.x, viewSize.y);
+				viewportFramebuffer->Resize(viewSize.x, viewSize.y);
+				accumulateFramebuffer->Resize(viewSize.x, viewSize.y);
+				camera.SetDimensions(viewSize.x, viewSize.y);
+				sceneChanged = true;
+			}
 		}
 
 		// DragAndDrop Target
@@ -406,7 +371,10 @@ namespace Lux
 				std::filesystem::path realPath = std::filesystem::path(assetsDir) / path;
 				if (realPath.has_extension())
 				{
-					//if (realPath.extension().string() == ".bsscene") OpenScene(realPath);
+					if (realPath.extension().string() == ".scene")
+					{
+						OpenScene(realPath.string());
+					}
 					if (realPath.extension().string() == ".obj" || realPath.extension().string() == ".fbx")
 					{
 						scene->CreateEntityWithPath(realPath.string(), realPath.filename().string());
@@ -421,9 +389,10 @@ namespace Lux
 		// ImGuizmo Begin
 		if (Entity* entitySelected = hierarchy.GetSelected())
 		{
+			ImGuizmo::Enable(true);
 			ImGuizmo::SetOrthographic(false);
-			ImGuizmo::SetDrawlist();
 			ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, ImGui::GetWindowWidth(), ImGui::GetWindowHeight());
+			ImGuizmo::SetDrawlist();
 		
 			const glm::mat4& camView = glm::transpose(camera.GetViewMatrix());
 			const glm::mat4& camProj = glm::transpose(camera.GetProjectionMatrix());
@@ -457,10 +426,22 @@ namespace Lux
 		ImGui::Text("Samples: ");
 		ImGui::SameLine();
 		ImGui::Text(std::to_string(samples).c_str());
-		ImGui::DragInt("Max samples", &maxSamples);
+		ImGui::Text("Max samples");
+		ImGui::SameLine();
+		ImGui::DragInt("##Max samples", &maxSamples, 1.0f, 1, 2000000);
+		ImGui::Text("Max bounces");
+		ImGui::SameLine();
+		int maxB = maxBounces;
+		if (ImGui::DragInt("##Max bounces", &maxB, 1.0f, 2, 8) && !startRenderer)
+		{
+			maxBounces = maxB;
+			Restart();
+		}
 
 		std::string actualValue = rendererSize == glm::vec2(1920.0, 1080.0) ? "1920 x 1080" : "1080 x 720";
-		if (ImGui::BeginCombo("Renderer Size", actualValue.c_str()))
+		ImGui::Text("Render Size");
+		ImGui::SameLine();
+		if (ImGui::BeginCombo("##Renderer Size", actualValue.c_str()))
 		{
 			if (ImGui::Selectable("1920 x 1080"))
 			{
@@ -483,14 +464,10 @@ namespace Lux
 
 		if (ImGui::Button("Restart"))
 		{
-			startRenderer = false;
-			ResetRenderer();
-			viewportFramebuffer->Resize(viewSize.x, viewSize.y);
-			accumulateFramebuffer->Resize(viewSize.x, viewSize.y);
-			camera.SetDimensions(viewSize.x, viewSize.y);
+			Restart();
 		}
 
-		if (samples >= maxSamples)
+		if (samples >= maxSamples && startRenderer)
 		{
 			if (ImGui::Button("Save Renderer"))
 			{
@@ -519,11 +496,11 @@ namespace Lux
 		{
 			MaterialInfo info;
 			const std::shared_ptr<Material>& material = hierarchy.GetSelected()->Get<MaterialComponent>()->GetMaterial();
-			info.color = material->GetColor();
-			info.textureIDs.x = material->GetDiffuse() ? material->GetDiffuse()->GetImageID() : -1.0;
-			info.textureIDs.y = material->GetNormalMap() ? material->GetNormalMap()->GetImageID() : -1.0;
-			info.textureIDs.z = material->GetMetallicMap() ? material->GetMetallicMap()->GetImageID() : -1.0;
-			info.textureIDs.w = material->GetRoughnessMap() ? material->GetRoughnessMap()->GetImageID() : -1.0;
+			info.color = glm::vec4(material->GetColor(), material->GetAbsorption());
+			info.textureIDs.x = material->GetDiffuse() ? material->GetDiffuse()->GetImageID() : -1.0f;
+			info.textureIDs.y = material->GetNormalMap() ? material->GetNormalMap()->GetImageID() : -1.0f;
+			info.textureIDs.z = material->GetMetallicMap() ? material->GetMetallicMap()->GetImageID() : -1.0f;
+			info.textureIDs.w = material->GetRoughnessMap() ? material->GetRoughnessMap()->GetImageID() : -1.0f;
 			info.properties.x = material->GetMetallic();
 			info.properties.y = material->GetRoughness();
 			info.properties.z = material->GetRefractionIndex();
@@ -588,46 +565,10 @@ namespace Lux
 		dispatcher.Dispatch<KeyPressedEvent>(LUX_BIND_EVENT_FN(EditorLayer::ShortCuts));
 	}
 
-	void EditorLayer::PathTracingView()
-	{
-		viewportFramebuffer->Bind();
-
-		Renderer::ClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
-		Renderer::Clear();
-
-		viewSceneShader->Bind();
-
-		//transformsTexture->Bind(4);
-		//viewSceneShader->SetUniformInt("transformsTex", 4);
-
-		viewSceneShader->SetUniformFloat3("viewPos", camera.GetPosition());
-
-		viewSceneShader->SetUniformFloat3("viewPos", camera.GetPosition());
-		viewSceneShader->SetUniformFloat2("canvas", viewSize);
-		viewSceneShader->SetUniformMat4("inverseCamera", glm::inverse(camera.GetProjectionMatrix() * camera.GetViewMatrix()));
-
-		Renderer::DrawFullscreenQuad();
-
-		sceneFramebuffer->UnbindTextures();
-		viewportFramebuffer->Unbind();
-	}
-
 	void EditorLayer::PathTracing()
 	{
 		if (samples >= maxSamples)
 			return;
-		//sceneFramebuffer->Bind();
-
-		//Renderer::ClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
-		//Renderer::Clear();
-
-		//Renderer::BeginScene(camera);
-
-		//scene->Update();
-
-		//Renderer::EndScene();
-
-		//sceneFramebuffer->Unbind();
 
 		viewportFramebuffer->Bind();
 
@@ -636,14 +577,10 @@ namespace Lux
 
 		lightingPass->Bind();
 
-		sceneFramebuffer->BindTextures();
-		lightingPass->SetUniformInt("positions", 0);
-		lightingPass->SetUniformInt("normals", 1);
-		lightingPass->SetUniformInt("albedoSpecular", 2);
-
 		accumulateFramebuffer->BindTextures(3);
 		lightingPass->SetUniformInt("accumulateTexture", 3);
 		lightingPass->SetUniformInt("samples", samples++);
+		lightingPass->SetUniformInt("maxBounces", maxBounces);
 
 		textureArray->Bind(5);
 		lightingPass->SetUniformInt("texturesTex", 5);
@@ -664,6 +601,7 @@ namespace Lux
 			{
 				lightingPass->SetUniformFloat3("dirLight.direction", transform->GetRotation());
 				lightingPass->SetUniformFloat3("dirLight.radiance", light->GetColor());
+				lightingPass->SetUniformFloat("dirLight.intensity", light->GetIntensity());
 				break;
 			}
 			case LightType::POINT:
@@ -672,19 +610,7 @@ namespace Lux
 				lightingPass->SetUniformFloat3("pointLights[" + number + "].position", transform->GetPosition());
 				lightingPass->SetUniformFloat3("pointLights[" + number + "].radiance", light->GetColor());
 
-				lightingPass->SetUniformFloat("pointLights[" + number + "].radius", light->GetRange());
-				break;
-			}
-			case LightType::SPOT:
-			{
-				std::string number = std::to_string(spotLights++);
-				lightingPass->SetUniformFloat3("spotLights[" + number + "].position", transform->GetPosition());
-				lightingPass->SetUniformFloat3("spotLights[" + number + "].direction", transform->GetRotation());
-				lightingPass->SetUniformFloat3("spotLights[" + number + "].radiance", light->GetColor());
-
-				lightingPass->SetUniformFloat("spotLights[" + number + "].radius", light->GetRange());
-				lightingPass->SetUniformFloat("spotLights[" + number + "].cutOff", glm::cos(glm::radians(light->GetCutOff())));
-				lightingPass->SetUniformFloat("spotLights[" + number + "].outerCutOff", glm::cos(glm::radians(light->GetCutOff() + 2.0f)));
+				lightingPass->SetUniformFloat("pointLights[" + number + "].intensity", light->GetIntensity());
 				break;
 			}
 			}
@@ -693,12 +619,9 @@ namespace Lux
 		lightingPass->SetUniformFloat3("viewPos", camera.GetPosition());
 		lightingPass->SetUniformInt("numPointLights", pointLights);
 		lightingPass->SetUniformFloat2("canvas", startRenderer == true ? rendererSize : viewSize);
-		lightingPass->SetUniformMat4("inverseCamera", glm::inverse(camera.GetProjectionMatrix() * camera.GetViewMatrix()));
-
-		lightingPass->SetUniformInt("seed3", UUID());
+		lightingPass->SetUniformMat4("inverseCamera", glm::inverse(camera.GetProjectionMatrix() * glm::mat4(camera.GetViewMatrix())));
 
 		Renderer::DrawFullscreenQuad();
-		//Renderer::DrawSkybox(vao, skybox, skyboxShader, camera.GetViewMatrix(), camera.GetProjectionMatrix());
 
 		sceneFramebuffer->UnbindTextures();
 		viewportFramebuffer->Unbind();
@@ -722,7 +645,8 @@ namespace Lux
 			if (ctrl)
 			{
 				// Open Scene
-				OpenScene();
+				std::string filepath = FileDialog::OpenFile("scene (*.scene)\0*.scene\0");
+				OpenScene(filepath);
 			}
 			break;
 		case Keys::S:
@@ -752,9 +676,13 @@ namespace Lux
 		case Keys::DEL:
 			if (hierarchy.GetSelected() != nullptr)
 			{
-				scene->DestroyEntity(hierarchy.GetSelected());
-				hierarchy.SetSelected(nullptr);
-				scene->Changed(Change::OBJECT);
+				LightComponent* comp = hierarchy.GetSelected()->Get<LightComponent>();
+				if (!comp || comp->GetType() != LightType::DIRECTIONAL)
+				{
+					scene->DestroyEntity(hierarchy.GetSelected());
+					hierarchy.SetSelected(nullptr);
+					scene->Changed(Change::OBJECT);
+				}
 			}
 			break;
 		}
@@ -770,9 +698,8 @@ namespace Lux
 		hierarchy.SetScene(scene);
 	}
 
-	void EditorLayer::OpenScene()
+	void EditorLayer::OpenScene(std::string& filepath)
 	{
-		std::string filepath = FileDialog::OpenFile("scene (*.scene)\0*.scene\0");
 		if (!filepath.empty())
 		{
 			SceneSerializer serializer(scene);
@@ -806,5 +733,14 @@ namespace Lux
 
 		if (!filename.empty())
 			accumulateFramebuffer->SaveToFile(filename);
+	}
+	
+	void EditorLayer::Restart()
+	{
+		startRenderer = false;
+		ResetRenderer();
+		viewportFramebuffer->Resize(viewSize.x, viewSize.y);
+		accumulateFramebuffer->Resize(viewSize.x, viewSize.y);
+		camera.SetDimensions(viewSize.x, viewSize.y);
 	}
 }
