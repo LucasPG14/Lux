@@ -178,6 +178,13 @@ namespace Lux
 	{
 		Entity* entity = CreateEntityWithUUID(UUID(), name);
 		entity->CreateComponent<MeshComponent>(path);
+
+		if (entity->Get<MeshComponent>()->GetMesh() == nullptr)
+		{
+			DestroyEntity(entity);
+			return nullptr;
+		}
+
 		entity->CreateComponent<MaterialComponent>();
 
 		return entity;

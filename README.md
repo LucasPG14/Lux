@@ -33,7 +33,7 @@ If you do this using SHIFT, the camera will move faster.
 There are some scene examples but the user can create new ones. When you open the app, the scene only have a directional light. You can import your models by dropping them into the content browser. Then from there, you can add them to the scene by dropping them into the viewport. You can select your objects and modify their materials properties in order to create a beatiful scene.
 When you have finished your scene, you can choose the number of samples do you want the render to have and also the number of rays bounces, which is limited to 8 due to performance reasons. Once the render is finished, you can save it as a png image.
 
-IMPORTANT: To import models, they need to be in a single mesh, otherwise it will only import the first mesh. Also, the path tracing it's a very expensive technique so you can't import heavy models. In the resource manager there are few basic objects like a sphere, cube and a cone.
+IMPORTANT: To import models, they need to be in a single mesh, otherwise it will only import the first mesh. Also, the path tracing it's a very expensive technique so you can't import heavy models. In the resource manager there are few basic objects like a sphere, cube and a cone. The models format supported are .obj and .fbx and the textures format supported are .png and .jpg.
 
 ## Dependencies
 

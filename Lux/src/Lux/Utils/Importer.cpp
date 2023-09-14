@@ -82,6 +82,12 @@ namespace Lux
 
 				std::vector<Vertex> vertices;
 
+				if (mesh->mNumVertices > 10000)
+				{
+					LUX_CORE_ERROR("The mesh is too big");
+					return nullptr;
+				}
+
 				vertices.reserve(mesh->mNumVertices);
 
 				for (int j = 0; j < mesh->mNumVertices; ++j)
