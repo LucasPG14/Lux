@@ -28,15 +28,15 @@ namespace Lux
 		//DrawCube("Assets/Models/Cube.obj", { 0.73, 0.73, 0.73, 1.0f }, { 0.0f, -1.5f, 0.0f }, { 0.1f, 3.0f, 3.0f }, {0.0f, 0.0f, 90.0f});
 		//DrawCube("Assets/Models/Cube.obj", { 0.73, 0.73, 0.73, 1.0f }, {0.0f, 1.5f, 0.0f}, {0.1f, 3.0f, 3.0f}, {0.0f, 0.0f, 90.0f});
 		//
-		DrawCube("Assets/Models/Cube.obj", { 0.73, 0.73, 0.73, 1.0f }, { -0.5f, -0.75f, -0.75f }, { 0.75f, 1.5f, 0.75f }, { 0.0f, 14.0f, 0.0f });
+		//DrawCube("Assets/Models/Cube.obj", { 0.73, 0.73, 0.73, 1.0f }, { -0.5f, -0.75f, -0.75f }, { 0.75f, 1.5f, 0.75f }, { 0.0f, 14.0f, 0.0f });
 		//
 		//DrawCube("Assets/Models/Cube.obj", { 0.05, 0.05, 0.65, 1.0f }, { -0.15f, -1.35f, 0.5f }, { 0.75f, 0.25f, 0.75f }, { 0.0f, -21.0f, 0.0f });
 		//DrawCube("Assets/Models/model.fbx", { 0.73, 0.73, 0.73, 1.0f }, { -0.15f, -0.928f, 0.5f }, { 0.3f, 0.3f, 0.3f }, { 0.0f, 0.0f, 0.0f });
 		
 		//DrawCube("Assets/Models/BakerHouse.obj", { 0.9, 0.0, 0.9 }, { 0.0f, -1.0f, 0.0f }, { 1.0f, 1.0f, 1.0f }, {0.0f, 0.0f, 0.0f});
-		DrawCube("Assets/Models/model.fbx", { 0.95, 0.95, 0.95, 1.0f }, { 0.0f, -1.15f, 0.0f }, { 0.3f, 0.3f, 0.3f }, {0.0f, 0.0f, 0.0f});
-		DrawCube("Assets/Models/model.fbx", { 1.0f, 0.0f, 0.0f, 1.0f }, { 0.7f, -1.15f, 0.0f }, { 0.3f, 0.3f, 0.3f }, {0.0f, 21.0f, 0.0f});
-		DrawCube("Assets/Models/model.fbx", { 0.0f, 0.0f, 1.0f, 1.0f }, { -0.7f, -1.15f, 0.0f }, { 0.3f, 0.3f, 0.3f }, {0.0f, 21.0f, 0.0f});
+		//DrawCube(std::string("Assets/Models/model.fbx"), { 0.95, 0.95, 0.95, 1.0f }, { 0.0f, -1.15f, 0.0f }, { 0.3f, 0.3f, 0.3f }, {0.0f, 0.0f, 0.0f});
+		//DrawCube("Assets/Models/model.fbx", { 1.0f, 0.0f, 0.0f, 1.0f }, { 0.7f, -1.15f, 0.0f }, { 0.3f, 0.3f, 0.3f }, {0.0f, 21.0f, 0.0f});
+		//DrawCube("Assets/Models/model.fbx", { 0.0f, 0.0f, 1.0f, 1.0f }, { -0.7f, -1.15f, 0.0f }, { 0.3f, 0.3f, 0.3f }, {0.0f, 21.0f, 0.0f});
 
 		//
 		//Entity& pointLight = CreateEntity("Spot Light");
@@ -75,6 +75,8 @@ namespace Lux
 		meshesInfo.clear();
 		objectsInfo.clear();
 		aabbs.clear();
+		textures.clear();
+		materialsInfo.clear();
 		lights.clear();
 	}
 
@@ -88,6 +90,7 @@ namespace Lux
 		objectsInfo.clear();
 		aabbs.clear();
 		textures.clear();
+		materialsInfo.clear();
 
 		float transformsCount = 0.0f;
 

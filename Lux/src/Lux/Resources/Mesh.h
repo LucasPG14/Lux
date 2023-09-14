@@ -15,7 +15,6 @@ namespace Lux
 	class Mesh
 	{
 	public:
-		Mesh();
 		Mesh(const AABB& aabb, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& ind, const std::string& p, const std::string& origPath);
 		virtual ~Mesh();
 

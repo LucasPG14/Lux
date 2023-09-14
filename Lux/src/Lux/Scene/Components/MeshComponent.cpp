@@ -12,13 +12,14 @@ namespace Lux
 {
 	MeshComponent::MeshComponent(const std::string& path) : type(ComponentType::MESH), mesh(nullptr)
 	{	
-		if (ResourceManager::GetMesh(path) == nullptr)
+		std::string p = path;
+		if (std::shared_ptr<Mesh> m = ResourceManager::GetMesh(p))
 		{
-			mesh = Importer::ImportFBX2(path, "Assets/");
+			mesh = m;
 		}
 		else
 		{
-			mesh = ResourceManager::GetMesh(path);
+			mesh = Importer::ImportFBX2(path, "Assets/");
 		}
 	}
 	

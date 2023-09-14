@@ -81,6 +81,7 @@ namespace Lux
 				aiMesh* mesh = scene->mMeshes[i];
 
 				std::vector<Vertex> vertices;
+
 				vertices.reserve(mesh->mNumVertices);
 
 				for (int j = 0; j < mesh->mNumVertices; ++j)

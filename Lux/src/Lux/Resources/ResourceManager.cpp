@@ -61,7 +61,7 @@ namespace Lux
 		return mesh;
 	}
 	
-	const std::shared_ptr<Mesh>& ResourceManager::GetMesh(const std::string& path)
+	std::shared_ptr<Mesh> ResourceManager::GetMesh(const std::string& path)
 	{
 		for (int i = 0; i < meshes.size(); ++i)
 		{

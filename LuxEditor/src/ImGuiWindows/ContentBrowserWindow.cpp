@@ -91,6 +91,10 @@ namespace Lux
 			if (file.is_directory()) ImGui::ImageButton((ImTextureID)folder->GetID(), { 100, 100 }, { 0, 1 }, { 1, 0 });
 			else if (file.path().extension() == ".png" || file.path().extension() == ".jpg")
 			{
+				if (ResourceManager::GetTexture(file.path().string()) == nullptr)
+				{
+					ResourceManager::CreateTexture(file.path().string());
+				}
 				ImGui::ImageButton((ImTextureID)ResourceManager::GetTexture(file.path().string())->GetID(), {100, 100}, {0, 1}, {1, 0});
 			}
 			else if (file.path().extension() == ".fbx" || file.path().extension() == ".obj")
@@ -121,7 +125,6 @@ namespace Lux
 				if (ImGui::IsMouseDoubleClicked(0))
 				{
 					if (file.is_directory()) currentDir /= path.filename();
-					//else if (path.extension().string() == ".scene") OpenScene(path);
 				}
 				else if (ImGui::IsMouseClicked(0))
 				{
@@ -166,6 +169,11 @@ namespace Lux
 		for (int i = 0; i < paths.size(); ++i)
 		{
 			std::filesystem::copy(paths[i], assetsDir);
+			std::filesystem::path newPath = assetsDir / std::filesystem::path(paths[i]).filename();
+			if (newPath.extension() == ".png" || newPath.extension() == ".jpg")
+			{
+				ResourceManager::CreateTexture(paths[i]);
+			}
 		}
 
 		return true;

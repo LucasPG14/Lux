@@ -374,11 +374,14 @@ namespace Lux
 					if (realPath.extension().string() == ".scene")
 					{
 						OpenScene(realPath.string());
+						hierarchy.SetSelected(nullptr);
 					}
 					if (realPath.extension().string() == ".obj" || realPath.extension().string() == ".fbx")
 					{
-						scene->CreateEntityWithPath(realPath.string(), realPath.filename().string());
+						realPath = realPath.generic_string();
+						scene->CreateEntityWithPath(realPath.string(), realPath.stem().string());
 						scene->Changed(Change::OBJECT);
+						hierarchy.SetSelected(nullptr);
 					}
 				}
 			}

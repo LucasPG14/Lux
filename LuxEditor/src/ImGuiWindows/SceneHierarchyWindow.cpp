@@ -344,21 +344,21 @@ namespace Lux
 			}
 		}
 
-		ImGui::Separator();
+		//ImGui::Separator();
 
-		if (ImGui::BeginCombo("##", "AddComponent"))
-		{
-			if (!entity.Get<MeshComponent>() && !entity.Get<LightComponent>())
-			{
-				ImGui::Selectable("Mesh Component");
-			}
-			if (entity.Get<LightComponent>() && !entity.Get<MeshComponent>())
-			{
-				ImGui::Selectable("Light Component");
-				scene->Changed(Change::OBJECT);
-			}
-			ImGui::EndCombo();
-		}
+		//if (ImGui::BeginCombo("##", "AddComponent"))
+		//{
+		//	if (!entity.Get<MeshComponent>() && !entity.Get<LightComponent>())
+		//	{
+		//		ImGui::Selectable("Mesh Component");
+		//	}
+		//	if (entity.Get<LightComponent>() && !entity.Get<MeshComponent>())
+		//	{
+		//		ImGui::Selectable("Light Component");
+		//		scene->Changed(Change::OBJECT);
+		//	}
+		//	ImGui::EndCombo();
+		//}
 		ImGui::PopID();
 	}
 }
