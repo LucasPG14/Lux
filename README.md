@@ -6,6 +6,10 @@ The aim of this project is to implement a path tracing renderer where you can im
 
 The basis of this project was made following [TheCherno's](https://www.youtube.com/c/TheChernoProject) [Game Engine Series](https://www.youtube.com/playlist?list=PLlrATfBNZ98dC-V-N3m0Go4deliWHPFwT) playlist. All the stuff related to the core engine is from this playlist, but all the renderer related things are made by myself.
 
+![](https://github.com/LucasPG14/Lux/blob/main/Screenshoots/Render.png)
+
+![](https://github.com/LucasPG14/Lux/blob/main/Screenshoots/RendererCompleto.png)
+
 ## Controls
 
 To move the camera:
