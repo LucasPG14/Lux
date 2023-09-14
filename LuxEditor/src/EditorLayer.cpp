@@ -425,7 +425,7 @@ namespace Lux
 		ImGui::End();
 		// Viewport End
 
-		ImGui::Begin("Path Tracing samples");
+		ImGui::Begin("Renderer options");
 		ImGui::Text("Samples: ");
 		ImGui::SameLine();
 		ImGui::Text(std::to_string(samples).c_str());

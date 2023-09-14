@@ -304,12 +304,12 @@ namespace Lux
 					scene->Changed(Change::MATERIAL);
 				}
 
-				ImGui::Text("Absorption");
-				ImGui::SameLine();
-				if (ImGui::DragFloat("##Absorption", &material.GetAbsorption(), 0.1f))
-				{
-					scene->Changed(Change::MATERIAL);
-				}
+				//ImGui::Text("Absorption");
+				//ImGui::SameLine();
+				//if (ImGui::DragFloat("##Absorption", &material.GetAbsorption(), 0.1f))
+				//{
+				//	scene->Changed(Change::MATERIAL);
+				//}
 
 				if (ImGui::ColorEdit3("##Emissive", glm::value_ptr(material.GetEmissive()), ImGuiColorEditFlags_NoInputs))
 				{

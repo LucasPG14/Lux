@@ -1,0 +1,139 @@
+Scene: Untitled
+Entities:
+  - UUID: 18312329488302921227
+    Name: Directional Light
+    TransformComponent:
+      Position: [0, 3, 0]
+      Rotation: [50, -30, -70]
+      Scale: [1, 1, 1]
+    LightComponent:
+      Light Type: 0
+      Color: [1, 1, 1]
+      Intensity: 0.100000001
+  - UUID: 17679402521740345708
+    Name: Cube
+    TransformComponent:
+      Position: [0, -1.400177, 0]
+      Rotation: [0, -2.20526072e-05, 0]
+      Scale: [5, 0.100000001, 3]
+    MeshComponent:
+      MeshPath: Assets/Models/Cube.fbx
+    MaterialComponent:
+      Color: [0.966839671, 0.436274529, 1]
+      Metallic: 0
+      Roughness: 0.5
+      IndexRefraction: 1.5
+      Transmission: 0
+      Emissive: [1, 1, 1]
+      Emission: false
+      Absorption: 0
+      HasDiffuseMap: false
+      HasNormalMap: false
+      HasMetallicMap: false
+      HasRoughnessMap: false
+  - UUID: 5760692952027661793
+    Name: model
+    TransformComponent:
+      Position: [-1.213727, -0.546295166, -0.590782583]
+      Rotation: [0, -0, 0]
+      Scale: [0.800000012, 0.800000012, 0.800000012]
+    MeshComponent:
+      MeshPath: Assets/Models/Sphere.fbx
+    MaterialComponent:
+      Color: [1, 1, 1]
+      Metallic: 0
+      Roughness: 0.5
+      IndexRefraction: 1.5
+      Transmission: 0
+      Emissive: [0, 0.823529243, 1]
+      Emission: true
+      Absorption: 0
+      HasDiffuseMap: false
+      HasNormalMap: false
+      HasMetallicMap: false
+      HasRoughnessMap: false
+  - UUID: 4619532733670155905
+    Name: Cube
+    TransformComponent:
+      Position: [-1.64118004, -0.845718205, 1.00156784]
+      Rotation: [0, 61.0000381, 0]
+      Scale: [0.499999911, 1, 0.499999911]
+    MeshComponent:
+      MeshPath: Assets/Models/Cube.fbx
+    MaterialComponent:
+      Color: [1, 0.465686262, 0.465686262]
+      Metallic: 0.5
+      Roughness: 0
+      IndexRefraction: 1.5
+      Transmission: 0
+      Emissive: [1, 1, 1]
+      Emission: false
+      Absorption: 0
+      HasDiffuseMap: false
+      HasNormalMap: false
+      HasMetallicMap: false
+      HasRoughnessMap: false
+  - UUID: 12244001607722950537
+    Name: model
+    TransformComponent:
+      Position: [1.90466309, -1.04524994, 1.22156537]
+      Rotation: [0, -0, 0]
+      Scale: [0.300000012, 0.300000012, 0.300000012]
+    MeshComponent:
+      MeshPath: Assets/Models/Sphere.fbx
+    MaterialComponent:
+      Color: [1, 1, 1]
+      Metallic: 0
+      Roughness: 0.5
+      IndexRefraction: 1.5
+      Transmission: 0
+      Emissive: [1, 1, 1]
+      Emission: false
+      Absorption: 0
+      HasDiffuseMap: true
+      DiffuseMap: Assets\Textures\BrickWallBaseColor.png
+      HasNormalMap: false
+      HasMetallicMap: false
+      HasRoughnessMap: false
+  - UUID: 6805288404424904175
+    Name: Cube
+    TransformComponent:
+      Position: [1.81601131, -0.830791891, -0.606340766]
+      Rotation: [0, -52.4025421, 0]
+      Scale: [0.5, 1, 0.5]
+    MeshComponent:
+      MeshPath: Assets/Models/Cube.fbx
+    MaterialComponent:
+      Color: [1, 1, 1]
+      Metallic: 1
+      Roughness: 0
+      IndexRefraction: 1.5
+      Transmission: 0
+      Emissive: [1, 1, 1]
+      Emission: false
+      Absorption: 0
+      HasDiffuseMap: false
+      HasNormalMap: false
+      HasMetallicMap: false
+      HasRoughnessMap: false
+  - UUID: 11521349324414698434
+    Name: model
+    TransformComponent:
+      Position: [0.289428711, -0.867950439, 0.27493763]
+      Rotation: [0, -0, 0]
+      Scale: [0.5, 0.5, 0.5]
+    MeshComponent:
+      MeshPath: Assets/Models/Sphere.fbx
+    MaterialComponent:
+      Color: [1, 1, 1]
+      Metallic: 0
+      Roughness: 0
+      IndexRefraction: 1
+      Transmission: 1
+      Emissive: [0, 1, 0.970587969]
+      Emission: false
+      Absorption: 0
+      HasDiffuseMap: false
+      HasNormalMap: false
+      HasMetallicMap: false
+      HasRoughnessMap: false

@@ -24,7 +24,7 @@ namespace Lux
 
 		static std::shared_ptr<Mesh> GetMesh(const std::string& path);
 		
-		static const std::shared_ptr<Texture2D>& GetTexture(const std::string& path);
+		static std::shared_ptr<Texture2D> GetTexture(const std::string& path);
 
 	private:
 		static std::vector<std::shared_ptr<Mesh>> meshes;

@@ -152,6 +152,46 @@ namespace Lux
 				emitter << YAML::Key << "Emission" << YAML::Value << comp->GetMaterial()->GetEmission();
 				emitter << YAML::Key << "Absorption" << YAML::Value << comp->GetMaterial()->GetAbsorption();
 
+				if (comp->GetMaterial()->GetDiffuse())
+				{
+					emitter << YAML::Key << "HasDiffuseMap" << YAML::Value << true;
+					emitter << YAML::Key << "DiffuseMap" << YAML::Value << comp->GetMaterial()->GetDiffuse()->GetOriginalPath();
+				}
+				else
+				{
+					emitter << YAML::Key << "HasDiffuseMap" << YAML::Value << false;
+				}
+
+				if (comp->GetMaterial()->GetNormalMap())
+				{
+					emitter << YAML::Key << "HasNormalMap" << YAML::Value << true;
+					emitter << YAML::Key << "NormalMap" << YAML::Value << comp->GetMaterial()->GetNormalMap()->GetOriginalPath();
+				}
+				else
+				{
+					emitter << YAML::Key << "HasNormalMap" << YAML::Value << false;
+				}
+
+				if (comp->GetMaterial()->GetMetallicMap())
+				{
+					emitter << YAML::Key << "HasMetallicMap" << YAML::Value << true;
+					emitter << YAML::Key << "MetallicMap" << YAML::Value << comp->GetMaterial()->GetMetallicMap()->GetOriginalPath();
+				}
+				else
+				{
+					emitter << YAML::Key << "HasMetallicMap" << YAML::Value << false;
+				}
+
+				if (comp->GetMaterial()->GetRoughnessMap())
+				{
+					emitter << YAML::Key << "HasRoughnessMap" << YAML::Value << true;
+					emitter << YAML::Key << "RoughnessMap" << YAML::Value << comp->GetMaterial()->GetRoughnessMap()->GetOriginalPath();
+				}
+				else
+				{
+					emitter << YAML::Key << "HasRoughnessMap" << YAML::Value << false;
+				}
+
 				emitter << YAML::EndMap;
 				// Material map end
 			}
@@ -228,10 +268,29 @@ namespace Lux
 				mat->SetEmissiveColor(material["Emissive"].as<glm::vec3>());
 				mat->SetAbsorption(material["Absorption"].as<float>());
 
-				mat->SetDiffuse(nullptr);
-				mat->SetNormalMap(nullptr);
-				mat->SetMetallicMap(nullptr);
-				mat->SetRoughnessMap(nullptr);
+				bool hasMap = material["HasDiffuseMap"].as<bool>();
+				if (hasMap)
+				{
+					mat->SetDiffuse(ResourceManager::GetTexture(material["DiffuseMap"].as<std::string>()));
+				}
+
+				hasMap = material["HasNormalMap"].as<bool>();
+				if (hasMap)
+				{
+					mat->SetNormalMap(ResourceManager::GetTexture(material["NormalMap"].as<std::string>()));
+				}
+
+				hasMap = material["HasMetallicMap"].as<bool>();
+				if (hasMap)
+				{
+					mat->SetMetallicMap(ResourceManager::GetTexture(material["MetallicMap"].as<std::string>()));
+				}
+
+				hasMap = material["HasRoughnessMap"].as<bool>();
+				if (hasMap)
+				{
+					mat->SetRoughnessMap(ResourceManager::GetTexture(material["RoughnessMap"].as<std::string>()));
+				}
 			}
 			
 			YAML::Node light = yamlEntity["LightComponent"];

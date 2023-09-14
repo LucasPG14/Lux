@@ -27,6 +27,10 @@ Entities:
       Emissive: [1, 1, 1]
       Emission: false
       Absorption: 0
+      HasDiffuseMap: false
+      HasNormalMap: false
+      HasMetallicMap: false
+      HasRoughnessMap: false
   - UUID: 5057059725016166316
     Name: Cube2
     TransformComponent:
@@ -44,6 +48,10 @@ Entities:
       Emissive: [1, 1, 1]
       Emission: false
       Absorption: 0
+      HasDiffuseMap: false
+      HasNormalMap: false
+      HasMetallicMap: false
+      HasRoughnessMap: false
   - UUID: 17966326471127193344
     Name: Cube3
     TransformComponent:
@@ -61,6 +69,10 @@ Entities:
       Emissive: [1, 1, 1]
       Emission: false
       Absorption: 0
+      HasDiffuseMap: false
+      HasNormalMap: false
+      HasMetallicMap: false
+      HasRoughnessMap: false
   - UUID: 3277480948526655959
     Name: Cube4
     TransformComponent:
@@ -78,6 +90,10 @@ Entities:
       Emissive: [1, 1, 1]
       Emission: false
       Absorption: 0
+      HasDiffuseMap: false
+      HasNormalMap: false
+      HasMetallicMap: false
+      HasRoughnessMap: false
   - UUID: 13826550688575402598
     Name: Cube5
     TransformComponent:
@@ -95,6 +111,10 @@ Entities:
       Emissive: [1, 1, 1]
       Emission: false
       Absorption: 0
+      HasDiffuseMap: false
+      HasNormalMap: false
+      HasMetallicMap: false
+      HasRoughnessMap: false
   - UUID: 14994097052079294065
     Name: Cube6
     TransformComponent:
@@ -112,6 +132,10 @@ Entities:
       Emissive: [1, 1, 1]
       Emission: false
       Absorption: 0
+      HasDiffuseMap: false
+      HasNormalMap: false
+      HasMetallicMap: false
+      HasRoughnessMap: false
   - UUID: 9523786925624661985
     Name: Cube7
     TransformComponent:
@@ -129,6 +153,10 @@ Entities:
       Emissive: [0.0882353783, 1, 0]
       Emission: true
       Absorption: 0
+      HasDiffuseMap: false
+      HasNormalMap: false
+      HasMetallicMap: false
+      HasRoughnessMap: false
   - UUID: 3196813362330997194
     Name: Cube8
     TransformComponent:
@@ -136,7 +164,7 @@ Entities:
       Rotation: [0, 0, 0]
       Scale: [0.300000012, 0.300000012, 0.300000012]
     MeshComponent:
-      MeshPath: Assets/Models/model.fbx
+      MeshPath: Assets/Models/Sphere.fbx
     MaterialComponent:
       Color: [0.730000019, 0.730000019, 0.730000019]
       Metallic: 0
@@ -146,6 +174,10 @@ Entities:
       Emissive: [1, 1, 1]
       Emission: false
       Absorption: 0
+      HasDiffuseMap: false
+      HasNormalMap: false
+      HasMetallicMap: false
+      HasRoughnessMap: false
   - UUID: 17409129708771449389
     Name: Point Light
     TransformComponent:

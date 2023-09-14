@@ -298,7 +298,7 @@ bool RayTriangleHit(Ray ray, inout HitRecord hit, float minT, float maxT)
 	return somethingHit;
 }
 
-vec3 cosineSampleHemisphere(vec3 n)
+vec3 CosineSampleHemisphere(vec3 n)
 {
     vec2 rnd = frand2();
 
@@ -314,28 +314,41 @@ vec3 cosineSampleHemisphere(vec3 n)
 
 void TangentAndBitangent(in vec3 n, out vec3 b1, out vec3 b2) 
 {
-    if(n.z < 0.0)
+    //if(n.z < 0.0)
+	//{
+    //    float a = 1.0 / (1.0 - n.z);
+    //    float b = n.x * n.y * a;
+    //    b1 = vec3(1.0 - n.x * n.x * a, -b, n.x);
+    //    b2 = vec3(b, n.y * n.y*a - 1.0, -n.y);
+    //}
+    //else
+	//{
+    //    float a = 1.0 / (1.0 + n.z);
+    //    float b = -n.x * n.y * a;
+    //    b1 = vec3(1.0 - n.x * n.x * a, b, -n.x);
+    //    b2 = vec3(b, 1.0 - n.y * n.y * a, -n.y);
+    //}
+
+	vec3 up;
+	if (abs(n.z) < 0.9999999)
 	{
-        float a = 1.0 / (1.0 - n.z);
-        float b = n.x * n.y * a;
-        b1 = vec3(1.0 - n.x * n.x * a, -b, n.x);
-        b2 = vec3(b, n.y * n.y*a - 1.0, -n.y);
-    }
-    else
+		up = vec3(0.0, 0.0, 1.0);
+	}
+	else
 	{
-        float a = 1.0 / (1.0 + n.z);
-        float b = -n.x * n.y * a;
-        b1 = vec3(1.0 - n.x * n.x * a, b, -n.x);
-        b2 = vec3(b, 1.0 - n.y * n.y * a, -n.y);
-    }
+		up = vec3(1.0, 0.0, 0.0);
+	}
+
+    b1 = normalize(cross(up, n));
+    b2 = cross(n, b1);
 }
 
-vec3 toWorld(vec3 x, vec3 y, vec3 z, vec3 v)
+vec3 ToWorld(vec3 x, vec3 y, vec3 z, vec3 v)
 {
     return v.x * x + v.y * y + v.z * z;
 }
 
-vec3 toLocal(vec3 x, vec3 y, vec3 z, vec3 v)
+vec3 ToLocal(vec3 x, vec3 y, vec3 z, vec3 v)
 {
     return vec3(dot(v, x), dot(v, y), dot(v, z));
 }
@@ -389,24 +402,24 @@ float GeometryTerm(float NdotL, float NdotV, float roughness)
     return G1 * G2;
 }
 
-vec3 SampleGGXVNDF(vec3 V, float ax, float ay, float r1, float r2)
+vec3 SampleGGXVNDF(vec3 direction, float ax, float r1, float r2)
 {
-    vec3 Vh = normalize(vec3(ax * V.x, ay * V.y, V.z));
+    vec3 vh = normalize(vec3(ax * direction.x, ax * direction.y, direction.z));
 
-    float lensq = Vh.x * Vh.x + Vh.y * Vh.y;
-    vec3 T1 = lensq > 0.0 ? vec3(-Vh.y, Vh.x, 0.0) * inversesqrt(lensq) : vec3(1.0, 0.0, 0.0);
-    vec3 T2 = cross(Vh, T1);
+    float lensq = vh.x * vh.x + vh.y * vh.y;
+    vec3 T1 = lensq > 0.0 ? vec3(-vh.y, vh.x, 0.0) * inversesqrt(lensq) : vec3(1.0, 0.0, 0.0);
+    vec3 T2 = cross(vh, T1);
 
     float r = sqrt(r1);
     float phi = 2.0 * PI * r2;
     float t1 = r * cos(phi);
     float t2 = r * sin(phi);
-    float s = 0.5 * (1.0 + Vh.z);
+    float s = 0.5 * (1.0 + vh.z);
     t2 = (1.0 - s) * sqrt(1.0 - t1 * t1) + s * t2;
 
-    vec3 Nh = t1 * T1 + t2 * T2 + sqrt(max(0.0, 1.0 - t1 * t1 - t2 * t2)) * Vh;
+    vec3 nh = t1 * T1 + t2 * T2 + sqrt(max(0.0, 1.0 - t1 * t1 - t2 * t2)) * vh;
 
-    return normalize(vec3(ax * Nh.x, ay * Nh.y, max(0.0, Nh.z)));
+    return normalize(vec3(ax * nh.x, ax * nh.y, max(0.0, nh.z)));
 }
 
 float GGXVNDFPdf(float NdotH, float NdotV, float roughness)
@@ -462,30 +475,31 @@ void CalculateBRDF(vec3 direction, HitRecord hit, inout RefractionState refState
 	float refractionIdx = hit.material.properties.z;
 	float transmission = hit.material.properties.w;
 
+	if (refractionIdx == 0.0)
+	{
+		refractionIdx = 0.01;
+	}
+
 	float roughness2 = pow(roughness, 2.0);
 
     // Calculating Microfacet normal
     vec3 t, b;
     TangentAndBitangent(hit.normal, t, b);
-	vec3 V = toLocal(t, b, hit.normal, direction);
-    vec3 h = SampleGGXVNDF(V, roughness2, roughness2, frand(), frand());
+	vec3 v = ToLocal(t, b, hit.normal, -direction);
+    vec3 h = SampleGGXVNDF(v, roughness2, frand(), frand());
     if (h.z < 0.0)
         h = -h;
-	h = toWorld(t, b, hit.normal, h);
-
-	//if (hit.material.textureIDs.y != -1)
-	//{
-	//	vec3 n = texture(texturesTex, vec3(hit.texCoords, hit.material.textureIDs.y)).xyz;
-	//}
+	h = ToWorld(t, b, hit.normal, h);
 
     // Fresnel
-    float VdotH = dot(direction, h);
+    float VdotH = dot(-direction, h);
     vec3 f0 = mix(vec3(0.04), albedo, metallic);
     vec3 fresnelValue = FSchlick(f0, VdotH);
     float dielectricFresnel = Fresnel(hit.frontFace ? 1.0 : refractionIdx, refractionIdx, abs(VdotH), 0.0, 1.0);
     
     // Weight probability
     float diffuseWeight = (1.0 - metallic) * (1.0 - transmission);
+	// Using luminance to calculate the reflect weight
     float reflectWeight = dot(fresnelValue, vec3(0.299, 0.587, 0.114));
     float refractWeight = (1.0 - metallic) * (transmission) * (1.0 - dielectricFresnel);
     float invW = 1.0 / (diffuseWeight + reflectWeight + refractWeight);
@@ -499,11 +513,11 @@ void CalculateBRDF(vec3 direction, HitRecord hit, inout RefractionState refState
 	float rnd = frand();
 	if (rnd < diffuseWeight)
 	{
-		L = cosineSampleHemisphere(hit.normal);
-        h = L + direction;
+		L = CosineSampleHemisphere(hit.normal);
+        h = L + (-direction);
         
         float NdotL = dot(hit.normal, L);
-        float NdotV = dot(hit.normal, direction);
+        float NdotV = dot(hit.normal, -direction);
         if (NdotL <= 0.0 || NdotV <= 0.0) 
 		{ 
 			return; 
@@ -512,16 +526,15 @@ void CalculateBRDF(vec3 direction, HitRecord hit, inout RefractionState refState
 		float LdotH = dot(L, h);
         float pdf = NdotL / PI;
         
-        vec3 diffuse = DisneyDiffuseBRDF(albedo, NdotL, NdotV, LdotH, roughness2) * (1.0 - fresnelValue);
-        brdf.rgb = diffuse;
+        brdf.rgb = DisneyDiffuseBRDF(albedo, NdotL, NdotV, LdotH, roughness2) * (1.0 - fresnelValue);
         brdf.a = diffuseWeight * pdf;
 	}
 	else if (rnd < diffuseWeight + reflectWeight)
 	{
-		L = reflect(-direction, h);
+		L = reflect(direction, h);
         
         float NdotL = dot(hit.normal, L);
-        float NdotV = dot(hit.normal, direction);
+        float NdotV = dot(hit.normal, -direction);
         if (NdotL <= 0.0 || NdotV <= 0.0) 
 		{ 
 			return; 
@@ -530,15 +543,14 @@ void CalculateBRDF(vec3 direction, HitRecord hit, inout RefractionState refState
 		float NdotH = min(0.99, dot(hit.normal, h));
         float pdf = GGXVNDFPdf(NdotH, NdotV, roughness2);
         
-        vec3 specular = DisneyReflectionBRDF(roughness, fresnelValue, NdotH, NdotV, NdotL);
-        brdf.rgb = specular;
+        brdf.rgb = DisneyReflectionBRDF(roughness, fresnelValue, NdotH, NdotV, NdotL);
         brdf.a = reflectWeight * pdf;
 	}
 	else
 	{
 		refState.isRefracted = !refState.isRefracted;
 		float refractionRatio = hit.frontFace ? 1.0 / refractionIdx : refractionIdx;
-        L = refract(-direction, h, refractionRatio);
+        L = refract(direction, h, refractionRatio);
         
         float NdotL = dot(hit.normal, L);
         if (NdotL <= 0.0) 
@@ -546,7 +558,7 @@ void CalculateBRDF(vec3 direction, HitRecord hit, inout RefractionState refState
 			return; 
 		}
         
-		float NdotV = dot(hit.normal, direction);
+		float NdotV = dot(hit.normal, -direction);
         float NdotH = min(0.99, dot(hit.normal, h));
         float LdotH = dot(L, h);
         
@@ -581,7 +593,7 @@ vec3 TracePath(const Ray ray, vec2 uv)
 			vec3 newDir;
 			vec4 brdf = vec4(0.0);
 
-			CalculateBRDF(-hitRay.direction, hit, refState, newDir, brdf);
+			CalculateBRDF(hitRay.direction, hit, refState, newDir, brdf);
 
 			if (hit.material.emissive.w == 1.0)
 				color += hit.material.emissive.xyz * throughput;
@@ -609,8 +621,7 @@ vec3 TracePath(const Ray ray, vec2 uv)
 
 			if (refState.wasRefracted)
 			{
-				vec4 col = hit.material.color;
-            	throughput *= exp(-hit.t * ((vec3(1.0) - col.xyz) * col.w));
+            	throughput *= exp(-hit.t * ((vec3(1.0) - hit.material.color.xyz) * 0.0));
         	}
 
 			hitRay.origin = hit.point;
@@ -680,11 +691,7 @@ void main()
     ray.direction = GetRayDirection(ray.origin, fragCoord, rx, ry);
 	color = TracePath(ray, uv);
 
-	color = min(color.rgb, vec3(10.0));
-
-	// Gamma correction and tonemapping
-	//color = color / (color + vec3(1.0));
-	//color = pow(color, vec3(1.0 / 2.2));
+	color = min(color.rgb, vec3(9.0));
 
 	color = (float(samples) * prev + color) / float(samples + 1);
 

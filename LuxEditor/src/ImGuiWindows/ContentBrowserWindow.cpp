@@ -91,9 +91,10 @@ namespace Lux
 			if (file.is_directory()) ImGui::ImageButton((ImTextureID)folder->GetID(), { 100, 100 }, { 0, 1 }, { 1, 0 });
 			else if (file.path().extension() == ".png" || file.path().extension() == ".jpg")
 			{
-				if (ResourceManager::GetTexture(file.path().string()) == nullptr)
+				std::shared_ptr<Texture2D> m = ResourceManager::GetTexture(file.path().string());
+				if (m == nullptr)
 				{
-					ResourceManager::CreateTexture(file.path().string());
+					m = ResourceManager::CreateTexture(file.path().string());
 				}
 				ImGui::ImageButton((ImTextureID)ResourceManager::GetTexture(file.path().string())->GetID(), {100, 100}, {0, 1}, {1, 0});
 			}
@@ -168,8 +169,8 @@ namespace Lux
 		std::vector<std::string>& paths = e.GetPaths();
 		for (int i = 0; i < paths.size(); ++i)
 		{
-			std::filesystem::copy(paths[i], assetsDir);
-			std::filesystem::path newPath = assetsDir / std::filesystem::path(paths[i]).filename();
+			std::filesystem::copy(paths[i], currentDir);
+			std::filesystem::path newPath = currentDir / std::filesystem::path(paths[i]).filename();
 			if (newPath.extension() == ".png" || newPath.extension() == ".jpg")
 			{
 				ResourceManager::CreateTexture(paths[i]);

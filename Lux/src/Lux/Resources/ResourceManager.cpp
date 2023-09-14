@@ -72,7 +72,7 @@ namespace Lux
 		return nullptr;
 	}
 
-	const std::shared_ptr<Texture2D>& ResourceManager::GetTexture(const std::string& path)
+	std::shared_ptr<Texture2D> ResourceManager::GetTexture(const std::string& path)
 	{
 		for (int i = 0; i < textures.size(); ++i)
 		{
